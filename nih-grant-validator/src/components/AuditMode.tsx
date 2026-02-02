@@ -4,7 +4,8 @@ import {
   Upload, FileText, CheckCircle, XCircle, AlertTriangle, 
   Download, Sparkles, ChevronDown, ChevronUp, ArrowLeft,
   FileCheck, AlertCircle, Info, Users, DollarSign, Briefcase, 
-  ClipboardList, Loader2, Plus, Trash2, File, Type, X, Clock
+  ClipboardList, Loader2, Plus, Trash2, File, Type, X, Clock,
+  Eye, FileUp, Layers
 } from 'lucide-react'
 import * as pdfjsLib from 'pdfjs-dist'
 import mammoth from 'mammoth'
@@ -131,6 +132,13 @@ export function AuditMode({ onBack }: AuditModeProps) {
   const [extractionTimedOut, setExtractionTimedOut] = useState(false)
   const [extractionProgress, setExtractionProgress] = useState({ currentPage: 0, totalPages: 0, elapsedTime: 0 })
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  
+  // Full Grant Upload States
+  const [uploadMode, setUploadMode] = useState<'full' | 'sections'>('full')
+  const [fullGrantDoc, setFullGrantDoc] = useState<{ fileName: string; content: string; pageCount?: number } | null>(null)
+  const [showDocViewer, setShowDocViewer] = useState(false)
+  const [fullGrantAudit, setFullGrantAudit] = useState<PackageAuditResult | null>(null)
+  const [isAuditingFullGrant, setIsAuditingFullGrant] = useState(false)
 
   // Timer effect for extraction progress
   useEffect(() => {
@@ -563,8 +571,213 @@ export function AuditMode({ onBack }: AuditModeProps) {
                   Upload Documents
                 </h2>
 
-                {/* Status Summary */}
-                <div className="mb-6 p-4 bg-neutral-50 rounded-lg">
+                {/* Upload Mode Selector */}
+                <div className="mb-6 flex gap-3">
+                  <button
+                    onClick={() => setUploadMode('full')}
+                    className={`flex-1 p-4 rounded-lg border-2 text-left transition-all ${
+                      uploadMode === 'full'
+                        ? 'border-primary-500 bg-primary-50'
+                        : 'border-neutral-200 hover:border-neutral-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileUp className={`w-8 h-8 ${uploadMode === 'full' ? 'text-primary-600' : 'text-neutral-400'}`} />
+                      <div>
+                        <p className="font-semibold text-neutral-900">Full Grant Upload</p>
+                        <p className="text-sm text-neutral-500">Upload your complete grant as one document</p>
+                      </div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setUploadMode('sections')}
+                    className={`flex-1 p-4 rounded-lg border-2 text-left transition-all ${
+                      uploadMode === 'sections'
+                        ? 'border-primary-500 bg-primary-50'
+                        : 'border-neutral-200 hover:border-neutral-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Layers className={`w-8 h-8 ${uploadMode === 'sections' ? 'text-primary-600' : 'text-neutral-400'}`} />
+                      <div>
+                        <p className="font-semibold text-neutral-900">Section by Section</p>
+                        <p className="text-sm text-neutral-500">Upload individual grant sections separately</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Full Grant Upload Mode */}
+                {uploadMode === 'full' && (
+                  <div className="space-y-4">
+                    {!fullGrantDoc ? (
+                      <div className="border-2 border-dashed border-neutral-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors">
+                        <input
+                          type="file"
+                          id="full-grant-upload"
+                          accept=".pdf,.docx,.doc,.txt"
+                          className="hidden"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0]
+                            if (!file) return
+                            setParsingFile(file.name)
+                            try {
+                              let content = ''
+                              let pageCount: number | undefined
+                              if (file.name.toLowerCase().endsWith('.pdf')) {
+                                const result = await extractTextFromPDF(file)
+                                content = result.text
+                                pageCount = result.pageCount
+                              } else if (file.name.toLowerCase().endsWith('.docx') || file.name.toLowerCase().endsWith('.doc')) {
+                                content = await extractTextFromDOCX(file)
+                              } else {
+                                content = await file.text()
+                              }
+                              setFullGrantDoc({ fileName: file.name, content, pageCount })
+                            } catch (err) {
+                              console.error('Error parsing file:', err)
+                            } finally {
+                              setParsingFile(null)
+                            }
+                          }}
+                        />
+                        <label htmlFor="full-grant-upload" className="cursor-pointer">
+                          <FileUp className="w-12 h-12 text-neutral-400 mx-auto mb-3" />
+                          <p className="font-medium text-neutral-700">Drop your complete grant document here</p>
+                          <p className="text-sm text-neutral-500 mt-1">Supports PDF, DOCX, DOC, or TXT</p>
+                          <button className="mt-4 px-6 py-2 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-600">
+                            Choose File
+                          </button>
+                        </label>
+                      </div>
+                    ) : (
+                      <div className="border border-green-200 bg-green-50 rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <FileText className="w-8 h-8 text-green-600" />
+                            <div>
+                              <p className="font-medium text-green-800">{fullGrantDoc.fileName}</p>
+                              <p className="text-sm text-green-600">
+                                {fullGrantDoc.pageCount && `${fullGrantDoc.pageCount} pages • `}
+                                {fullGrantDoc.content.length.toLocaleString()} characters extracted
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setShowDocViewer(true)}
+                              className="flex items-center gap-2 px-4 py-2 bg-white border border-green-300 text-green-700 rounded-lg hover:bg-green-100"
+                            >
+                              <Eye className="w-4 h-4" />
+                              View Document
+                            </button>
+                            <button
+                              onClick={() => { setFullGrantDoc(null); setFullGrantAudit(null); }}
+                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {parsingFile && (
+                      <div className="flex items-center justify-center gap-3 p-4 bg-blue-50 rounded-lg">
+                        <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                        <span className="text-blue-700">Extracting text from {parsingFile}...</span>
+                        {extractionProgress.totalPages > 0 && (
+                          <span className="text-blue-600">
+                            Page {extractionProgress.currentPage}/{extractionProgress.totalPages}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {fullGrantDoc && !fullGrantAudit && (
+                      <button
+                        onClick={async () => {
+                          if (!fullGrantDoc || !mechanism) return
+                          setIsAuditingFullGrant(true)
+                          try {
+                            const { data, error } = await supabase.functions.invoke('audit-grant', {
+                              body: {
+                                mechanism,
+                                institute: institute || undefined,
+                                documents: {
+                                  full_grant: fullGrantDoc.content
+                                },
+                                isFullGrantMode: true
+                              }
+                            })
+                            if (error) throw error
+                            setFullGrantAudit(data)
+                          } catch (err) {
+                            console.error('Audit error:', err)
+                          } finally {
+                            setIsAuditingFullGrant(false)
+                          }
+                        }}
+                        disabled={isAuditingFullGrant}
+                        className="w-full px-6 py-4 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {isAuditingFullGrant ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            Analyzing Grant...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-5 h-5" />
+                            Run Full Grant Audit
+                          </>
+                        )}
+                      </button>
+                    )}
+
+                    {fullGrantAudit && (
+                      <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center gap-2 mb-4">
+                          <CheckCircle className="w-6 h-6 text-green-600" />
+                          <h3 className="font-semibold text-green-800">Audit Complete</h3>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+                          <div className="p-3 bg-white rounded-lg text-center">
+                            <p className="text-2xl font-bold text-primary-600">{fullGrantAudit.audit?.overallScores?.weighted_total || 0}</p>
+                            <p className="text-xs text-neutral-500">Overall</p>
+                          </div>
+                          <div className="p-3 bg-white rounded-lg text-center">
+                            <p className="text-xl font-bold text-blue-600">{fullGrantAudit.audit?.overallScores?.scientific || 0}</p>
+                            <p className="text-xs text-neutral-500">Scientific</p>
+                          </div>
+                          <div className="p-3 bg-white rounded-lg text-center">
+                            <p className="text-xl font-bold text-purple-600">{fullGrantAudit.audit?.overallScores?.structural || 0}</p>
+                            <p className="text-xs text-neutral-500">Structural</p>
+                          </div>
+                          <div className="p-3 bg-white rounded-lg text-center">
+                            <p className="text-xl font-bold text-green-600">{fullGrantAudit.audit?.overallScores?.budget || 0}</p>
+                            <p className="text-xs text-neutral-500">Budget</p>
+                          </div>
+                          <div className="p-3 bg-white rounded-lg text-center">
+                            <p className="text-xl font-bold text-amber-600">{fullGrantAudit.audit?.overallScores?.commercialization || 0}</p>
+                            <p className="text-xs text-neutral-500">Commercialization</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setPackageAudit(fullGrantAudit)}
+                          className="w-full px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+                        >
+                          View Detailed Results
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Section by Section Mode - Status Summary */}
+                {uploadMode === 'sections' && (
+                  <>
+                    <div className="mb-6 p-4 bg-neutral-50 rounded-lg">
                   <div className="flex flex-wrap gap-2 mb-3">
                     {categories.map(cat => {
                       const hasFiles = cat.files.length > 0
@@ -762,6 +975,8 @@ export function AuditMode({ onBack }: AuditModeProps) {
                     )
                   })}
                 </div>
+                  </>
+                )}
               </div>
             )}
 
@@ -1188,6 +1403,62 @@ export function AuditMode({ onBack }: AuditModeProps) {
           </div>
         )}
       </div>
+
+      {/* Document Viewer Modal */}
+      {showDocViewer && fullGrantDoc && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-neutral-200">
+              <div className="flex items-center gap-3">
+                <FileText className="w-6 h-6 text-primary-600" />
+                <div>
+                  <h3 className="font-semibold text-neutral-900">{fullGrantDoc.fileName}</h3>
+                  <p className="text-sm text-neutral-500">
+                    {fullGrantDoc.pageCount && `${fullGrantDoc.pageCount} pages • `}
+                    {fullGrantDoc.content.length.toLocaleString()} characters
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDocViewer(false)}
+                className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-6">
+              <div className="prose prose-sm max-w-none">
+                <pre className="whitespace-pre-wrap font-sans text-sm text-neutral-700 leading-relaxed bg-neutral-50 p-4 rounded-lg">
+                  {fullGrantDoc.content}
+                </pre>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 p-4 border-t border-neutral-200 bg-neutral-50">
+              <button
+                onClick={() => {
+                  const blob = new Blob([fullGrantDoc.content], { type: 'text/plain' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `${fullGrantDoc.fileName.replace(/\.[^/.]+$/, '')}_extracted.txt`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                }}
+                className="px-4 py-2 bg-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-300 flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Download Text
+              </button>
+              <button
+                onClick={() => setShowDocViewer(false)}
+                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
