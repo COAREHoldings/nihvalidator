@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { documents, mechanism, generateSuggestions, institute } = await req.json();
+    const { documents, pageCounts, mechanism, generateSuggestions, institute } = await req.json();
 
     if (!documents || !mechanism) {
       throw new Error('Documents and mechanism are required');
@@ -90,12 +90,14 @@ Deno.serve(async (req) => {
     };
 
     // Run administrative compliance checks
-    const runComplianceChecks = (docs: Record<string, string>, mech: string) => {
+    const runComplianceChecks = (docs: Record<string, string>, mech: string, actualPageCounts?: Record<string, number>) => {
       const results: Record<string, { 
+        actualPages: number | null,
         estimatedPages: number, 
         pageLimit: number, 
         status: 'pass' | 'warning' | 'fail',
-        issues: string[] 
+        issues: string[],
+        isActualCount: boolean
       }> = {};
       
       const overallIssues: string[] = [];
@@ -106,19 +108,26 @@ Deno.serve(async (req) => {
       for (const [docType, content] of Object.entries(docs)) {
         const limit = pageLimits[docType]?.[mech] || 999;
         const estimated = estimatePages(content);
+        const actualCount = actualPageCounts?.[docType];
+        const pageCount = actualCount ?? estimated; // Use actual if available, otherwise estimate
+        const isActualCount = actualCount !== undefined;
         const { warnings } = checkFormattingIndicators(content);
         const issues: string[] = [...warnings];
         
         let status: 'pass' | 'warning' | 'fail' = 'pass';
         
         if (limit < 999) {
-          if (estimated > limit) {
+          if (pageCount > limit) {
             status = 'fail';
-            issues.unshift(`Estimated ${estimated} pages exceeds ${limit}-page limit`);
+            if (isActualCount) {
+              issues.unshift(`CRITICAL: ${pageCount} pages exceeds ${limit}-page limit (will be rejected)`);
+            } else {
+              issues.unshift(`Estimated ${pageCount} pages exceeds ${limit}-page limit`);
+            }
             failCount++;
-          } else if (estimated > limit * 0.9) {
+          } else if (pageCount > limit * 0.9) {
             status = 'warning';
-            issues.unshift(`Near page limit: ${estimated}/${limit} pages (may be tight)`);
+            issues.unshift(`Near page limit: ${pageCount}/${limit} pages`);
             warningCount++;
           } else {
             passCount++;
@@ -132,7 +141,14 @@ Deno.serve(async (req) => {
           warningCount++;
         }
         
-        results[docType] = { estimatedPages: estimated, pageLimit: limit, status, issues };
+        results[docType] = { 
+          actualPages: actualCount ?? null,
+          estimatedPages: estimated, 
+          pageLimit: limit, 
+          status, 
+          issues,
+          isActualCount
+        };
       }
 
       // Add general formatting reminders
@@ -149,7 +165,7 @@ Deno.serve(async (req) => {
       };
     };
 
-    const complianceResults = runComplianceChecks(documents, mechanism);
+    const complianceResults = runComplianceChecks(documents, mechanism, pageCounts);
 
     // Phase requirement matrix
     const requirementMatrix: Record<string, { required: string[]; recommended: string[]; conditional: Record<string, string[]> }> = {

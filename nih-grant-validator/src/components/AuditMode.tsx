@@ -23,6 +23,7 @@ interface UploadedFile {
   file: File
   fileName: string
   content: string
+  pageCount?: number
   audit?: DocumentAuditResult
   isAuditing?: boolean
 }
@@ -69,7 +70,7 @@ interface PackageAuditResult {
     conditionalDetection: Record<string, { detected: boolean; details: string }>
   }
   administrativeCompliance?: {
-    documents: Record<string, { estimatedPages: number; pageLimit: number; status: 'pass' | 'warning' | 'fail'; issues: string[] }>
+    documents: Record<string, { actualPages: number | null; estimatedPages: number; pageLimit: number; status: 'pass' | 'warning' | 'fail'; issues: string[]; isActualCount: boolean }>
     summary: { pass: number; warning: number; fail: number }
     formatReminders: string[]
     agencyAlerts: string[]
@@ -184,11 +185,12 @@ export function AuditMode({ onBack }: AuditModeProps) {
     setParsingFile(null)
   }
 
-  const extractTextFromPDF = async (file: File): Promise<string> => {
+  const extractTextFromPDF = async (file: File): Promise<{ text: string; pageCount: number }> => {
     const arrayBuffer = await file.arrayBuffer()
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
     let fullText = ''
-    const maxPages = Math.min(pdf.numPages, 50)
+    const actualPageCount = pdf.numPages
+    const maxPages = Math.min(actualPageCount, 50)
     setExtractionProgress(p => ({ ...p, totalPages: maxPages, currentPage: 0 }))
     for (let i = 1; i <= maxPages; i++) {
       if (extractionCancelledRef.current) throw new Error('cancelled')
@@ -198,7 +200,7 @@ export function AuditMode({ onBack }: AuditModeProps) {
       const pageText = textContent.items.map((item) => ('str' in item ? item.str : '')).join(' ')
       fullText += pageText + '\n\n'
     }
-    return fullText.trim()
+    return { text: fullText.trim(), pageCount: actualPageCount }
   }
 
   const extractTextFromDOCX = async (file: File): Promise<string> => {
@@ -221,6 +223,7 @@ export function AuditMode({ onBack }: AuditModeProps) {
     
     try {
       let content = ''
+      let pageCount: number | undefined = undefined
       
       // Create timeout promise
       const timeoutPromise = new Promise<never>((_, reject) => {
@@ -229,15 +232,18 @@ export function AuditMode({ onBack }: AuditModeProps) {
       
       const extractionPromise = (async () => {
         if (file.name.toLowerCase().endsWith('.pdf')) {
-          return await extractTextFromPDF(file)
+          const result = await extractTextFromPDF(file)
+          return { text: result.text, pageCount: result.pageCount }
         } else if (file.name.toLowerCase().endsWith('.docx')) {
-          return await extractTextFromDOCX(file)
+          return { text: await extractTextFromDOCX(file), pageCount: undefined }
         } else {
-          return await file.text()
+          return { text: await file.text(), pageCount: undefined }
         }
       })()
       
-      content = await Promise.race([extractionPromise, timeoutPromise])
+      const result = await Promise.race([extractionPromise, timeoutPromise])
+      content = result.text
+      pageCount = result.pageCount
 
       if (extractionCancelledRef.current) return
 
@@ -251,7 +257,8 @@ export function AuditMode({ onBack }: AuditModeProps) {
         id: `${categoryType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         file,
         fileName: file.name,
-        content
+        content,
+        pageCount
       }
 
       setCategories(prev => prev.map(cat => {
@@ -351,18 +358,23 @@ export function AuditMode({ onBack }: AuditModeProps) {
     // Then run package-level audit
     try {
       const documentsObj: Record<string, string> = {}
+      const pageCountsObj: Record<string, number> = {}
       categories.forEach(cat => {
         if (cat.files.length > 0) {
           if (cat.multiFile) {
             documentsObj[cat.type] = cat.files.map((f, i) => `[${f.fileName}]\n${f.content}`).join('\n\n---\n\n')
+            // Sum page counts for multi-file categories
+            const totalPages = cat.files.reduce((sum, f) => sum + (f.pageCount || 0), 0)
+            if (totalPages > 0) pageCountsObj[cat.type] = totalPages
           } else {
             documentsObj[cat.type] = cat.files[0].content
+            if (cat.files[0].pageCount) pageCountsObj[cat.type] = cat.files[0].pageCount
           }
         }
       })
 
       const { data, error } = await supabase.functions.invoke('audit-grant', {
-        body: { documents: documentsObj, mechanism, institute, generateSuggestions: false }
+        body: { documents: documentsObj, pageCounts: pageCountsObj, mechanism, institute, generateSuggestions: false }
       })
 
       if (error) throw error
@@ -381,18 +393,22 @@ export function AuditMode({ onBack }: AuditModeProps) {
 
     try {
       const documentsObj: Record<string, string> = {}
+      const pageCountsObj: Record<string, number> = {}
       categories.forEach(cat => {
         if (cat.files.length > 0) {
           if (cat.multiFile) {
             documentsObj[cat.type] = cat.files.map(f => `[${f.fileName}]\n${f.content}`).join('\n\n---\n\n')
+            const totalPages = cat.files.reduce((sum, f) => sum + (f.pageCount || 0), 0)
+            if (totalPages > 0) pageCountsObj[cat.type] = totalPages
           } else {
             documentsObj[cat.type] = cat.files[0].content
+            if (cat.files[0].pageCount) pageCountsObj[cat.type] = cat.files[0].pageCount
           }
         }
       })
 
       const { data, error } = await supabase.functions.invoke('audit-grant', {
-        body: { documents: documentsObj, mechanism, institute, generateSuggestions: true }
+        body: { documents: documentsObj, pageCounts: pageCountsObj, mechanism, institute, generateSuggestions: true }
       })
 
       if (error) throw error
@@ -909,6 +925,138 @@ export function AuditMode({ onBack }: AuditModeProps) {
                       )}
                     </div>
                   ))
+                )}
+              </div>
+            ) : activeTab === 'compliance' ? (
+              /* Administrative Compliance */
+              <div className="space-y-6">
+                {/* Warning Banner */}
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-red-800">Administrative Non-Compliance May Result in Rejection Without Review</p>
+                    <p className="text-sm text-red-700 mt-1">NIH strictly enforces formatting requirements. Applications exceeding page limits or violating format rules are returned without scientific review.</p>
+                  </div>
+                </div>
+
+                {packageAudit.administrativeCompliance ? (
+                  <>
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                        <div className="text-3xl font-bold text-green-600">{packageAudit.administrativeCompliance.summary.pass}</div>
+                        <p className="text-sm text-green-700">Pass</p>
+                      </div>
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                        <div className="text-3xl font-bold text-yellow-600">{packageAudit.administrativeCompliance.summary.warning}</div>
+                        <p className="text-sm text-yellow-700">Warnings</p>
+                      </div>
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                        <div className="text-3xl font-bold text-red-600">{packageAudit.administrativeCompliance.summary.fail}</div>
+                        <p className="text-sm text-red-700">Failures</p>
+                      </div>
+                    </div>
+
+                    {/* Page Count Table */}
+                    <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+                      <h3 className="font-semibold text-neutral-900 mb-4">Page Count Validation</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-neutral-200">
+                              <th className="text-left py-2 px-3 font-medium text-neutral-600">Document</th>
+                              <th className="text-center py-2 px-3 font-medium text-neutral-600">Pages</th>
+                              <th className="text-center py-2 px-3 font-medium text-neutral-600">Limit</th>
+                              <th className="text-center py-2 px-3 font-medium text-neutral-600">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {Object.entries(packageAudit.administrativeCompliance.documents).map(([docType, info]) => (
+                              <tr key={docType} className="border-b border-neutral-100">
+                                <td className="py-2 px-3 font-medium capitalize">{docType.replace(/_/g, ' ')}</td>
+                                <td className="py-2 px-3 text-center">
+                                  {info.isActualCount ? (
+                                    <span className="font-semibold">{info.actualPages}</span>
+                                  ) : (
+                                    <span className="text-neutral-500" title="Estimated from text length">~{info.estimatedPages}</span>
+                                  )}
+                                  {info.isActualCount && <span className="text-xs text-green-600 ml-1">(PDF)</span>}
+                                </td>
+                                <td className="py-2 px-3 text-center">{info.pageLimit < 999 ? info.pageLimit : 'No limit'}</td>
+                                <td className="py-2 px-3 text-center">
+                                  <span className={`px-2 py-1 text-xs font-medium rounded ${
+                                    info.status === 'pass' ? 'bg-green-100 text-green-700' :
+                                    info.status === 'warning' ? 'bg-yellow-100 text-yellow-700' :
+                                    'bg-red-100 text-red-700'
+                                  }`}>
+                                    {info.status.toUpperCase()}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Document Issues */}
+                    {Object.entries(packageAudit.administrativeCompliance.documents).some(([_, info]) => info.issues.length > 0) && (
+                      <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+                        <h3 className="font-semibold text-neutral-900 mb-4">Document-Specific Issues</h3>
+                        <div className="space-y-3">
+                          {Object.entries(packageAudit.administrativeCompliance.documents)
+                            .filter(([_, info]) => info.issues.length > 0)
+                            .map(([docType, info]) => (
+                              <div key={docType} className={`p-3 rounded-lg border ${
+                                info.status === 'fail' ? 'bg-red-50 border-red-200' : 'bg-yellow-50 border-yellow-200'
+                              }`}>
+                                <p className="font-medium capitalize text-neutral-800">{docType.replace(/_/g, ' ')}</p>
+                                <ul className="mt-2 space-y-1">
+                                  {info.issues.map((issue, i) => (
+                                    <li key={i} className="text-sm text-neutral-700 flex items-start gap-2">
+                                      <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                      {issue}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Format Reminders */}
+                    <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+                      <h3 className="font-semibold text-neutral-900 mb-4">NIH Formatting Requirements Checklist</h3>
+                      <ul className="space-y-2">
+                        {packageAudit.administrativeCompliance.formatReminders.map((reminder, i) => (
+                          <li key={i} className="text-sm text-neutral-700 flex items-center gap-2">
+                            <div className="w-4 h-4 border border-neutral-400 rounded" />
+                            {reminder}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Agency Alerts */}
+                    {packageAudit.administrativeCompliance.agencyAlerts.length > 0 && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                        <h3 className="font-semibold text-blue-900 mb-3">Institute-Specific Alerts</h3>
+                        <ul className="space-y-2">
+                          {packageAudit.administrativeCompliance.agencyAlerts.map((alert, i) => (
+                            <li key={i} className="text-sm text-blue-800 flex items-start gap-2">
+                              <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                              {alert}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6 text-center text-neutral-500">
+                    Administrative compliance data not available
+                  </div>
                 )}
               </div>
             ) : (
