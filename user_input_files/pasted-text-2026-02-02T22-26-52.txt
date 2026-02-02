@@ -1,0 +1,288 @@
+# NIH RESEARCH STRATEGY SYSTEM
+
+## Generator + Validator + Auditor + Uploaded Document Review Engine
+
+---
+
+# SYSTEM PURPOSE
+
+This system supports four integrated but independent engines:
+
+1. Generator – Builds NIH-compliant Research Strategy from modules.
+2. Validator – Enforces structural and mechanism compliance.
+3. Auditor – Simulates NIH reviewer scoring and competitiveness.
+4. Uploaded Document Review Engine – Critiques, improves, and optionally rewrites uploaded grant documents with full user control.
+
+The system must preserve researcher sovereignty at all times.
+No AI changes may be auto-applied without explicit approval.
+
+---
+
+# ONE-CLICK GENERATION (POST-MODULE)
+
+After completion of 8 modules:
+
+[ Generate NIH Research Strategy ]
+
+System Flow:
+
+1. Generator builds document (mechanism-aware).
+2. Validator runs structural compliance checks.
+3. User edits or regenerates sections.
+4. Auditor simulates study section scoring.
+
+---
+
+# UPLOADED DOCUMENT REVIEW ENGINE
+
+## PURPOSE
+
+Allow researchers to upload:
+
+• Full NIH grant (PDF/DOCX/text)
+• Research Strategy only
+• Phase I, Phase II, Fast-Track, Direct-to-Phase II, or Phase IIB proposals
+
+The system must:
+
+1. Parse document into sections.
+2. Critique each section individually.
+3. Critique entire grant holistically.
+4. Offer concrete improvement guidance.
+5. Offer optional AI rewrites per section.
+6. Allow accept / reject / manual edit control.
+
+---
+
+# STEP 1 – DOCUMENT INGESTION
+
+System must:
+
+• Extract text from PDF/DOCX
+• Identify NIH structural sections:
+
+* Specific Aims
+* Significance
+* Innovation
+* Approach
+* Statistical Plan
+* Milestones
+* Regulatory/Commercial (if present)
+
+If sections cannot be detected, system flags "Structural Ambiguity".
+
+---
+
+# STEP 2 – SECTION-LEVEL CRITIQUE
+
+For EACH section, the Auditor must provide:
+
+SECTION REVIEW REPORT
+
+1. Clarity Assessment
+2. Logical Coherence
+3. Rigor and Statistical Strength
+4. Alignment with NIH expectations
+5. Mechanism alignment (Phase I, II, etc.)
+6. Major Strengths
+7. Major Weaknesses
+8. Specific Actionable Improvements
+
+This must be practical and concrete.
+No vague feedback.
+
+---
+
+# STEP 3 – WHOLE-GRANT CRITIQUE
+
+System must also evaluate:
+
+• Logical continuity across sections
+• Redundancy
+• Missing transition logic (e.g., Fast-Track gates)
+• Scope creep
+• Feasibility realism
+• Commercial/regulatory alignment (when required)
+• Competitive positioning
+
+WHOLE GRANT REPORT
+
+• Overall structural integrity
+• Major structural weaknesses
+• Risk areas likely to concern reviewers
+• Missing elements
+• Top 5 improvements that would materially raise score
+
+---
+
+# STEP 4 – OPTIONAL REWRITE ENGINE
+
+For any section, user may click:
+
+[ Rewrite Section ]
+
+Rewrite prompt must:
+
+"You are a senior NIH reviewer and grant writer.
+Rewrite this section to improve clarity, rigor, and competitiveness.
+Preserve scientific meaning.
+Strengthen statistical reasoning.
+Improve logical transitions.
+Do not exaggerate.
+Do not fabricate citations."
+
+Output displayed as:
+
+Original | AI Rewrite (side-by-side)
+
+User may:
+• Accept rewrite
+• Accept selected paragraphs
+• Reject
+• Edit manually
+• Regenerate alternative rewrite
+
+---
+
+# STEP 5 – TARGETED IMPROVEMENT BUTTONS
+
+Each section must include:
+
+• Improve Clarity
+• Strengthen Innovation
+• Add Statistical Rigor
+• Add Quantitative Milestones
+• Tighten to Page Limit
+• Red-Team as Skeptical Reviewer
+• Rewrite for High-Impact Framing
+
+Each action produces a diff view.
+
+---
+
+# VALIDATOR INTEGRATION (POST-UPLOAD)
+
+After critique and optional rewrite, user may run:
+
+[ Run Structural Validation ]
+
+Validator checks:
+
+• Required NIH sections present
+• Quantitative milestones defined
+• Statistical plan included
+• Risk mitigation included
+• Mechanism scope alignment
+• Phase transition logic (Fast-Track)
+• Preliminary data strength (Direct-to-Phase II)
+• Commercialization logic (Phase IIB)
+
+Output:
+PASS / CONDITIONAL PASS / FAIL
+
+---
+
+# AUDITOR INTEGRATION (POST-UPLOAD)
+
+User may then run:
+
+[ Run NIH Audit ]
+
+Auditor returns:
+
+Overall Impact Score (Projected)
+Criterion Scores:
+
+* Significance
+* Innovation
+* Approach
+* Team
+* Environment
+* Commercialization (if applicable)
+
+Plus:
+• Major Strengths
+• Major Weaknesses
+• Fatal Flaws
+• Competitiveness Estimate
+• Fundability Probability (heuristic)
+
+Auditor does not rewrite automatically.
+
+---
+
+# USER CONTROL MODEL
+
+At every stage, researcher must be able to:
+
+• Accept
+• Reject
+• Edit manually
+• Compare versions
+• Revert to earlier draft
+• Export tracked-changes version
+
+No AI content replaces original without explicit approval.
+
+---
+
+# MECHANISM-AWARE REVIEW
+
+Uploaded documents must be evaluated according to declared mechanism:
+
+Phase I:
+
+* Feasibility clarity
+* Defined go/no-go criteria
+
+Phase II:
+
+* Clear Phase I foundation
+* Expanded development plan
+
+Direct-to-Phase II:
+
+* Strong preliminary data
+* Justified bypass
+
+Fast-Track:
+
+* Phase I–II bridge logic
+* Transition gates
+
+Phase IIB:
+
+* Prior SBIR de-risking
+* Commercialization advancement
+
+---
+
+# FINAL SYSTEM CAPABILITIES
+
+The system must allow a researcher to:
+
+• Generate a full NIH Research Strategy at one click
+• Upload an existing proposal
+• Receive section-by-section critique
+• Receive whole-grant critique
+• See actionable improvement steps
+• Receive optional AI rewrites
+• Maintain control over every change
+• Validate structural compliance
+• Simulate NIH scoring
+• Export submission-ready drafts
+
+---
+
+# END STATE
+
+This system functions as a:
+
+• Grant Generation Engine
+• Structural Compliance Validator
+• NIH Reviewer Simulator
+• Uploaded Document Critique & Rewrite Platform
+
+All engines operate independently but integrate seamlessly.
+
+User sovereignty, transparency, and NIH alignment are mandatory at every layer.
