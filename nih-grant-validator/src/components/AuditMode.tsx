@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { 
   Upload, FileText, CheckCircle, XCircle, AlertTriangle, 
   Download, Sparkles, ChevronDown, ChevronUp, ArrowLeft,
   FileCheck, AlertCircle, Info, Users, DollarSign, Briefcase, 
-  ClipboardList, Loader2, Plus, Trash2, File
+  ClipboardList, Loader2, Plus, Trash2, File, Type, X
 } from 'lucide-react'
 import * as pdfjsLib from 'pdfjs-dist'
 import mammoth from 'mammoth'
@@ -44,6 +44,8 @@ interface DocumentCategory {
   multiFile: boolean
   maxFiles: number
   files: UploadedFile[]
+  inputMode: 'upload' | 'paste'
+  pastedText: string
 }
 
 interface PackageAuditResult {
@@ -83,13 +85,13 @@ const MECHANISMS: { value: Mechanism; label: string; description: string }[] = [
 ]
 
 const createInitialCategories = (): DocumentCategory[] => [
-  { type: 'specific_aims', label: 'Specific Aims', description: '1-page summary of aims and goals', required: ['Phase I', 'Phase II', 'Direct-to-Phase II', 'Fast Track', 'Phase IIB'], recommended: [], multiFile: false, maxFiles: 1, files: [] },
-  { type: 'research_strategy', label: 'Research Strategy', description: 'Significance, Innovation, Approach sections', required: ['Phase I', 'Phase II', 'Direct-to-Phase II', 'Fast Track', 'Phase IIB'], recommended: [], multiFile: false, maxFiles: 1, files: [] },
-  { type: 'budget', label: 'Budget', description: 'Detailed budget and justification', required: ['Phase II', 'Direct-to-Phase II', 'Fast Track', 'Phase IIB'], recommended: ['Phase I'], multiFile: false, maxFiles: 1, files: [] },
-  { type: 'commercialization_plan', label: 'Commercialization Plan', description: 'NIH 12-page commercialization plan', required: ['Phase II', 'Direct-to-Phase II', 'Fast Track', 'Phase IIB'], recommended: [], multiFile: false, maxFiles: 1, files: [] },
-  { type: 'biosketches', label: 'Biosketches', description: 'Key personnel biosketches (PI, Co-I, etc.)', required: [], recommended: ['Phase I', 'Phase II', 'Direct-to-Phase II', 'Fast Track', 'Phase IIB'], multiFile: true, maxFiles: 10, files: [] },
-  { type: 'letters_of_support', label: 'Letters of Support', description: 'Collaborator and partner letters', required: [], recommended: ['Phase I', 'Phase II', 'Direct-to-Phase II', 'Fast Track', 'Phase IIB'], multiFile: true, maxFiles: 15, files: [] },
-  { type: 'milestones', label: 'Milestones', description: 'Project milestones and timeline', required: ['Fast Track'], recommended: ['Phase II', 'Direct-to-Phase II', 'Phase IIB'], multiFile: false, maxFiles: 1, files: [] },
+  { type: 'specific_aims', label: 'Specific Aims', description: '1-page summary of aims and goals', required: ['Phase I', 'Phase II', 'Direct-to-Phase II', 'Fast Track', 'Phase IIB'], recommended: [], multiFile: false, maxFiles: 1, files: [], inputMode: 'upload', pastedText: '' },
+  { type: 'research_strategy', label: 'Research Strategy', description: 'Significance, Innovation, Approach sections', required: ['Phase I', 'Phase II', 'Direct-to-Phase II', 'Fast Track', 'Phase IIB'], recommended: [], multiFile: false, maxFiles: 1, files: [], inputMode: 'upload', pastedText: '' },
+  { type: 'budget', label: 'Budget', description: 'Detailed budget and justification', required: ['Phase II', 'Direct-to-Phase II', 'Fast Track', 'Phase IIB'], recommended: ['Phase I'], multiFile: false, maxFiles: 1, files: [], inputMode: 'upload', pastedText: '' },
+  { type: 'commercialization_plan', label: 'Commercialization Plan', description: 'NIH 12-page commercialization plan', required: ['Phase II', 'Direct-to-Phase II', 'Fast Track', 'Phase IIB'], recommended: [], multiFile: false, maxFiles: 1, files: [], inputMode: 'upload', pastedText: '' },
+  { type: 'biosketches', label: 'Biosketches', description: 'Key personnel biosketches (PI, Co-I, etc.)', required: [], recommended: ['Phase I', 'Phase II', 'Direct-to-Phase II', 'Fast Track', 'Phase IIB'], multiFile: true, maxFiles: 10, files: [], inputMode: 'upload', pastedText: '' },
+  { type: 'letters_of_support', label: 'Letters of Support', description: 'Collaborator and partner letters', required: [], recommended: ['Phase I', 'Phase II', 'Direct-to-Phase II', 'Fast Track', 'Phase IIB'], multiFile: true, maxFiles: 15, files: [], inputMode: 'upload', pastedText: '' },
+  { type: 'milestones', label: 'Milestones', description: 'Project milestones and timeline', required: ['Fast Track'], recommended: ['Phase II', 'Direct-to-Phase II', 'Phase IIB'], multiFile: false, maxFiles: 1, files: [], inputMode: 'upload', pastedText: '' },
 ]
 
 interface AuditModeProps {
@@ -105,12 +107,55 @@ export function AuditMode({ onBack }: AuditModeProps) {
   const [expandedDocs, setExpandedDocs] = useState<Set<string>>(new Set())
   const [parsingFile, setParsingFile] = useState<string | null>(null)
   const [generatingSuggestions, setGeneratingSuggestions] = useState(false)
+  const extractionCancelledRef = useRef(false)
+  const [extractionTimedOut, setExtractionTimedOut] = useState(false)
+
+  const setInputMode = (categoryType: DocumentType, mode: 'upload' | 'paste') => {
+    setCategories(prev => prev.map(cat => 
+      cat.type === categoryType ? { ...cat, inputMode: mode } : cat
+    ))
+  }
+
+  const setPastedText = (categoryType: DocumentType, text: string) => {
+    setCategories(prev => prev.map(cat =>
+      cat.type === categoryType ? { ...cat, pastedText: text } : cat
+    ))
+  }
+
+  const addPastedDocument = (categoryType: DocumentType) => {
+    const cat = categories.find(c => c.type === categoryType)
+    if (!cat || !cat.pastedText.trim()) return
+    
+    const newFile: UploadedFile = {
+      id: `${categoryType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      file: new File([cat.pastedText], `pasted_${cat.label.toLowerCase().replace(/\s+/g, '_')}.txt`),
+      fileName: `Pasted Text (${cat.pastedText.length.toLocaleString()} chars)`,
+      content: cat.pastedText
+    }
+
+    setCategories(prev => prev.map(c => {
+      if (c.type !== categoryType) return c
+      if (c.multiFile) {
+        if (c.files.length >= c.maxFiles) return c
+        return { ...c, files: [...c.files, newFile], pastedText: '' }
+      } else {
+        return { ...c, files: [newFile], pastedText: '' }
+      }
+    }))
+  }
+
+  const cancelExtraction = () => {
+    extractionCancelledRef.current = true
+    setParsingFile(null)
+  }
 
   const extractTextFromPDF = async (file: File): Promise<string> => {
     const arrayBuffer = await file.arrayBuffer()
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
     let fullText = ''
-    for (let i = 1; i <= pdf.numPages; i++) {
+    const maxPages = Math.min(pdf.numPages, 50) // Limit to 50 pages
+    for (let i = 1; i <= maxPages; i++) {
+      if (extractionCancelledRef.current) throw new Error('cancelled')
       const page = await pdf.getPage(i)
       const textContent = await page.getTextContent()
       const pageText = textContent.items.map((item) => ('str' in item ? item.str : '')).join(' ')
@@ -126,19 +171,42 @@ export function AuditMode({ onBack }: AuditModeProps) {
   }
 
   const handleFileUpload = useCallback(async (categoryType: DocumentType, file: File) => {
+    // Check file size (warn if > 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      if (!confirm(`${file.name} is ${(file.size / 1024 / 1024).toFixed(1)}MB. Large files may take longer to process. Continue?`)) {
+        return
+      }
+    }
+
+    extractionCancelledRef.current = false
+    setExtractionTimedOut(false)
     setParsingFile(file.name)
+    
     try {
       let content = ''
-      if (file.name.toLowerCase().endsWith('.pdf')) {
-        content = await extractTextFromPDF(file)
-      } else if (file.name.toLowerCase().endsWith('.docx')) {
-        content = await extractTextFromDOCX(file)
-      } else {
-        content = await file.text()
-      }
+      
+      // Create timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('timeout')), 30000)
+      })
+      
+      const extractionPromise = (async () => {
+        if (file.name.toLowerCase().endsWith('.pdf')) {
+          return await extractTextFromPDF(file)
+        } else if (file.name.toLowerCase().endsWith('.docx')) {
+          return await extractTextFromDOCX(file)
+        } else {
+          return await file.text()
+        }
+      })()
+      
+      content = await Promise.race([extractionPromise, timeoutPromise])
+
+      if (extractionCancelledRef.current) return
 
       if (!content || content.trim().length === 0) {
-        alert(`Could not extract text from ${file.name}`)
+        alert(`Could not extract text from ${file.name}. Try pasting text instead.`)
+        setInputMode(categoryType, 'paste')
         return
       }
 
@@ -161,9 +229,17 @@ export function AuditMode({ onBack }: AuditModeProps) {
           return { ...cat, files: [newFile] }
         }
       }))
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.message === 'cancelled') return
+      if (error?.message === 'timeout') {
+        setExtractionTimedOut(true)
+        setInputMode(categoryType, 'paste')
+        alert('Extraction timed out (30s). Please paste your text manually.')
+        return
+      }
       console.error('Error parsing file:', error)
-      alert(`Error parsing ${file.name}`)
+      alert(`Error parsing ${file.name}. Try pasting text instead.`)
+      setInputMode(categoryType, 'paste')
     } finally {
       setParsingFile(null)
     }
@@ -487,29 +563,81 @@ export function AuditMode({ onBack }: AuditModeProps) {
 
                         {/* Upload Button */}
                         {(cat.multiFile ? cat.files.length < cat.maxFiles : cat.files.length === 0) && (
-                          <label className={`flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
-                            parsingFile ? 'border-primary-300 bg-primary-50' : 'border-neutral-300 hover:border-primary-400 hover:bg-primary-50'
-                          }`}>
-                            {parsingFile ? (
-                              <>
-                                <Loader2 className="w-4 h-4 text-primary-500 animate-spin" />
-                                <span className="text-sm text-primary-600">Extracting {parsingFile}...</span>
-                              </>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setInputMode(cat.type, 'upload')}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                                  cat.inputMode === 'upload' ? 'bg-primary-500 text-white' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                                }`}
+                              >
+                                <Upload className="w-3.5 h-3.5" /> Upload File
+                              </button>
+                              <button
+                                onClick={() => setInputMode(cat.type, 'paste')}
+                                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                                  cat.inputMode === 'paste' ? 'bg-primary-500 text-white' : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                                }`}
+                              >
+                                <Type className="w-3.5 h-3.5" /> Paste Text
+                              </button>
+                            </div>
+
+                            {cat.inputMode === 'upload' ? (
+                              <label className={`flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                                parsingFile ? 'border-primary-300 bg-primary-50' : 'border-neutral-300 hover:border-primary-400 hover:bg-primary-50'
+                              }`}>
+                                {parsingFile ? (
+                                  <div className="flex flex-col items-center gap-2">
+                                    <div className="flex items-center gap-2">
+                                      <Loader2 className="w-4 h-4 text-primary-500 animate-spin" />
+                                      <span className="text-sm text-primary-600">Extracting {parsingFile}...</span>
+                                    </div>
+                                    <button
+                                      onClick={(e) => { e.preventDefault(); cancelExtraction(); }}
+                                      className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1"
+                                    >
+                                      <X className="w-3 h-3" /> Cancel
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <>
+                                    {cat.multiFile && cat.files.length > 0 ? <Plus className="w-4 h-4 text-neutral-400" /> : <Upload className="w-4 h-4 text-neutral-400" />}
+                                    <span className="text-sm text-neutral-500">
+                                      {cat.multiFile && cat.files.length > 0 ? `Add Another ${cat.label.replace(/s$/, '')}` : 'Upload PDF, DOCX, or TXT'}
+                                    </span>
+                                    <input
+                                      type="file"
+                                      accept=".pdf,.docx,.txt,.md"
+                                      className="hidden"
+                                      onChange={(e) => e.target.files?.[0] && handleFileUpload(cat.type, e.target.files[0])}
+                                    />
+                                  </>
+                                )}
+                              </label>
                             ) : (
-                              <>
-                                {cat.multiFile && cat.files.length > 0 ? <Plus className="w-4 h-4 text-neutral-400" /> : <Upload className="w-4 h-4 text-neutral-400" />}
-                                <span className="text-sm text-neutral-500">
-                                  {cat.multiFile && cat.files.length > 0 ? `Add Another ${cat.label.replace(/s$/, '')}` : 'Upload PDF, DOCX, or TXT'}
-                                </span>
-                                <input
-                                  type="file"
-                                  accept=".pdf,.docx,.txt,.md"
-                                  className="hidden"
-                                  onChange={(e) => e.target.files?.[0] && handleFileUpload(cat.type, e.target.files[0])}
+                              <div className="space-y-2">
+                                <textarea
+                                  value={cat.pastedText}
+                                  onChange={(e) => setPastedText(cat.type, e.target.value)}
+                                  placeholder="Paste your document text here..."
+                                  className="w-full h-40 p-3 text-sm border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400 resize-y"
                                 />
-                              </>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-neutral-400">
+                                    {cat.pastedText.length.toLocaleString()} characters
+                                  </span>
+                                  <button
+                                    onClick={() => addPastedDocument(cat.type)}
+                                    disabled={!cat.pastedText.trim()}
+                                    className="px-3 py-1.5 text-sm bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  >
+                                    Add Document
+                                  </button>
+                                </div>
+                              </div>
                             )}
-                          </label>
+                          </div>
                         )}
                       </div>
                     )
