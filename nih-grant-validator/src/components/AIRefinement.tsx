@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Sparkles, ShieldCheck, Users, BarChart3, Loader2, CheckCircle, XCircle, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react'
+import { Sparkles, ShieldCheck, Users, BarChart3, Loader2, CheckCircle, XCircle, AlertTriangle, ChevronDown, ChevronUp, Lock } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
+import type { AIGatingResult } from '../types'
 
 const supabase = createClient(
   'https://dvuhtfzsvcacyrlfettz.supabase.co',
@@ -41,7 +42,11 @@ interface ScoreResult {
   improvementPotential: string
 }
 
-export function AIRefinement() {
+interface Props {
+  aiGating: AIGatingResult
+}
+
+export function AIRefinement({ aiGating }: Props) {
   const [activeTab, setActiveTab] = useState<TabType>('refine')
   const [text, setText] = useState('')
   const [sectionType, setSectionType] = useState('Specific Aims')
@@ -60,6 +65,43 @@ export function AIRefinement() {
 
   const toggleSection = (key: string) => {
     setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  // AI Gating Block
+  if (!aiGating.allowed) {
+    return (
+      <div>
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-neutral-900 mb-2">AI Refinement</h2>
+          <p className="text-neutral-600">Use AI to improve your grant sections and get expert feedback</p>
+        </div>
+        
+        <div className="p-8 bg-neutral-50 rounded-lg border border-neutral-200 text-center">
+          <Lock className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-neutral-700 mb-2">AI Refinement Locked</h3>
+          <p className="text-neutral-500 mb-6">{aiGating.blocking_reason}</p>
+          
+          {aiGating.missing_fields.length > 0 && (
+            <div className="text-left max-w-md mx-auto">
+              <h4 className="font-semibold text-neutral-700 mb-3">Missing Requirements:</h4>
+              {aiGating.missing_fields.map(mf => (
+                <div key={mf.module_id} className="mb-3 p-3 bg-white rounded border border-neutral-200">
+                  <p className="font-medium text-neutral-800 mb-1">Module {mf.module_id}</p>
+                  <ul className="text-sm text-neutral-600">
+                    {mf.fields.slice(0, 3).map(f => (
+                      <li key={f}>- {f.replace(/_/g, ' ')}</li>
+                    ))}
+                    {mf.fields.length > 3 && (
+                      <li className="text-neutral-400">...and {mf.fields.length - 3} more</li>
+                    )}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    )
   }
 
   const handleAnalyze = async () => {
@@ -97,7 +139,6 @@ export function AIRefinement() {
             <h4 className="font-semibold text-neutral-900 mb-2">Summary</h4>
             <p className="text-neutral-700">{r.summary}</p>
           </div>
-
           <div>
             <h4 className="font-semibold text-neutral-900 mb-3 flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-semantic-success" /> Strengths
@@ -108,7 +149,6 @@ export function AIRefinement() {
               ))}
             </ul>
           </div>
-
           <div>
             <h4 className="font-semibold text-neutral-900 mb-3 flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-semantic-warning" /> Suggested Improvements
@@ -122,7 +162,6 @@ export function AIRefinement() {
               ))}
             </div>
           </div>
-
           {r.revisedExcerpt && (
             <div>
               <h4 className="font-semibold text-neutral-900 mb-3">Revised Excerpt</h4>
@@ -137,8 +176,6 @@ export function AIRefinement() {
 
     if (activeTab === 'compliance') {
       const r = result as ComplianceResult
-      const riskColors = { low: 'green', medium: 'amber', high: 'red' }
-      const color = riskColors[r.overallRisk] || 'neutral'
       return (
         <div className="space-y-6">
           <div className={`p-4 rounded-lg border ${r.compliant ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
@@ -146,11 +183,10 @@ export function AIRefinement() {
               {r.compliant ? <CheckCircle className="w-8 h-8 text-semantic-success" /> : <XCircle className="w-8 h-8 text-semantic-error" />}
               <div>
                 <h4 className="font-semibold text-neutral-900">{r.compliant ? 'Compliant' : 'Issues Found'}</h4>
-                <p className="text-neutral-700">Overall Risk: <span className={`font-semibold text-${color}-600`}>{r.overallRisk.toUpperCase()}</span></p>
+                <p className="text-neutral-700">Overall Risk: <span className="font-semibold">{r.overallRisk.toUpperCase()}</span></p>
               </div>
             </div>
           </div>
-
           {r.issues?.length > 0 && (
             <div>
               <h4 className="font-semibold text-neutral-900 mb-3">Compliance Issues</h4>
@@ -182,13 +218,9 @@ export function AIRefinement() {
             <h4 className="font-semibold text-neutral-900 mb-2">Overall Impression</h4>
             <p className="text-neutral-700 whitespace-pre-wrap">{r.overallImpression}</p>
           </div>
-
           {sections.map(({ key, label, data }) => (
             <div key={key} className="border border-neutral-200 rounded-lg overflow-hidden">
-              <button
-                onClick={() => toggleSection(key)}
-                className="w-full p-4 bg-neutral-50 flex items-center justify-between hover:bg-neutral-100 transition-colors"
-              >
+              <button onClick={() => toggleSection(key)} className="w-full p-4 bg-neutral-50 flex items-center justify-between hover:bg-neutral-100 transition-colors">
                 <div className="flex items-center gap-3">
                   <span className="font-semibold text-neutral-900">{label}</span>
                   <span className={`px-2 py-1 rounded text-sm font-bold ${data.score <= 3 ? 'bg-green-100 text-green-800' : data.score <= 5 ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}`}>
@@ -211,7 +243,6 @@ export function AIRefinement() {
               )}
             </div>
           ))}
-
           {r.additionalComments && (
             <div className="p-4 bg-neutral-50 rounded-lg border border-neutral-200">
               <h4 className="font-semibold text-neutral-900 mb-2">Additional Comments</h4>
@@ -224,21 +255,18 @@ export function AIRefinement() {
 
     if (activeTab === 'score') {
       const r = result as ScoreResult
-      const scoreColor = r.predictedScore <= 3 ? 'green' : r.predictedScore <= 5 ? 'amber' : 'red'
       const scoreLabel = r.predictedScore <= 2 ? 'Exceptional/Outstanding' : r.predictedScore <= 4 ? 'Excellent/Very Good' : r.predictedScore <= 6 ? 'Good/Satisfactory' : 'Fair/Marginal'
       return (
         <div className="space-y-6">
-          <div className={`p-6 rounded-lg border bg-${scoreColor}-50 border-${scoreColor}-200 text-center`}>
-            <div className={`text-6xl font-bold text-${scoreColor}-600 mb-2`}>{r.predictedScore}</div>
+          <div className={`p-6 rounded-lg border text-center ${r.predictedScore <= 3 ? 'bg-green-50 border-green-200' : r.predictedScore <= 5 ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'}`}>
+            <div className={`text-6xl font-bold mb-2 ${r.predictedScore <= 3 ? 'text-green-600' : r.predictedScore <= 5 ? 'text-amber-600' : 'text-red-600'}`}>{r.predictedScore}</div>
             <p className="text-lg font-semibold text-neutral-900">{scoreLabel}</p>
             <p className="text-sm text-neutral-600">Confidence: {r.confidence}</p>
           </div>
-
           <div className="p-4 bg-neutral-50 rounded-lg border border-neutral-200">
             <h4 className="font-semibold text-neutral-900 mb-2">Rationale</h4>
             <p className="text-neutral-700">{r.rationale}</p>
           </div>
-
           <div className="grid md:grid-cols-2 gap-4">
             <div className="p-4 bg-green-50 rounded-lg border border-green-200">
               <h4 className="font-semibold text-green-800 mb-3">Positive Factors</h4>
@@ -249,7 +277,6 @@ export function AIRefinement() {
               <ul className="space-y-2">{r.scoringFactors?.negative?.map((n, i) => <li key={i} className="text-neutral-700 text-sm">- {n}</li>)}</ul>
             </div>
           </div>
-
           <div className="p-4 bg-primary-50 rounded-lg border border-primary-200">
             <h4 className="font-semibold text-neutral-900 mb-2">Improvement Potential</h4>
             <p className="text-neutral-700">{r.improvementPotential}</p>
@@ -257,7 +284,6 @@ export function AIRefinement() {
         </div>
       )
     }
-
     return null
   }
 
@@ -270,15 +296,7 @@ export function AIRefinement() {
 
       <div className="flex flex-wrap gap-2 mb-6">
         {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => { setActiveTab(tab.id); setResult(null); setError(null) }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-              activeTab === tab.id
-                ? 'bg-primary-500 text-white shadow-sm'
-                : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-            }`}
-          >
+          <button key={tab.id} onClick={() => { setActiveTab(tab.id); setResult(null); setError(null) }} className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${activeTab === tab.id ? 'bg-primary-500 text-white shadow-sm' : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'}`}>
             <tab.icon className="w-4 h-4" />
             <span className="hidden sm:inline">{tab.label}</span>
           </button>
@@ -290,37 +308,21 @@ export function AIRefinement() {
       <div className="grid md:grid-cols-2 gap-4 mb-6">
         <div>
           <label className="block text-sm font-medium text-neutral-700 mb-2">Section Type</label>
-          <select
-            value={sectionType}
-            onChange={e => setSectionType(e.target.value)}
-            className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
-          >
+          <select value={sectionType} onChange={e => setSectionType(e.target.value)} className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
             {SECTION_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
         <div>
           <label className="block text-sm font-medium text-neutral-700 mb-2">Grant Type</label>
-          <select
-            value={grantType}
-            onChange={e => setGrantType(e.target.value)}
-            className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
-          >
+          <select value={grantType} onChange={e => setGrantType(e.target.value)} className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white">
             {GRANT_TYPES.map(g => <option key={g} value={g}>{g}</option>)}
           </select>
         </div>
       </div>
 
       <div className="mb-6">
-        <label className="block text-sm font-medium text-neutral-700 mb-2">
-          Paste your grant section text
-        </label>
-        <textarea
-          value={text}
-          onChange={e => setText(e.target.value)}
-          rows={10}
-          placeholder="Paste your Specific Aims, Research Strategy, or other grant section text here..."
-          className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-y"
-        />
+        <label className="block text-sm font-medium text-neutral-700 mb-2">Paste your grant section text</label>
+        <textarea value={text} onChange={e => setText(e.target.value)} rows={10} placeholder="Paste your Specific Aims, Research Strategy, or other grant section text here..." className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-y" />
       </div>
 
       {error && (
@@ -330,22 +332,8 @@ export function AIRefinement() {
         </div>
       )}
 
-      <button
-        onClick={handleAnalyze}
-        disabled={loading || !text.trim()}
-        className="w-full px-6 py-4 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-      >
-        {loading ? (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Analyzing...
-          </>
-        ) : (
-          <>
-            <Sparkles className="w-5 h-5" />
-            Analyze with AI
-          </>
-        )}
+      <button onClick={handleAnalyze} disabled={loading || !text.trim()} className="w-full px-6 py-4 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+        {loading ? (<><Loader2 className="w-5 h-5 animate-spin" />Analyzing...</>) : (<><Sparkles className="w-5 h-5" />Analyze with AI</>)}
       </button>
 
       {result && (

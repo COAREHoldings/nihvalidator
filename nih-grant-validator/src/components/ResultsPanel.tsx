@@ -38,7 +38,7 @@ export function ResultsPanel({ result, onReset }: Props) {
               {isReady ? 'Structurally Ready' : 'Not Ready for Submission'}
             </h2>
             <p className="text-neutral-700">
-              {result.phase} | {result.data.programType}
+              {result.phase} | {result.data.program_type}
             </p>
           </div>
         </div>
@@ -99,15 +99,15 @@ export function ResultsPanel({ result, onReset }: Props) {
           </div>
           <div className="p-3 bg-neutral-50 rounded-lg">
             <span className="text-neutral-500">Program:</span>
-            <span className="ml-2 font-medium text-neutral-900">{result.data.programType}</span>
+            <span className="ml-2 font-medium text-neutral-900">{result.data.program_type}</span>
           </div>
           <div className="p-3 bg-neutral-50 rounded-lg">
             <span className="text-neutral-500">Direct Costs:</span>
-            <span className="ml-2 font-medium text-neutral-900">${result.data.budget.directCosts.toLocaleString()}</span>
+            <span className="ml-2 font-medium text-neutral-900">${result.data.legacy_budget.directCosts.toLocaleString()}</span>
           </div>
           <div className="p-3 bg-neutral-50 rounded-lg">
             <span className="text-neutral-500">Small Business %:</span>
-            <span className="ml-2 font-medium text-neutral-900">{result.data.budget.smallBusinessPercent}%</span>
+            <span className="ml-2 font-medium text-neutral-900">{result.data.legacy_budget.smallBusinessPercent}%</span>
           </div>
         </div>
       </div>
