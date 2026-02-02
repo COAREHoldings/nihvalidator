@@ -1,10 +1,10 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { 
   Upload, FileText, CheckCircle, XCircle, AlertTriangle, 
   Download, Sparkles, ChevronDown, ChevronUp, ArrowLeft,
   FileCheck, AlertCircle, Info, Users, DollarSign, Briefcase, 
-  ClipboardList, Loader2, Plus, Trash2, File, Type, X
+  ClipboardList, Loader2, Plus, Trash2, File, Type, X, Clock
 } from 'lucide-react'
 import * as pdfjsLib from 'pdfjs-dist'
 import mammoth from 'mammoth'
@@ -109,6 +109,22 @@ export function AuditMode({ onBack }: AuditModeProps) {
   const [generatingSuggestions, setGeneratingSuggestions] = useState(false)
   const extractionCancelledRef = useRef(false)
   const [extractionTimedOut, setExtractionTimedOut] = useState(false)
+  const [extractionProgress, setExtractionProgress] = useState({ currentPage: 0, totalPages: 0, elapsedTime: 0 })
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Timer effect for extraction progress
+  useEffect(() => {
+    if (parsingFile) {
+      setExtractionProgress(p => ({ ...p, elapsedTime: 0 }))
+      timerRef.current = setInterval(() => {
+        setExtractionProgress(p => ({ ...p, elapsedTime: p.elapsedTime + 1 }))
+      }, 1000)
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current)
+      setExtractionProgress({ currentPage: 0, totalPages: 0, elapsedTime: 0 })
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }, [parsingFile])
 
   const setInputMode = (categoryType: DocumentType, mode: 'upload' | 'paste') => {
     setCategories(prev => prev.map(cat => 
@@ -153,9 +169,11 @@ export function AuditMode({ onBack }: AuditModeProps) {
     const arrayBuffer = await file.arrayBuffer()
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
     let fullText = ''
-    const maxPages = Math.min(pdf.numPages, 50) // Limit to 50 pages
+    const maxPages = Math.min(pdf.numPages, 50)
+    setExtractionProgress(p => ({ ...p, totalPages: maxPages, currentPage: 0 }))
     for (let i = 1; i <= maxPages; i++) {
       if (extractionCancelledRef.current) throw new Error('cancelled')
+      setExtractionProgress(p => ({ ...p, currentPage: i }))
       const page = await pdf.getPage(i)
       const textContent = await page.getTextContent()
       const pageText = textContent.items.map((item) => ('str' in item ? item.str : '')).join(' ')
@@ -588,11 +606,37 @@ export function AuditMode({ onBack }: AuditModeProps) {
                                 parsingFile ? 'border-primary-300 bg-primary-50' : 'border-neutral-300 hover:border-primary-400 hover:bg-primary-50'
                               }`}>
                                 {parsingFile ? (
-                                  <div className="flex flex-col items-center gap-2">
+                                  <div className="flex flex-col items-center gap-3 py-2 w-full">
+                                    {/* Progress bar */}
+                                    <div className="w-full">
+                                      <div className="h-2 bg-neutral-200 rounded-full overflow-hidden">
+                                        <div 
+                                          className={`h-full transition-all duration-300 ${
+                                            extractionProgress.elapsedTime < 15 ? 'bg-green-500' :
+                                            extractionProgress.elapsedTime < 25 ? 'bg-yellow-500' : 'bg-red-500'
+                                          }`}
+                                          style={{ width: `${Math.min((extractionProgress.elapsedTime / 30) * 100, 100)}%` }}
+                                        />
+                                      </div>
+                                    </div>
+                                    {/* Status text */}
                                     <div className="flex items-center gap-2">
                                       <Loader2 className="w-4 h-4 text-primary-500 animate-spin" />
-                                      <span className="text-sm text-primary-600">Extracting {parsingFile}...</span>
+                                      <span className="text-sm text-primary-600">
+                                        {extractionProgress.totalPages > 0 
+                                          ? `Page ${extractionProgress.currentPage} of ${extractionProgress.totalPages}` 
+                                          : `Extracting ${parsingFile}`}
+                                      </span>
                                     </div>
+                                    {/* Timer */}
+                                    <div className={`flex items-center gap-1 text-xs ${
+                                      extractionProgress.elapsedTime < 15 ? 'text-green-600' :
+                                      extractionProgress.elapsedTime < 25 ? 'text-yellow-600' : 'text-red-600'
+                                    }`}>
+                                      <Clock className="w-3 h-3" />
+                                      <span>{extractionProgress.elapsedTime}s / 30s max</span>
+                                    </div>
+                                    {/* Cancel button */}
                                     <button
                                       onClick={(e) => { e.preventDefault(); cancelExtraction(); }}
                                       className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1"

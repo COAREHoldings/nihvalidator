@@ -1,0 +1,252 @@
+# NIH RESEARCH STRATEGY VALIDATOR + GENERATOR ENGINE
+
+## Multi-Mechanism Compliance and One-Click Generation Specification
+
+---
+
+# PURPOSE
+
+This document defines the integrated VALIDATOR + GENERATION logic for NIH SBIR/STTR Research Strategy documents.
+
+This system must:
+
+1. Allow users who completed the 8 modules to generate a complete NIH-compliant Research Strategy document at the press of a button.
+2. Immediately validate that generated document for structural and mechanism compliance.
+3. Flag deficiencies if present.
+4. Never auto-modify user content without approval.
+
+The validator is compliance-focused (structure, scope, milestones, regulatory alignment), not stylistic and not impact-scoring.
+
+---
+
+# PRIMARY USER ACTION
+
+After completion of the 8 modules, display:
+
+[ Generate NIH Research Strategy ]
+
+Upon click:
+
+Step 1 – AI Generation Engine builds full document.
+Step 2 – Validator immediately runs compliance checks.
+Step 3 – User sees:
+• Generated document
+• Validation report
+• PASS / CONDITIONAL PASS / FAIL
+
+User must approve edits before finalizing.
+
+---
+
+# GENERATION ENGINE (ONE-CLICK BUILD)
+
+## SYSTEM PROMPT TEMPLATE
+
+"You are an NIH study section reviewer and translational scientist.
+
+Using the structured module data below, generate a complete NIH Research Strategy document appropriate for the selected mechanism.
+
+Strict Requirements:
+
+* Follow NIH structure (Significance, Innovation, Approach).
+* Include explicit aims-to-experiment mapping.
+* Include measurable quantitative milestones.
+* Include statistical rationale.
+* Include risk mitigation strategies.
+* Align scope with mechanism time and budget.
+* Avoid exaggeration.
+* Do not fabricate citations.
+
+Output a fully formatted Research Strategy ready for review."
+
+---
+
+# MECHANISM OPTIONS FOR ONE-CLICK GENERATION
+
+User selects mechanism prior to generation:
+
+○ Phase I Only
+○ Phase II Only
+○ Direct-to-Phase II
+○ Fast-Track (Phase I + Phase II)
+○ Phase IIB Bridge
+
+The generator must adapt structure automatically.
+
+---
+
+# MECHANISM-SPECIFIC GENERATION RULES
+
+## PHASE I
+
+Generated document must include:
+
+* Significance (Feasibility framing)
+* Innovation
+* Approach (Technical feasibility focus)
+* Risk & Alternative Strategies
+* Statistical Plan
+* Quantitative Go/No-Go Criteria
+
+Must clearly answer:
+"What feasibility must be demonstrated to justify Phase II?"
+
+---
+
+## PHASE II
+
+Generated document must include:
+
+* Significance (Translational framing)
+* Innovation (Product differentiation)
+* Summary of Phase I accomplishments (if provided)
+* Expanded Development Plan
+* Statistical Plan
+* Regulatory Alignment
+* Commercialization Integration
+* Quantitative Milestones
+
+---
+
+## DIRECT-TO-PHASE II
+
+Must include:
+
+* Strong Preliminary Data Summary
+* Justification for bypassing Phase I
+* Development Plan
+* Statistical Plan
+* Regulatory and Commercial Alignment
+* Milestones
+
+System must warn if module data lacks sufficient feasibility depth.
+
+---
+
+## FAST-TRACK
+
+Must generate:
+
+1. Fast-Track Overview (Bridge section)
+2. Phase I Research Strategy
+3. Phase I Milestones + Go/No-Go Criteria
+4. Phase II Research Strategy
+5. Phase II Milestones
+6. Integrated Milestone Table
+
+Must include explicit phase transition gates.
+
+---
+
+## PHASE IIB
+
+Must include:
+
+* Summary of prior SBIR results
+* Regulatory advancement plan
+* Manufacturing scale plan
+* Commercialization & capital strategy
+* Quantitative commercialization milestones
+
+---
+
+# VALIDATOR ENGINE (AUTOMATIC POST-GENERATION CHECK)
+
+Immediately after generation, validator checks:
+
+GLOBAL CHECKS:
+
+1. Required NIH sections present.
+2. Logical flow: Problem → Hypothesis → Aims → Experiments → Milestones.
+3. Quantitative milestones defined.
+4. Statistical plan included.
+5. Risk mitigation included.
+6. Scope consistent with mechanism.
+7. No obvious duplication between sections.
+
+MECHANISM-SPECIFIC CHECKS:
+
+Phase I:
+
+* Feasibility objective present
+* Go/No-Go criteria defined
+
+Phase II:
+
+* Phase I achievements referenced (if applicable)
+* Regulatory trajectory described
+
+Direct-to-Phase II:
+
+* Preliminary data strength evident
+* Justification for bypass present
+
+Fast-Track:
+
+* Phase I and II both present
+* Explicit transition gate defined
+* Integrated milestone table present
+
+Phase IIB:
+
+* Prior SBIR achievements summarized
+* Commercialization milestones present
+
+---
+
+# VALIDATION OUTPUT FORMAT
+
+After generation, display:
+
+VALIDATION SUMMARY
+
+SECTION COMPLETENESS:
+✓ Significance
+✓ Innovation
+✓ Approach
+
+MILESTONES:
+✓ Quantitative thresholds present
+
+STATISTICAL PLAN:
+✓ Defined tests and rationale
+
+MECHANISM ALIGNMENT:
+✓ Scope appropriate for Phase I
+
+FINAL STATUS:
+PASS / CONDITIONAL PASS / FAIL
+
+If CONDITIONAL or FAIL, list required corrections.
+
+Validator does NOT rewrite.
+Validator only flags.
+
+---
+
+# USER CONTROL
+
+After generation and validation:
+
+User may:
+
+* Edit document manually
+* Regenerate specific section
+* Accept as Final Draft
+* Export NIH-formatted version
+
+No AI revision auto-applies without explicit user action.
+
+---
+
+# END STATE
+
+At the press of one button, a researcher who completed the modules can:
+
+• Generate a full NIH-compliant Research Strategy
+• Instantly validate structural compliance
+• See deficiencies clearly
+• Edit or regenerate sections
+• Export submission-ready draft
+
+This system integrates generation and compliance enforcement while preserving u
