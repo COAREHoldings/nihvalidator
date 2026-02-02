@@ -6,6 +6,7 @@ import { GrantTypeSelector } from './components/GrantTypeSelector'
 import { PriorPhaseEditor } from './components/PriorPhaseEditor'
 import { AIRefinement } from './components/AIRefinement'
 import { CommercializationDirector } from './components/CommercializationDirector'
+import { AuditMode } from './components/AuditMode'
 import type { ProjectSchemaV2, ValidationResult } from './types'
 import { INSTITUTE_BUDGET_CAPS } from './types'
 import { createNewProject, updateModuleStates, runFullValidation, checkAIGating, getBudgetCap } from './validation'
@@ -15,8 +16,10 @@ import { SpecificAimsGenerator } from './components/SpecificAimsGenerator'
 
 type AppMode = 'modules' | 'ai-refinement' | 'results'
 type ConfigTab = 'grant-type' | 'lifecycle'
+type MainView = 'home' | 'build' | 'audit'
 
 export default function App() {
+  const [mainView, setMainView] = useState<MainView>('home')
   const [started, setStarted] = useState(false)
   const [mode, setMode] = useState<AppMode>('modules')
   const [activeModule, setActiveModule] = useState(1)
@@ -104,8 +107,13 @@ export default function App() {
   
   const canGenerateAims = configComplete && checkModules1to4Complete()
 
-  if (!started) {
-    return <Hero onStart={() => setStarted(true)} />
+  // Show audit mode
+  if (mainView === 'audit') {
+    return <AuditMode onBack={() => setMainView('home')} />
+  }
+
+  if (!started && mainView === 'home') {
+    return <Hero onStart={() => { setStarted(true); setMainView('build') }} onAudit={() => setMainView('audit')} />
   }
 
   const exportJSON = () => {
@@ -153,6 +161,13 @@ export default function App() {
       <header className="sticky top-0 z-50 bg-white border-b border-neutral-200 h-16 flex items-center px-4 md:px-6">
         <h1 className="text-lg font-semibold text-neutral-900">NIH SBIR/STTR Validator</h1>
         <div className="ml-auto flex items-center gap-2">
+          <button
+            onClick={() => setMainView('audit')}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-all border border-indigo-200"
+          >
+            <Upload className="w-4 h-4" />
+            <span className="hidden sm:inline">Audit Existing</span>
+          </button>
           <button
             onClick={() => setShowImport(true)}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-600 hover:bg-neutral-100 transition-all border border-neutral-200"

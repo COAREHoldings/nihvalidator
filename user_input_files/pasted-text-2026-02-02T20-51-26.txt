@@ -1,0 +1,427 @@
+# MINIMAX ENGINEERING SPECIFICATION
+
+## Independent Grant Audit Engine (Standalone Upload Mode)
+
+### Project: GrantMother / GrantMaster
+
+---
+
+## OBJECTIVE
+
+Build an independent, standalone Grant Audit Engine that allows users to upload completed or partially completed grant applications for structured evaluation.
+
+This module must function independently of Build Mode.
+
+It must NOT generate a grant from scratch.
+It must strictly evaluate, validate, score, and suggest improvements.
+
+Supported mechanisms:
+
+* Phase I
+* Phase II
+* Direct-to-Phase II
+* Fast Track
+* Phase IIB
+* (Optional future expansion: R01)
+
+---
+
+# MODULE ROUTE
+
+`/modules/GrantAudit`
+
+Accessible from dashboard via:
+
+"Upload & Audit Existing Grant"
+
+---
+
+# SYSTEM FLOW
+
+User selects mechanism →
+Uploads documents →
+System parses →
+Maps to required structure →
+Runs validation engines →
+Generates audit report →
+Optional AI improvement suggestions →
+Export audit report
+
+---
+
+# STEP 1 — DOCUMENT INGESTION
+
+## Supported Formats
+
+* PDF (.pdf)
+* Word (.docx)
+* Excel (.xlsx) for budgets
+
+## Upload Categories
+
+User may upload individually or as bundle:
+
+* Research Strategy
+* Specific Aims
+* Budget + Justification
+* Commercialization Plan (if applicable)
+* Biosketches
+* Letters of Support
+* Milestones
+
+System must allow partial uploads.
+
+---
+
+# STEP 2 — STRUCTURAL PARSING ENGINE
+
+Create:
+
+`/lib/documentParser.ts`
+
+Responsibilities:
+
+1. Extract headings and subheadings
+
+2. Detect NIH-standard sections
+
+3. Identify:
+
+   * Significance
+   * Innovation
+   * Approach
+   * Statistical plan
+   * Milestones
+   * Commercialization headings (if Phase II/IIB)
+
+4. Convert to structured JSON
+
+Example structure:
+
+{
+phase: "Phase II",
+sections: {
+aims: {...},
+research_strategy: {...},
+budget: {...},
+commercialization: {...}
+}
+}
+
+If section cannot be detected:
+
+* Flag as "Unmapped Content"
+* Allow manual reassignment by user
+
+---
+
+# STEP 3 — PHASE REQUIREMENT MATRIX
+
+Create:
+
+`/lib/phaseRequirementMatrix.ts`
+
+Matrix defines required components per phase:
+
+Phase I:
+
+* Specific Aims
+* Research Strategy (Significance + Approach focus)
+* Budget
+* Milestones
+* Commercialization discussion (brief)
+
+Phase II / Direct-to-Phase II:
+
+* Full Research Strategy
+* 12-page Commercialization Plan
+* Budget
+* Milestones
+
+Fast Track:
+
+* Phase I + Phase II integrated logic
+* Transition criteria
+* Commercialization Plan
+
+Phase IIB:
+
+* Expanded Commercialization Plan
+* Investor/partner evidence
+* Advanced regulatory strategy
+
+Engine must flag missing required components.
+
+---
+
+# STEP 4 — VALIDATION ENGINES
+
+Create unified validation core:
+
+`/lib/validationCore.ts`
+
+This core must perform:
+
+## 1. Structural Completeness Audit
+
+* Required sections present?
+* Correct headings used?
+* Missing attachments?
+
+## 2. Logical Consistency Audit
+
+* Hypothesis ↔ Aims alignment
+* Aims ↔ Experiments alignment
+* Milestones ↔ Budget alignment
+* Market ↔ Revenue alignment
+
+## 3. Budget Compliance Audit
+
+* Cap violations
+* Effort inconsistencies
+* Subcontract rule violations
+
+## 4. Commercialization Validation (if required)
+
+* All NIH headings present
+* Market logic coherent
+* Finance and revenue aligned
+
+---
+
+# STEP 5 — SCORING SYSTEM
+
+Create:
+
+`/lib/auditScoringEngine.ts`
+
+Return the following scores (0–100):
+
+1. Structural Completeness Score
+2. Scientific Rigor Score
+3. Budget Compliance Score
+4. Commercialization Strength Score (if applicable)
+5. Cross-Module Consistency Score
+
+---
+
+## UNIFIED AUDIT SCORE
+
+Weighted composite:
+
+* Structural completeness (25%)
+* Scientific rigor (30%)
+* Budget compliance (15%)
+* Commercialization strength (20%)
+* Cross-module consistency (10%)
+
+Return:
+
+* Final Audit Score (0–100)
+* Plain-English explanation of deductions
+
+No funding probability predictions allowed.
+
+---
+
+# STEP 6 — REVIEWER SIMULATION
+
+Create:
+
+`/lib/reviewerSimulation.ts`
+
+Simulate:
+
+1. Scientific Reviewer
+2. Commercialization Reviewer (if applicable)
+3. Budget Reviewer
+
+Each returns:
+
+* Top 3 weaknesses
+* Primary risk category
+* Suggested improvement priority
+
+---
+
+# STEP 7 — AI IMPROVEMENT SUGGESTION MODE
+
+After audit, user may enable:
+
+"Generate Improvement Suggestions"
+
+AI must:
+
+* Suggest section-level improvements
+* Highlight unclear logic
+* Recommend statistical clarification
+* Suggest tightening commercialization narrative
+
+Must NOT automatically rewrite full document.
+Must allow user-controlled regeneration.
+
+---
+
+# OUTPUT REPORT
+
+Generate downloadable Audit Report including:
+
+* Section-by-section evaluation
+* Scores
+* Risk heatmap
+* Reviewer simulation summaries
+* Missing elements checklist
+
+Label clearly:
+"Advisory Pre-Submission Audit — Not an NIH Official Review"
+
+---
+
+# NON-NEGOTIABLE RULES
+
+* No fabricated citations
+* No false compliance claims
+* All scoring explainable
+* No automatic content overwriting
+* Maintain data security and document privacy
+
+---
+
+# STRATEGIC OUTCOME
+
+Independent Audit Engine functions as a digital pre-study-section evaluation tool for applicants who already possess a completed or near-complete grant.
+
+It remains distinct from Build Mode but shares the same Validation Core architecture.
+
+---
+
+# DOCUMENT REQUIREMENT ALERT SYSTEM
+
+The Independent Grant Audit Engine must include a mandatory Document Requirement Matrix that alerts researchers to missing or required documents based on selected mechanism.
+
+Create:
+
+`/lib/documentRequirementMatrix.ts`
+
+---
+
+## PHASE-BASED REQUIRED DOCUMENT MATRIX
+
+The system must define required and conditional documents per mechanism.
+
+### Phase I
+
+Required:
+
+* Specific Aims
+* Research Strategy
+* Budget
+* Budget Justification
+* Milestones
+* Biosketches
+* Facilities & Other Resources
+
+Commercialization Plan:
+
+* Not required (only brief commercialization discussion inside Research Plan)
+
+---
+
+### Phase II / Direct-to-Phase II
+
+Required:
+
+* Specific Aims
+* Full Research Strategy
+* Budget + Justification
+* Milestones
+* 12-page Commercialization Plan
+* Biosketches
+* Facilities & Other Resources
+* Letters of Support (if referenced)
+
+---
+
+### Fast Track
+
+Required:
+
+* Phase I and Phase II research components
+* Transition criteria
+* 12-page Commercialization Plan
+* Budget covering both phases
+* Milestones (Phase I and Phase II)
+
+---
+
+### Phase IIB
+
+Required:
+
+* Expanded Commercialization Plan
+* Investor/Third-Party Funding Documentation
+* Partner Commitment Letters
+* Advanced Regulatory Strategy Description
+* Budget + Justification
+* Milestones
+
+---
+
+## CONDITIONAL DOCUMENT DETECTION
+
+The system must perform NLP-based conditional checks.
+
+Examples:
+
+* If Research Strategy references human subjects → Require Human Subjects section.
+* If animal models referenced → Require Vertebrate Animals section.
+* If genomic sequencing mentioned → Recommend Data Management Plan.
+* If subcontract described → Require Subaward documentation.
+
+If conditional requirement detected but document missing:
+→ Display Red Alert.
+
+---
+
+## DOCUMENT STATUS PANEL (UI REQUIREMENT)
+
+Display real-time status table:
+
+| Document                  | Status                     |
+| ------------------------- | -------------------------- |
+| Research Strategy         | Present / Missing          |
+| Commercialization Plan    | Present / Required Missing |
+| Investor Commitment (IIB) | Required Missing           |
+| Letters of Support        | Recommended Missing        |
+
+Color coding:
+
+* Green: Present
+* Red: Required Missing
+* Yellow: Recommended Missing
+
+---
+
+## AUDIT REPORT INTEGRATION
+
+Final Audit Report must include:
+
+* Complete checklist of required documents
+* Missing required documents section
+* Missing conditional documents section
+* Recommended supporting documents section
+
+System must clearly state:
+"Administrative incompleteness may result in application rejection."
+
+---
+
+## NON-NEGOTIABLE REQUIREMENTS
+
+* Document matrix must be easily updatable for new NIH Forms versions
+* No phase may bypass document validation
+* Export must be blocked if required documents are missing (unless user overrides with explicit confirmation)
+
+---
+
+END OF SPECIFICATION
