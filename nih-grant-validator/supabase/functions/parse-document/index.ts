@@ -24,62 +24,70 @@ Deno.serve(async (req) => {
     // For DOCX/PDF, the frontend will extract text; we receive plain text
     const textContent = fileContent;
 
-    const systemPrompt = `You are an expert NIH grant document parser. Analyze the provided grant document and extract content into the appropriate NIH SBIR/STTR grant modules.
+    const systemPrompt = `You are an NIH grant document parser. Your ONLY job is to extract information that is EXPLICITLY WRITTEN in the document provided below.
 
-Return a JSON object with these exact keys (only include keys where you found relevant content):
+CRITICAL RULES:
+1. ONLY extract text that appears VERBATIM or is directly stated in the document
+2. If information for a field is NOT in the document, leave that field EMPTY or omit it entirely
+3. NEVER invent, fabricate, or guess ANY content - not even plausible-sounding content
+4. NEVER use your training knowledge to fill in gaps
+5. If the document is about Topic X, ALL extracted content must relate to Topic X
+6. Return an EMPTY object {} if the document doesn't contain grant-related content
+
+Return a JSON object with these keys (ONLY include keys where you found EXPLICIT content):
 
 {
   "m1_title_concept": {
-    "project_title": "extracted title",
-    "lay_summary": "non-technical summary",
-    "scientific_abstract": "technical abstract",
-    "problem_statement": "the problem being addressed",
-    "proposed_solution": "the proposed solution",
-    "target_population": "who benefits",
-    "therapeutic_area": "medical/scientific area",
-    "technology_type": "type of technology"
+    "project_title": "EXACT title from document",
+    "lay_summary": "EXACT non-technical summary from document",
+    "scientific_abstract": "EXACT technical abstract from document",
+    "problem_statement": "EXACT problem statement from document",
+    "proposed_solution": "EXACT proposed solution from document",
+    "target_population": "EXACT target population mentioned",
+    "therapeutic_area": "EXACT medical/scientific area mentioned",
+    "technology_type": "EXACT technology type mentioned"
   },
   "m2_hypothesis": {
-    "central_hypothesis": "main hypothesis",
-    "supporting_rationale": "why hypothesis is valid",
-    "preliminary_data_summary": "existing data supporting this",
-    "expected_outcomes": "what outcomes are expected",
-    "success_criteria": "how success will be measured"
+    "central_hypothesis": "EXACT hypothesis stated",
+    "supporting_rationale": "EXACT rationale from document",
+    "preliminary_data_summary": "EXACT preliminary data mentioned",
+    "expected_outcomes": "EXACT expected outcomes stated",
+    "success_criteria": "EXACT success criteria stated"
   },
   "m3_specific_aims": {
-    "aim1_statement": "first specific aim",
-    "aim1_milestones": ["milestone1", "milestone2"],
-    "aim2_statement": "second specific aim",
-    "aim2_milestones": ["milestone1", "milestone2"],
-    "aim3_statement": "third specific aim (if any)",
-    "aim3_milestones": ["milestone1", "milestone2"],
-    "timeline_summary": "overall timeline",
-    "interdependencies": "how aims relate"
+    "aim1_statement": "EXACT Aim 1 from document",
+    "aim1_milestones": ["EXACT milestones listed"],
+    "aim2_statement": "EXACT Aim 2 from document",
+    "aim2_milestones": ["EXACT milestones listed"],
+    "aim3_statement": "EXACT Aim 3 if present",
+    "aim3_milestones": ["EXACT milestones listed"],
+    "timeline_summary": "EXACT timeline from document",
+    "interdependencies": "EXACT interdependencies stated"
   },
   "m4_team_mapping": {
-    "pi_name": "Principal Investigator name",
-    "pi_qualifications": "PI qualifications",
-    "key_personnel": [{"name": "", "role": "", "expertise": ""}]
+    "pi_name": "EXACT PI name from document",
+    "pi_qualifications": "EXACT qualifications stated",
+    "key_personnel": [{"name": "EXACT name", "role": "EXACT role", "expertise": "EXACT expertise"}]
   },
   "m5_experimental_approach": {
-    "methodology_overview": "research methods",
-    "experimental_design": "study design",
-    "data_collection_methods": "how data collected",
-    "analysis_plan": "analysis approach",
-    "statistical_approach": "statistics used",
-    "expected_results": "anticipated findings",
-    "potential_pitfalls": "possible problems",
-    "alternative_approaches": "backup plans"
+    "methodology_overview": "EXACT methods described",
+    "experimental_design": "EXACT study design",
+    "data_collection_methods": "EXACT data collection methods",
+    "analysis_plan": "EXACT analysis approach",
+    "statistical_approach": "EXACT statistics mentioned",
+    "expected_results": "EXACT anticipated findings",
+    "potential_pitfalls": "EXACT pitfalls mentioned",
+    "alternative_approaches": "EXACT alternatives described"
   },
   "m7_regulatory": {
-    "human_subjects_involved": true/false,
-    "vertebrate_animals_involved": true/false,
-    "biohazards_involved": true/false,
-    "facilities_description": "lab/facility details"
+    "human_subjects_involved": true/false based on EXPLICIT mention,
+    "vertebrate_animals_involved": true/false based on EXPLICIT mention,
+    "biohazards_involved": true/false based on EXPLICIT mention,
+    "facilities_description": "EXACT facilities description"
   }
 }
 
-Only include fields where you found clear, relevant content in the document. Do not fabricate or guess content.`;
+REMEMBER: If content is NOT in the document, return {} for that module. NEVER make up content.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -91,9 +99,9 @@ Only include fields where you found clear, relevant content in the document. Do 
         model: 'gpt-4o',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Parse this grant document and extract content into the appropriate modules:\n\n${textContent}` }
+          { role: 'user', content: `IMPORTANT: Only extract content that is EXPLICITLY written in the following document. Do NOT add any information from your training data. If the document mentions "ovarian cancer", do NOT return anything about "Alzheimer's". Extract ONLY what you see below:\n\n---DOCUMENT START---\n${textContent}\n---DOCUMENT END---` }
         ],
-        temperature: 0.1,
+        temperature: 0,
         response_format: { type: 'json_object' }
       }),
     });
