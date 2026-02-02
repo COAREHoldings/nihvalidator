@@ -4,6 +4,42 @@ export const CURRENT_SCHEMA_VERSION = 2
 export type GrantType = 'Phase I' | 'Phase II' | 'Fast Track' | 'Direct to Phase II' | 'Phase IIB'
 export type ProgramType = 'SBIR' | 'STTR'
 export type ModuleStatus = 'incomplete' | 'partial' | 'complete'
+export type NIHInstitute = 'NCI' | 'NHLBI' | 'NIAID' | 'NIMH' | 'NINDS' | 'NIDDK' | 'NEI' | 'NICHD' | 'NIA' | 'NIGMS' | 'Standard NIH'
+
+// Institute Budget Caps
+export interface InstituteBudgetCaps {
+  phase1: number
+  phase2: number
+  phase2b: number | null
+}
+
+export const INSTITUTE_BUDGET_CAPS: Record<NIHInstitute, InstituteBudgetCaps> = {
+  'NCI': { phase1: 400000, phase2: 2000000, phase2b: 4500000 },
+  'NHLBI': { phase1: 275000, phase2: 1750000, phase2b: null },
+  'NIAID': { phase1: 275000, phase2: 1750000, phase2b: null },
+  'NIMH': { phase1: 275000, phase2: 1750000, phase2b: null },
+  'NINDS': { phase1: 275000, phase2: 1750000, phase2b: null },
+  'NIDDK': { phase1: 275000, phase2: 1750000, phase2b: null },
+  'NEI': { phase1: 275000, phase2: 1750000, phase2b: null },
+  'NICHD': { phase1: 275000, phase2: 1750000, phase2b: null },
+  'NIA': { phase1: 275000, phase2: 1750000, phase2b: null },
+  'NIGMS': { phase1: 275000, phase2: 1750000, phase2b: null },
+  'Standard NIH': { phase1: 275000, phase2: 1750000, phase2b: null }
+}
+
+export const NIH_INSTITUTES: { code: NIHInstitute; name: string }[] = [
+  { code: 'NCI', name: 'National Cancer Institute' },
+  { code: 'NHLBI', name: 'National Heart, Lung, and Blood Institute' },
+  { code: 'NIAID', name: 'National Institute of Allergy and Infectious Diseases' },
+  { code: 'NIMH', name: 'National Institute of Mental Health' },
+  { code: 'NINDS', name: 'National Institute of Neurological Disorders and Stroke' },
+  { code: 'NIDDK', name: 'National Institute of Diabetes and Digestive and Kidney Diseases' },
+  { code: 'NEI', name: 'National Eye Institute' },
+  { code: 'NICHD', name: 'Eunice Kennedy Shriver National Institute of Child Health and Human Development' },
+  { code: 'NIA', name: 'National Institute on Aging' },
+  { code: 'NIGMS', name: 'National Institute of General Medical Sciences' },
+  { code: 'Standard NIH', name: 'Standard NIH (Default Caps)' }
+]
 
 // FOA Configuration
 export interface FOAConfig {
@@ -196,6 +232,7 @@ export interface ProjectSchemaV2 {
   updated_at: string
   grant_type: GrantType | null
   program_type: ProgramType
+  institute: NIHInstitute
   foa_config: FOAConfig
   
   // Module States
