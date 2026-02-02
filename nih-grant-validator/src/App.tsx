@@ -10,7 +10,7 @@ import { AuditMode } from './components/AuditMode'
 import type { ProjectSchemaV2, ValidationResult } from './types'
 import { INSTITUTE_BUDGET_CAPS } from './types'
 import { createNewProject, updateModuleStates, runFullValidation, checkAIGating, getBudgetCap } from './validation'
-import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, Briefcase, Upload, FileText } from 'lucide-react'
+import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, ChevronLeft, Briefcase, Upload, FileText, Home, Menu, X } from 'lucide-react'
 import { DocumentImport } from './components/DocumentImport'
 import { SpecificAimsGenerator } from './components/SpecificAimsGenerator'
 
@@ -29,6 +29,7 @@ export default function App() {
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const [showImport, setShowImport] = useState(false)
   const [showAimsGenerator, setShowAimsGenerator] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Update module states when project changes
   useEffect(() => {
@@ -158,40 +159,169 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      <header className="sticky top-0 z-50 bg-white border-b border-neutral-200 h-16 flex items-center px-4 md:px-6">
-        <h1 className="text-lg font-semibold text-neutral-900">NIH SBIR/STTR Validator</h1>
-        <div className="ml-auto flex items-center gap-2">
+      {/* Improved Header */}
+      <header className="sticky top-0 z-50 bg-white border-b border-neutral-200">
+        <div className="h-16 flex items-center px-4 md:px-6">
+          {/* Home Button & Logo */}
           <button
-            onClick={() => setMainView('audit')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-indigo-600 hover:bg-indigo-50 transition-all border border-indigo-200"
+            onClick={() => { setMainView('home'); setStarted(false); }}
+            className="flex items-center gap-2 text-neutral-900 hover:text-primary-600 transition-colors mr-4"
           >
-            <Upload className="w-4 h-4" />
-            <span className="hidden sm:inline">Audit Existing</span>
+            <Home className="w-5 h-5" />
+            <span className="font-semibold hidden sm:inline">NIH Validator</span>
           </button>
+
+          {/* Breadcrumbs */}
+          <nav className="hidden md:flex items-center gap-2 text-sm">
+            <ChevronRight className="w-4 h-4 text-neutral-400" />
+            <span className="text-primary-600 font-medium">Build Mode</span>
+            {!showConfig && (
+              <>
+                <ChevronRight className="w-4 h-4 text-neutral-400" />
+                <span className="text-neutral-600">
+                  {activeModule === 9 ? 'Commercialization' : `Module ${activeModule}`}
+                </span>
+              </>
+            )}
+          </nav>
+
+          {/* Desktop Actions */}
+          <div className="ml-auto hidden md:flex items-center gap-2">
+            <button
+              onClick={() => setMainView('audit')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-indigo-600 hover:bg-indigo-50 border border-indigo-200"
+            >
+              <Upload className="w-4 h-4" />
+              Audit Mode
+            </button>
+            <button
+              onClick={() => setShowImport(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-600 hover:bg-neutral-100 border border-neutral-200"
+            >
+              <Upload className="w-4 h-4" />
+              Import
+            </button>
+            <div className="w-px h-6 bg-neutral-200 mx-2" />
+            <button
+              onClick={() => setMode('modules')}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium ${mode === 'modules' ? 'bg-primary-500 text-white' : 'text-neutral-600 hover:bg-neutral-100'}`}
+            >
+              Modules
+            </button>
+            <button
+              onClick={() => setMode('ai-refinement')}
+              disabled={!aiGating.allowed}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium ${mode === 'ai-refinement' ? 'bg-primary-500 text-white' : 'text-neutral-600 hover:bg-neutral-100'} ${!aiGating.allowed ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {!aiGating.allowed && <Lock className="w-3 h-3" />}
+              <Sparkles className="w-4 h-4" />
+              AI
+            </button>
+            <button onClick={reset} className="px-3 py-1.5 text-sm text-red-500 hover:bg-red-50 rounded-lg">
+              Reset
+            </button>
+          </div>
+
+          {/* Mobile Menu Button */}
           <button
-            onClick={() => setShowImport(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-600 hover:bg-neutral-100 transition-all border border-neutral-200"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="ml-auto md:hidden p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg"
           >
-            <Upload className="w-4 h-4" />
-            <span className="hidden sm:inline">Import Document</span>
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
-          <button
-            onClick={() => setMode('modules')}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${mode === 'modules' ? 'bg-primary-500 text-white' : 'text-neutral-600 hover:bg-neutral-100'}`}
-          >
-            <ClipboardCheck className="w-4 h-4" />
-            <span className="hidden sm:inline">Modules</span>
-          </button>
-          <button
-            onClick={() => setMode('ai-refinement')}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${mode === 'ai-refinement' ? 'bg-primary-500 text-white' : 'text-neutral-600 hover:bg-neutral-100'} ${!aiGating.allowed ? 'opacity-60' : ''}`}
-          >
-            {!aiGating.allowed && <Lock className="w-3 h-3" />}
-            <Sparkles className="w-4 h-4" />
-            <span className="hidden sm:inline">AI Refinement</span>
-          </button>
-          <button onClick={reset} className="ml-2 text-sm text-neutral-500 hover:text-neutral-700">Reset</button>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-neutral-200 bg-white p-4 space-y-2">
+            <button
+              onClick={() => { setMainView('home'); setStarted(false); setMobileMenuOpen(false); }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg hover:bg-neutral-100"
+            >
+              <Home className="w-5 h-5" />
+              <span>Home</span>
+            </button>
+            <button
+              onClick={() => { setMainView('audit'); setMobileMenuOpen(false); }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg hover:bg-indigo-50 text-indigo-600"
+            >
+              <Upload className="w-5 h-5" />
+              <span>Audit Mode</span>
+            </button>
+            <button
+              onClick={() => { setShowImport(true); setMobileMenuOpen(false); }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg hover:bg-neutral-100"
+            >
+              <FileText className="w-5 h-5" />
+              <span>Import Document</span>
+            </button>
+            <div className="border-t border-neutral-200 my-2" />
+            <button
+              onClick={() => { setMode('modules'); setMobileMenuOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg ${mode === 'modules' ? 'bg-primary-50 text-primary-700' : 'hover:bg-neutral-100'}`}
+            >
+              <ClipboardCheck className="w-5 h-5" />
+              <span>Modules</span>
+            </button>
+            <button
+              onClick={() => { setMode('ai-refinement'); setMobileMenuOpen(false); }}
+              disabled={!aiGating.allowed}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg ${mode === 'ai-refinement' ? 'bg-primary-50 text-primary-700' : 'hover:bg-neutral-100'} ${!aiGating.allowed ? 'opacity-50' : ''}`}
+            >
+              <Sparkles className="w-5 h-5" />
+              <span>AI Refinement</span>
+              {!aiGating.allowed && <Lock className="w-4 h-4 ml-auto" />}
+            </button>
+            <div className="border-t border-neutral-200 my-2" />
+            <button onClick={() => { reset(); setMobileMenuOpen(false); }} className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg text-red-500 hover:bg-red-50">
+              <RotateCcw className="w-5 h-5" />
+              <span>Reset</span>
+            </button>
+          </div>
+        )}
+
+        {/* Module Navigation Bar (when in modules mode) */}
+        {mode === 'modules' && !showConfig && configComplete && (
+          <div className="h-12 flex items-center justify-between px-4 md:px-6 bg-neutral-50 border-t border-neutral-100">
+            <button
+              onClick={() => {
+                if (activeModule === 1) setShowConfig(true);
+                else setActiveModule(prev => Math.max(1, prev - 1));
+              }}
+              className="flex items-center gap-1 px-3 py-1.5 text-sm text-neutral-600 hover:bg-white rounded-lg border border-transparent hover:border-neutral-200"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">{activeModule === 1 ? 'Config' : `Module ${activeModule - 1}`}</span>
+              <span className="sm:hidden">Prev</span>
+            </button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalModules }, (_, i) => i + 1).map(num => (
+                <button
+                  key={num}
+                  onClick={() => setActiveModule(num)}
+                  className={`w-8 h-8 rounded-full text-xs font-medium ${
+                    activeModule === num 
+                      ? 'bg-primary-500 text-white' 
+                      : project.module_states[num - 1]?.status === 'complete'
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                        : 'bg-white text-neutral-600 hover:bg-neutral-100 border border-neutral-200'
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setActiveModule(prev => Math.min(totalModules, prev + 1))}
+              disabled={activeModule === totalModules}
+              className="flex items-center gap-1 px-3 py-1.5 text-sm text-neutral-600 hover:bg-white rounded-lg border border-transparent hover:border-neutral-200 disabled:opacity-50"
+            >
+              <span className="hidden sm:inline">{activeModule === totalModules ? 'Last' : `Module ${activeModule + 1}`}</span>
+              <span className="sm:hidden">Next</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </header>
 
       <div className="flex">
