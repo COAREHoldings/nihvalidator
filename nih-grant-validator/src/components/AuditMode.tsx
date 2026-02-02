@@ -263,6 +263,13 @@ export function AuditMode({ onBack }: AuditModeProps) {
     }
   }, [])
 
+  const handleMultipleFileUpload = useCallback(async (categoryType: DocumentType, files: FileList) => {
+    const fileArray = Array.from(files)
+    for (const file of fileArray) {
+      await handleFileUpload(categoryType, file)
+    }
+  }, [handleFileUpload])
+
   const removeFile = useCallback((categoryType: DocumentType, fileId: string) => {
     setCategories(prev => prev.map(cat => {
       if (cat.type !== categoryType) return cat
@@ -648,13 +655,26 @@ export function AuditMode({ onBack }: AuditModeProps) {
                                   <>
                                     {cat.multiFile && cat.files.length > 0 ? <Plus className="w-4 h-4 text-neutral-400" /> : <Upload className="w-4 h-4 text-neutral-400" />}
                                     <span className="text-sm text-neutral-500">
-                                      {cat.multiFile && cat.files.length > 0 ? `Add Another ${cat.label.replace(/s$/, '')}` : 'Upload PDF, DOCX, or TXT'}
+                                      {cat.multiFile && cat.files.length > 0 
+                                        ? `Add More ${cat.label}` 
+                                        : cat.multiFile 
+                                          ? 'Select Multiple Files (Ctrl+Click)' 
+                                          : 'Upload PDF, DOCX, or TXT'}
                                     </span>
                                     <input
                                       type="file"
                                       accept=".pdf,.docx,.txt,.md"
+                                      multiple={cat.multiFile}
                                       className="hidden"
-                                      onChange={(e) => e.target.files?.[0] && handleFileUpload(cat.type, e.target.files[0])}
+                                      onChange={(e) => {
+                                        if (!e.target.files?.length) return
+                                        if (cat.multiFile && e.target.files.length > 1) {
+                                          handleMultipleFileUpload(cat.type, e.target.files)
+                                        } else {
+                                          handleFileUpload(cat.type, e.target.files[0])
+                                        }
+                                        e.target.value = ''
+                                      }}
                                     />
                                   </>
                                 )}
