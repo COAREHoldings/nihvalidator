@@ -1,0 +1,379 @@
+# MINIMAX ENGINEERING SPECIFICATION
+
+## Budget Director Engine
+
+### Project: GrantMother / GrantMaster
+
+---
+
+## OBJECTIVE
+
+Build a Budget Director Engine that:
+
+1. Creates NIH/SBIR/STTR compliant budgets
+2. Validates uploaded budgets for compliance
+3. Auto-generates a detailed Budget Justification document
+4. Flags regulatory and cap violations
+5. Aligns budget with milestones and research plan
+
+This module must function in two modes:
+
+* Build Mode (create new budget)
+* Audit Mode (validate uploaded budget)
+
+---
+
+# MODULE ROUTE
+
+`/modules/BudgetDirector`
+
+Accessible from:
+
+* New Grant Flow
+* Grant Audit Flow
+
+---
+
+# BUILD MODE — COMPLIANT BUDGET CREATION
+
+## STEP 1: Mechanism Selection
+
+User selects:
+
+* Phase I
+* Phase II
+* Fast Track
+* Phase IIB
+* R01 (optional extension)
+
+System loads mechanism-specific rules:
+
+* Direct cost cap
+* Subcontract limits (e.g., SBIR vs STTR ratios)
+* Duration limits
+* Personnel effort expectations
+
+---
+
+## STEP 2: Structured Budget Builder
+
+### Personnel Section
+
+Inputs:
+
+* Name
+* Role
+* Effort (%)
+* Base Salary
+* Fringe Rate
+
+System auto-calculates:
+
+Salary Requested = Base Salary × Effort
+Fringe = Salary Requested × Fringe Rate
+
+Checks:
+
+* Effort alignment with aims
+* PI effort minimum (if required)
+* Total personnel consistency
+
+---
+
+### Equipment Section
+
+Inputs:
+
+* Item name
+* Cost
+* Justification link to aim
+
+Flag if equipment exceeds typical Phase I expectations.
+
+---
+
+### Supplies Section
+
+* Consumables
+* Animal costs
+* Lab materials
+
+Check proportionality relative to study scope.
+
+---
+
+### Subcontracts / Consultants
+
+Inputs:
+
+* Organization
+* Total cost
+* Work description
+
+System validates:
+
+* SBIR/STTR subcontract ratio compliance
+* Percentage allocation rules
+
+---
+
+### Indirect Costs
+
+Inputs:
+
+* Approved rate
+
+System auto-calculates indirects based on direct costs.
+
+---
+
+# COMPLIANCE ENGINE
+
+Create:
+
+`/lib/budgetComplianceEngine.ts`
+
+This engine must validate:
+
+1. Direct cost cap compliance
+2. Subcontract percentage rules
+3. Personnel effort logic
+4. Budget-to-milestone alignment
+5. Duplicate cost detection
+
+Return:
+
+* Compliance Score (0–100)
+* Violations List
+* Warning Flags
+
+Example Output:
+"Compliance Score: 82/100 — Subcontract exceeds recommended Phase I threshold."
+
+---
+
+# JUSTIFICATION GENERATOR
+
+Create:
+
+`/lib/budgetJustificationGenerator.ts`
+
+For each category, auto-generate NIH-style narrative justification.
+
+Example Structure:
+
+Personnel:
+"Dr. X (PI) will devote 30% effort to oversee Aim 1 and 2 experimental design, data interpretation, and milestone evaluation."
+
+Equipment:
+"The flow cytometer upgrade is required to quantify immune cell subsets in Aim 2."
+
+Subcontracts:
+"CRO Y will perform GLP toxicology studies necessary for regulatory preparation."
+
+All justification text must:
+
+* Be editable
+* Avoid exaggerated language
+* Link cost to scientific necessity
+
+---
+
+# AUDIT MODE — UPLOADED BUDGET VALIDATION
+
+User uploads:
+
+* Excel budget
+* PDF budget justification
+
+System parses:
+
+* Personnel totals
+* Subcontracts
+* Equipment
+* Indirects
+
+Runs compliance engine and produces:
+
+1. Compliance Score
+2. Risk Heatmap
+3. Budget-Strategy Misalignment Flags
+
+---
+
+# BUDGET-STRATEGY ALIGNMENT CHECK
+
+The system must verify:
+
+* Each aim has financial support
+* Milestones have allocated resources
+* Commercialization tasks are funded (SBIR)
+
+If mismatch detected → Red Flag
+
+---
+
+# SCORING FRAMEWORK
+
+Budget Strength Score (0–100):
+
+* Compliance (40%)
+* Justification Clarity (20%)
+* Alignment with Aims (20%)
+* Realism of Costing (20%)
+
+Return clear explanation for each deduction.
+
+---
+
+# EXPORT REQUIREMENTS
+
+Allow export of:
+
+* NIH-compliant Budget Spreadsheet
+* Budget Justification Document (Word/PDF)
+* Compliance Report
+
+---
+
+# USER FLOW
+
+User selects Budget Director →
+Selects phase →
+Builds or uploads budget →
+Compliance engine runs →
+Violations flagged →
+Justification generated →
+User edits →
+Export finalized documents.
+
+---
+
+# NON-NEGOTIABLE RULES
+
+* No fabricated institutional rates
+* No unrealistic salary assumptions
+* All calculations transparent
+* All formulas visible to user
+* Maintain Supabase compatibility
+
+---
+
+# AI BUDGET INTELLIGENCE LAYER
+
+The Budget Director must actively use AI to assist in both budget construction and institute-specific justification drafting.
+
+## AI-ASSISTED BUDGET CONSTRUCTION
+
+When building a budget, AI must:
+
+1. Analyze Research Strategy and Aims automatically.
+2. Infer likely cost drivers (e.g., animal studies, sequencing, CAR-T manufacturing, CRO toxicology, regulatory consulting).
+3. Suggest:
+
+   * Reasonable personnel effort allocations
+   * Typical cost ranges for study types
+   * Appropriate equipment categorization
+   * Commercialization-related expenses (SBIR/STTR)
+
+AI must provide:
+
+* Suggested line items
+* Estimated cost ranges (clearly labeled as estimates)
+* Confidence level (0–1)
+* Rationale explanation in plain English
+
+User must be able to:
+
+* Accept
+* Modify
+* Reject
+
+No automatic locking of AI suggestions.
+
+---
+
+## INSTITUTE-SPECIFIC JUSTIFICATION GENERATION
+
+Budget justification language must adapt based on:
+
+* NIH Institute (e.g., NCI, NIAID, NHLBI, NIMH)
+* Mechanism (Phase I, Phase II, Fast Track, Phase IIB, R01)
+* SBIR vs STTR requirements
+
+AI must:
+
+1. Adjust tone and emphasis according to institute culture.
+2. Highlight elements valued by the selected institute (e.g., translational impact for NCI, public health impact for NIAID).
+3. Ensure justification ties each cost directly to:
+
+   * Specific Aim
+   * Milestone
+   * Regulatory requirement
+
+Example logic:
+
+If NCI + Phase II:
+
+* Emphasize translational progression and IND-enabling studies.
+
+If STTR:
+
+* Emphasize academic collaboration and subcontract scientific necessity.
+
+---
+
+## JUSTIFICATION QUALITY CHECK
+
+AI must validate that each justification paragraph:
+
+* Explains necessity
+* Links to scientific objective
+* Avoids vague phrasing
+* Does not exaggerate
+
+Flag vague terms such as:
+
+* "essential"
+* "critical"
+* "highly important"
+
+Unless supported by explicit linkage.
+
+---
+
+## BUDGET ANOMALY DETECTION
+
+AI must detect anomalies such as:
+
+* Personnel effort inconsistent with narrative workload
+* High-cost items unsupported by approach
+* Underfunded milestones
+* Commercialization activities missing budget allocation
+
+Return:
+
+* Anomaly Score (0–100 risk scale)
+* Specific flagged inconsistencies
+
+---
+
+## AI TRANSPARENCY RULE
+
+All AI-generated cost suggestions and justification language must:
+
+* Be labeled as AI-generated
+* Display reasoning logic
+* Allow full user editing
+
+No hidden automated calculations beyond visible formulas.
+
+---
+
+# STRATEGIC OUTCOME
+
+Budget Director transforms the platform from a narrative tool into a full-stack grant submission system capable of producing compliant financial documentation and justification ready for NIH or SBIR/STTR submission.
+
+---
+
+END OF SPECIFICATION
