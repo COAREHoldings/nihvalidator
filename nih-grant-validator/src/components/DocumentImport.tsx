@@ -1,6 +1,11 @@
 import { useState, useRef } from 'react'
 import { Upload, FileText, X, Check, AlertCircle, Loader2 } from 'lucide-react'
+import * as mammoth from 'mammoth'
+import * as pdfjsLib from 'pdfjs-dist'
 import type { ProjectSchemaV2 } from '../types'
+
+// Initialize PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
 
 interface ParsedModule {
   [key: string]: string | number | boolean | string[] | object[] | undefined
@@ -43,39 +48,33 @@ export function DocumentImport({ onImport, onClose }: DocumentImportProps) {
     const arrayBuffer = await file.arrayBuffer()
     
     if (file.name.endsWith('.pdf')) {
-      // For PDF, we'll extract text from the raw content
-      // This is a simplified approach - real implementation would use pdf.js
-      const text = new TextDecoder('utf-8', { fatal: false }).decode(arrayBuffer)
-      // Extract readable text between stream markers
-      const matches = text.match(/stream[\r\n]+([\s\S]*?)[\r\n]+endstream/g) || []
-      let extractedText = ''
-      for (const match of matches) {
-        const content = match.replace(/stream[\r\n]+/, '').replace(/[\r\n]+endstream/, '')
-        // Filter to printable ASCII
-        const readable = content.replace(/[^\x20-\x7E\r\n]/g, ' ').replace(/\s+/g, ' ').trim()
-        if (readable.length > 20) {
-          extractedText += readable + '\n'
+      try {
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+        let fullText = ''
+        const maxPages = Math.min(pdf.numPages, 50)
+        for (let i = 1; i <= maxPages; i++) {
+          const page = await pdf.getPage(i)
+          const textContent = await page.getTextContent()
+          const pageText = textContent.items
+            .map((item: any) => item.str)
+            .join(' ')
+          fullText += pageText + '\n\n'
         }
+        return fullText.trim() || 'Unable to extract PDF text.'
+      } catch (err) {
+        console.error('PDF extraction error:', err)
+        return 'Unable to extract PDF text. Please try a DOCX file.'
       }
-      // Fallback: try to get any readable text
-      if (extractedText.length < 100) {
-        extractedText = text.replace(/[^\x20-\x7E\r\n]/g, ' ').replace(/\s+/g, ' ').substring(0, 50000)
-      }
-      return extractedText || 'Unable to extract PDF text. Please try a DOCX file.'
     }
     
     if (file.name.endsWith('.docx')) {
-      // DOCX is a ZIP file containing XML
-      const bytes = new Uint8Array(arrayBuffer)
-      // Find document.xml content within the ZIP
-      const text = new TextDecoder('utf-8', { fatal: false }).decode(bytes)
-      // Extract text from XML tags
-      const xmlContent = text.match(/<w:t[^>]*>([^<]*)<\/w:t>/g) || []
-      const extractedText = xmlContent.map(tag => {
-        const match = tag.match(/>([^<]*)</)
-        return match ? match[1] : ''
-      }).join(' ')
-      return extractedText || text.replace(/<[^>]+>/g, ' ').replace(/[^\x20-\x7E\r\n]/g, ' ').replace(/\s+/g, ' ')
+      try {
+        const result = await mammoth.extractRawText({ arrayBuffer })
+        return result.value || 'Unable to extract DOCX text.'
+      } catch (err) {
+        console.error('DOCX extraction error:', err)
+        return 'Unable to extract DOCX text.'
+      }
     }
     
     // Plain text
