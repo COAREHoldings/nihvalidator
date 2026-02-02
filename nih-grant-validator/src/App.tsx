@@ -9,7 +9,8 @@ import { CommercializationDirector } from './components/CommercializationDirecto
 import type { ProjectSchemaV2, ValidationResult } from './types'
 import { INSTITUTE_BUDGET_CAPS } from './types'
 import { createNewProject, updateModuleStates, runFullValidation, checkAIGating, getBudgetCap } from './validation'
-import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, Briefcase } from 'lucide-react'
+import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, Briefcase, Upload } from 'lucide-react'
+import { DocumentImport } from './components/DocumentImport'
 
 type AppMode = 'modules' | 'ai-refinement' | 'results'
 type ConfigTab = 'grant-type' | 'lifecycle'
@@ -22,6 +23,7 @@ export default function App() {
   const [showConfig, setShowConfig] = useState(true)
   const [project, setProject] = useState<ProjectSchemaV2>(() => createNewProject())
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
+  const [showImport, setShowImport] = useState(false)
 
   // Update module states when project changes
   useEffect(() => {
@@ -117,6 +119,13 @@ export default function App() {
       <header className="sticky top-0 z-50 bg-white border-b border-neutral-200 h-16 flex items-center px-4 md:px-6">
         <h1 className="text-lg font-semibold text-neutral-900">NIH SBIR/STTR Validator</h1>
         <div className="ml-auto flex items-center gap-2">
+          <button
+            onClick={() => setShowImport(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-600 hover:bg-neutral-100 transition-all border border-neutral-200"
+          >
+            <Upload className="w-4 h-4" />
+            <span className="hidden sm:inline">Import Document</span>
+          </button>
           <button
             onClick={() => setMode('modules')}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${mode === 'modules' ? 'bg-primary-500 text-white' : 'text-neutral-600 hover:bg-neutral-100'}`}
@@ -434,6 +443,13 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {showImport && (
+        <DocumentImport
+          onImport={updateProject}
+          onClose={() => setShowImport(false)}
+        />
+      )}
     </div>
   )
 }
