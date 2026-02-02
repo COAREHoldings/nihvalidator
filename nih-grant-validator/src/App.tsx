@@ -6,8 +6,9 @@ import { GrantTypeSelector } from './components/GrantTypeSelector'
 import { PriorPhaseEditor } from './components/PriorPhaseEditor'
 import { AIRefinement } from './components/AIRefinement'
 import type { ProjectSchemaV2, ValidationResult } from './types'
-import { createNewProject, updateModuleStates, runFullValidation, checkAIGating } from './validation'
-import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw } from 'lucide-react'
+import { INSTITUTE_BUDGET_CAPS } from './types'
+import { createNewProject, updateModuleStates, runFullValidation, checkAIGating, getBudgetCap } from './validation'
+import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight } from 'lucide-react'
 
 type AppMode = 'modules' | 'ai-refinement' | 'results'
 type ConfigTab = 'grant-type' | 'lifecycle'
@@ -47,9 +48,19 @@ export default function App() {
     setShowConfig(true)
   }
 
+  const startModules = () => {
+    setShowConfig(false)
+    setActiveModule(1)
+  }
+
   const aiGating = checkAIGating(project)
   const overallProgress = project.module_states.filter(m => m.status === 'complete').length
-  const canValidate = project.grant_type !== null
+  const configComplete = project.grant_type !== null
+  const canValidate = configComplete
+
+  // Get budget cap for display
+  const institute = project.institute || 'Standard NIH'
+  const budgetCap = project.grant_type ? getBudgetCap(institute, project.grant_type) : 0
 
   if (!started) {
     return <Hero onStart={() => setStarted(true)} />
@@ -65,6 +76,34 @@ export default function App() {
     a.download = `nih-validation-${project.grant_type?.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}.json`
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  // Configuration Summary Component
+  const ConfigSummary = () => {
+    if (!configComplete) return null
+    
+    return (
+      <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-5 h-5 text-green-600" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-green-800">Configuration Complete</p>
+            <p className="text-xs text-green-600">
+              {project.program_type} | {project.grant_type} | {institute}
+              {budgetCap > 0 && ` | $${budgetCap.toLocaleString()} cap`}
+            </p>
+          </div>
+          {showConfig && (
+            <button
+              onClick={startModules}
+              className="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1"
+            >
+              Start Module 1 <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -95,6 +134,19 @@ export default function App() {
         {/* Sidebar */}
         {mode === 'modules' && (
           <aside className="hidden lg:block w-72 border-r border-neutral-200 bg-white p-4 min-h-[calc(100vh-64px)] sticky top-16">
+            {/* Step indicator */}
+            <div className="mb-4">
+              <div className="flex items-center gap-2 text-xs text-neutral-500 mb-3">
+                <span className={`px-2 py-0.5 rounded ${showConfig ? 'bg-primary-100 text-primary-700 font-medium' : configComplete ? 'bg-green-100 text-green-700' : 'bg-neutral-100'}`}>
+                  Step 0: Config
+                </span>
+                <ChevronRight className="w-3 h-3" />
+                <span className={`px-2 py-0.5 rounded ${!showConfig ? 'bg-primary-100 text-primary-700 font-medium' : 'bg-neutral-100'}`}>
+                  Steps 1-8: Modules
+                </span>
+              </div>
+            </div>
+
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-neutral-700">Overall Progress</span>
@@ -105,18 +157,47 @@ export default function App() {
               </div>
             </div>
             
+            {/* Configuration Button */}
             <button
-              onClick={() => setShowConfig(!showConfig)}
-              className={`w-full mb-4 p-3 rounded-lg border text-left flex items-center gap-3 transition-all ${showConfig ? 'border-primary-500 bg-primary-50' : 'border-neutral-200 hover:border-neutral-300'}`}
+              onClick={() => setShowConfig(true)}
+              className={`w-full mb-4 p-3 rounded-lg border text-left flex items-center gap-3 transition-all ${
+                showConfig 
+                  ? 'border-primary-500 bg-primary-50' 
+                  : configComplete 
+                    ? 'border-green-300 bg-green-50 hover:border-green-400' 
+                    : 'border-amber-300 bg-amber-50 hover:border-amber-400'
+              }`}
             >
-              <Settings className="w-5 h-5 text-neutral-600" />
+              {configComplete ? (
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              ) : (
+                <Settings className="w-5 h-5 text-amber-600" />
+              )}
               <div className="flex-1">
-                <span className="font-medium text-neutral-900 text-sm">Configuration</span>
-                <p className="text-xs text-neutral-500">{project.grant_type || 'Not selected'} | {project.program_type}</p>
+                <span className={`font-medium text-sm ${configComplete ? 'text-green-800' : 'text-amber-800'}`}>
+                  {configComplete ? 'Configuration' : 'Configure First'}
+                </span>
+                <p className={`text-xs ${configComplete ? 'text-green-600' : 'text-amber-600'}`}>
+                  {configComplete 
+                    ? `${project.grant_type} | ${institute}` 
+                    : 'Select grant type to continue'}
+                </p>
               </div>
             </button>
 
-            <ModuleNav modules={project.module_states} activeModule={activeModule} onSelectModule={id => { setShowConfig(false); setActiveModule(id) }} />
+            {/* Modules - with disabled state when config not complete */}
+            <div className={`${!configComplete ? 'opacity-50 pointer-events-none' : ''}`}>
+              {!configComplete && (
+                <div className="mb-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700 text-center">
+                  Complete configuration to unlock modules
+                </div>
+              )}
+              <ModuleNav 
+                modules={project.module_states} 
+                activeModule={activeModule} 
+                onSelectModule={id => { setShowConfig(false); setActiveModule(id) }} 
+              />
+            </div>
 
             <button
               onClick={runValidation}
@@ -208,14 +289,22 @@ export default function App() {
                 <div className="flex items-center gap-2 mb-4">
                   <button
                     onClick={() => setShowConfig(true)}
-                    className={`flex-1 p-3 rounded-lg border text-sm font-medium ${showConfig ? 'border-primary-500 bg-primary-50' : 'border-neutral-200'}`}
+                    className={`flex-1 p-3 rounded-lg border text-sm font-medium flex items-center justify-center gap-2 ${
+                      showConfig 
+                        ? 'border-primary-500 bg-primary-50' 
+                        : configComplete 
+                          ? 'border-green-300 bg-green-50' 
+                          : 'border-amber-300 bg-amber-50'
+                    }`}
                   >
+                    {configComplete ? <CheckCircle className="w-4 h-4 text-green-600" /> : <Settings className="w-4 h-4 text-amber-600" />}
                     Config
                   </button>
                   <select
                     value={showConfig ? '' : activeModule}
                     onChange={e => { setShowConfig(false); setActiveModule(Number(e.target.value)) }}
-                    className="flex-1 p-3 border border-neutral-200 rounded-lg text-sm"
+                    disabled={!configComplete}
+                    className="flex-1 p-3 border border-neutral-200 rounded-lg text-sm disabled:opacity-50"
                   >
                     {project.module_states.map(m => (
                       <option key={m.module_id} value={m.module_id} disabled={m.locked}>
@@ -229,9 +318,21 @@ export default function App() {
                 </button>
               </div>
 
+              {/* Config Summary Banner (when not showing config) */}
+              {!showConfig && <ConfigSummary />}
+
               <div className="bg-white rounded-lg shadow-card p-6 md:p-10">
                 {showConfig ? (
                   <div>
+                    {/* Step indicator in main content */}
+                    <div className="mb-6 pb-4 border-b border-neutral-200">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="w-6 h-6 rounded-full bg-primary-500 text-white text-xs font-bold flex items-center justify-center">0</span>
+                        <h2 className="text-lg font-semibold text-neutral-900">Application Configuration</h2>
+                      </div>
+                      <p className="text-sm text-neutral-500 ml-8">Select your grant type and NIH institute before proceeding to modules</p>
+                    </div>
+
                     <div className="flex gap-2 mb-6">
                       <button
                         onClick={() => setConfigTab('grant-type')}
@@ -246,8 +347,50 @@ export default function App() {
                         Lifecycle Requirements
                       </button>
                     </div>
+                    
                     {configTab === 'grant-type' && <GrantTypeSelector project={project} onUpdate={updateProject} />}
                     {configTab === 'lifecycle' && <PriorPhaseEditor project={project} onUpdate={updateProject} />}
+
+                    {/* Continue Button */}
+                    {configComplete && (
+                      <div className="mt-8 pt-6 border-t border-neutral-200">
+                        <div className="p-4 bg-green-50 border border-green-200 rounded-lg mb-4">
+                          <div className="flex items-start gap-3">
+                            <CheckCircle className="w-6 h-6 text-green-600 mt-0.5" />
+                            <div>
+                              <h3 className="font-semibold text-green-800">Configuration Complete</h3>
+                              <p className="text-sm text-green-700 mt-1">
+                                <strong>{project.program_type} {project.grant_type}</strong> application for <strong>{institute}</strong>
+                                {budgetCap > 0 && <span> with a <strong>${budgetCap.toLocaleString()}</strong> budget cap</span>}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={startModules}
+                          className="w-full px-6 py-4 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors flex items-center justify-center gap-2 text-lg"
+                        >
+                          Continue to Module 1: Title & Concept <ArrowRight className="w-5 h-5" />
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Prompt to complete config */}
+                    {!configComplete && (
+                      <div className="mt-8 pt-6 border-t border-neutral-200">
+                        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                          <div className="flex items-start gap-3">
+                            <Settings className="w-6 h-6 text-amber-600 mt-0.5" />
+                            <div>
+                              <h3 className="font-semibold text-amber-800">Select Grant Type to Continue</h3>
+                              <p className="text-sm text-amber-700 mt-1">
+                                Choose a grant type above to unlock the application modules.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <ModuleEditor
