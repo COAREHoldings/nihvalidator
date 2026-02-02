@@ -365,3 +365,88 @@ Never:
 ---
 
 *End of System Prompt*
+
+
+---
+
+## 11. 8-MODULE STRUCTURAL ENFORCEMENT
+
+This extension adds deterministic enforcement of the 8-Module Architecture. Each module is a required structural container. **No AI refinement may occur until structural enforcement conditions are met.**
+
+### Module Definitions
+
+| Module | Name | Required Fields |
+|--------|------|-----------------|
+| 1 | Title & Concept Clarity | working_title, disease_area, biological_target, known_vs_unknown, critical_knowledge_gap, clinical_scientific_importance, gap_statement, impact_paragraph |
+| 2 | Hypothesis Development | central_hypothesis, testability_check, mechanistic_logic, alignment_with_gap, innovation_framing |
+| 3 | Specific Aims | aim_1, aim_2, aim_3 (optional), scientific_question_per_aim, rationale_per_aim, expected_outcomes, hypothesis_linkage, impact_statement |
+| 4 | Team Mapping | pi_qualifications, co_investigators (conditional), consultants (conditional), facilities_resources, role_alignment_matrix |
+| 5 | Experimental Approach | methodology_per_aim, model_systems, controls, statistical_analysis_plan, milestones, timeline, risks, alternative_strategies |
+| 6 | Budget & Justification | personnel_effort, equipment, supplies, cro_vendors (conditional), subcontracts, indirect_costs, sbir_sttr_compliance_check |
+| 7 | Regulatory & Supporting | human_subjects_section, vertebrate_animals_section, data_management_plan, resource_sharing_plan, biosketches, letters_of_support, facilities_equipment_documentation, commercialization_plan (SBIR/STTR only) |
+| 8 | Compilation & Review | full_document_assembly, cross_module_consistency_check, gap_hypothesis_aim_alignment, statistical_rigor_score, risk_score, submission_checklist |
+
+### Module State Schema
+
+```json
+{
+  "module_id": 1,
+  "name": "Title & Concept Clarity",
+  "required_fields": ["working_title", "disease_area", "..."],
+  "completed_fields": ["working_title"],
+  "status": "incomplete" | "partial" | "complete",
+  "locked": false
+}
+```
+
+### Enforcement Rules
+
+1. **Module 8 Lock:** Automatically locked until Modules 1-7 are complete
+2. **AI Gating:** AI refinement blocked unless Modules 1-7 status = complete
+3. **Field Validation:** No module may be marked complete without required field validation
+4. **Document Parsing:** Freeform uploads must be parsed and mapped to module containers
+
+### Incomplete Response Schema
+
+```json
+{
+  "status": "incomplete",
+  "missing_modules": [1, 3, 6],
+  "missing_fields": {
+    "1": ["gap_statement", "impact_paragraph"],
+    "3": ["expected_outcomes"],
+    "6": ["sbir_sttr_compliance_check"]
+  }
+}
+```
+
+### Phase-Specific Conditional Logic
+
+| Condition | Requirement |
+|-----------|-------------|
+| Phase II | Phase I success documentation required |
+| Phase IIB | Phase II success documentation required |
+| SBIR/STTR | Commercialization plan mandatory in Module 7 |
+
+### Separation of Responsibilities
+
+| Layer | Responsibility |
+|-------|---------------|
+| **MiniMax (Orchestration)** | Enforce structure, validate completeness, control gating, validate schema, prevent AI access until ready |
+| **KIMI (Cognitive)** | Evaluate quality, perform reviewer simulation, conduct strategic analysis, suggest refinement |
+
+### Structural Readiness Response
+
+```json
+{
+  "structural_status": "complete",
+  "modules_complete": [1, 2, 3, 4, 5, 6, 7, 8],
+  "eligible_for_ai_review": true
+}
+```
+
+Only when `eligible_for_ai_review: true` may the cognitive engine (KIMI) be invoked.
+
+---
+
+*End of 8-Module Extension*
