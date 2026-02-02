@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import type { ProjectSchemaV2, ModuleState } from '../types'
-import { MODULE_DEFINITIONS, DIRECT_PHASE2_REQUIRED_FIELDS } from '../types'
-import { Plus, Trash2, AlertTriangle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import type { ProjectSchemaV2, ModuleState, M3SpecificAims, M5ExperimentalApproach, M6Budget, M7Regulatory, M7Phase2Additional } from '../types'
+import { MODULE_DEFINITIONS } from '../types'
+import { Plus, Trash2, AlertTriangle, Lock, CheckCircle } from 'lucide-react'
 
 interface Props {
   project: ProjectSchemaV2
@@ -55,13 +55,15 @@ interface NumberFieldProps {
   required?: boolean
   prefix?: string
   suffix?: string
+  max?: number
 }
 
-function NumberField({ label, value, onChange, required, prefix, suffix }: NumberFieldProps) {
+function NumberField({ label, value, onChange, required, prefix, suffix, max }: NumberFieldProps) {
   return (
     <div className="mb-4">
       <label className="block text-sm font-medium text-neutral-700 mb-1.5">
         {label} {required && <span className="text-semantic-error">*</span>}
+        {max && <span className="text-xs text-neutral-500 ml-2">(cap: ${max.toLocaleString()})</span>}
       </label>
       <div className="flex items-center">
         {prefix && <span className="text-neutral-500 mr-2">{prefix}</span>}
@@ -77,9 +79,131 @@ function NumberField({ label, value, onChange, required, prefix, suffix }: Numbe
   )
 }
 
+type PhaseTab = 'phase1' | 'phase2' | 'shared'
+
+interface PhaseTabsProps {
+  activeTab: PhaseTab
+  onTabChange: (tab: PhaseTab) => void
+  phase1Complete: boolean
+  phase2Locked: boolean
+  moduleId: number
+}
+
+function PhaseTabs({ activeTab, onTabChange, phase1Complete, phase2Locked, moduleId }: PhaseTabsProps) {
+  const isM7 = moduleId === 7
+  
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-1 mb-2">
+        <span className="text-xs font-medium text-primary-600 bg-primary-50 px-2 py-1 rounded">Fast Track</span>
+        <span className="text-xs text-neutral-500">Phase-specific content required</span>
+      </div>
+      <div className="flex gap-2 p-1 bg-neutral-100 rounded-lg">
+        {isM7 ? (
+          <>
+            <button
+              onClick={() => onTabChange('shared')}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2
+                ${activeTab === 'shared' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-600 hover:text-neutral-900'}`}
+            >
+              Shared Documents
+              {phase1Complete && <CheckCircle className="w-4 h-4 text-semantic-success" />}
+            </button>
+            <button
+              onClick={() => !phase2Locked && onTabChange('phase2')}
+              disabled={phase2Locked}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2
+                ${activeTab === 'phase2' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-600 hover:text-neutral-900'}
+                ${phase2Locked ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {phase2Locked && <Lock className="w-3 h-3" />}
+              Phase II Specific
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => onTabChange('phase1')}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2
+                ${activeTab === 'phase1' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-600 hover:text-neutral-900'}`}
+            >
+              Phase I {moduleId === 6 && '($275K cap)'}
+              {phase1Complete && <CheckCircle className="w-4 h-4 text-semantic-success" />}
+            </button>
+            <button
+              onClick={() => !phase2Locked && onTabChange('phase2')}
+              disabled={phase2Locked}
+              className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2
+                ${activeTab === 'phase2' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-600 hover:text-neutral-900'}
+                ${phase2Locked ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {phase2Locked && <Lock className="w-3 h-3" />}
+              Phase II {moduleId === 6 && '($1.75M cap)'}
+            </button>
+          </>
+        )}
+      </div>
+      {phase2Locked && (
+        <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+          <AlertTriangle className="w-3 h-3" />
+          Complete {isM7 ? 'Shared Documents' : 'Phase I'} to unlock {isM7 ? 'Phase II Specific' : 'Phase II'}
+        </p>
+      )}
+    </div>
+  )
+}
+
+function PhaseIndicator({ phase }: { phase: 'I' | 'II' | 'Shared' }) {
+  const colors = phase === 'I' ? 'bg-blue-100 text-blue-800' : phase === 'II' ? 'bg-purple-100 text-purple-800' : 'bg-neutral-100 text-neutral-800'
+  return (
+    <span className={`text-xs font-medium px-2 py-0.5 rounded ${colors}`}>
+      {phase === 'Shared' ? 'Shared' : `Phase ${phase}`}
+    </span>
+  )
+}
+
 export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props) {
   const def = MODULE_DEFINITIONS.find(m => m.id === moduleId)
+  const isFastTrack = project.grant_type === 'Fast Track'
+  const hasPhases = isFastTrack && [3, 5, 6, 7].includes(moduleId)
   
+  const [phaseTab, setPhaseTab] = useState<PhaseTab>(moduleId === 7 ? 'shared' : 'phase1')
+  
+  // Reset phase tab when module changes
+  useEffect(() => {
+    setPhaseTab(moduleId === 7 ? 'shared' : 'phase1')
+  }, [moduleId])
+
+  // Check phase completion for locking
+  const getPhase1Complete = () => {
+    if (moduleId === 3) return project.m3_fast_track.phase1_complete
+    if (moduleId === 5) return project.m5_fast_track.phase1_complete
+    if (moduleId === 6) return project.m6_fast_track.phase1_complete
+    if (moduleId === 7) return project.m7_fast_track.shared_complete
+    return false
+  }
+
+  const checkPhase1Fields = (data: Partial<M3SpecificAims> | Partial<M5ExperimentalApproach> | Partial<M6Budget> | Partial<M7Regulatory>) => {
+    if (moduleId === 3) {
+      const d = data as Partial<M3SpecificAims>
+      return !!(d.aim1_statement?.trim() && d.aim1_milestones?.length && d.aim2_statement?.trim() && d.timeline_summary?.trim())
+    }
+    if (moduleId === 5) {
+      const d = data as Partial<M5ExperimentalApproach>
+      return !!(d.methodology_overview?.trim() && d.experimental_design?.trim() && d.data_collection_methods?.trim() && d.analysis_plan?.trim())
+    }
+    if (moduleId === 6) {
+      const d = data as Partial<M6Budget>
+      return !!(d.direct_costs_total && d.direct_costs_total > 0 && d.budget_justification?.trim())
+    }
+    if (moduleId === 7) {
+      const d = data as Partial<M7Regulatory>
+      return !!(d.facilities_description?.trim())
+    }
+    return false
+  }
+
+  // Module 1: Title & Concept (shared for Fast Track)
   const renderM1 = () => {
     const data = project.m1_title_concept
     const update = (field: string, value: string) => {
@@ -99,6 +223,7 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
     )
   }
 
+  // Module 2: Hypothesis (shared for Fast Track)
   const renderM2 = () => {
     const data = project.m2_hypothesis
     const update = (field: string, value: string) => {
@@ -115,7 +240,52 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
     )
   }
 
+  // Module 3: Specific Aims - with Fast Track phases
   const renderM3 = () => {
+    if (isFastTrack) {
+      const ftData = project.m3_fast_track
+      const currentPhaseData = phaseTab === 'phase1' ? ftData.phase1 : ftData.phase2
+      const phase1Complete = checkPhase1Fields(ftData.phase1)
+      
+      const update = (field: string, value: string | string[]) => {
+        const updatedPhase = { ...currentPhaseData, [field]: value }
+        const isComplete = checkPhase1Fields(updatedPhase as Partial<M3SpecificAims>)
+        onUpdate({
+          m3_fast_track: {
+            ...ftData,
+            [phaseTab]: updatedPhase,
+            [`${phaseTab}_complete`]: isComplete
+          }
+        })
+      }
+
+      return (
+        <div>
+          <PhaseTabs
+            activeTab={phaseTab}
+            onTabChange={setPhaseTab}
+            phase1Complete={phase1Complete}
+            phase2Locked={!phase1Complete && phaseTab !== 'phase1'}
+            moduleId={3}
+          />
+          <div className="flex items-center gap-2 mb-4">
+            <PhaseIndicator phase={phaseTab === 'phase1' ? 'I' : 'II'} />
+            <span className="text-sm text-neutral-600">
+              {phaseTab === 'phase1' ? 'Feasibility study aims' : 'Full development aims'}
+            </span>
+          </div>
+          <TextField label="Aim 1 Statement" value={currentPhaseData.aim1_statement || ''} onChange={v => update('aim1_statement', v)} required multiline placeholder={phaseTab === 'phase1' ? 'Phase I feasibility aim' : 'Phase II development aim'} />
+          <TextField label="Aim 1 Milestones" value={(currentPhaseData.aim1_milestones || []).join('\n')} onChange={v => update('aim1_milestones', v.split('\n').filter(s => s.trim()))} required multiline placeholder="Enter milestones (one per line)" />
+          <TextField label="Aim 2 Statement" value={currentPhaseData.aim2_statement || ''} onChange={v => update('aim2_statement', v)} required multiline placeholder={phaseTab === 'phase1' ? 'Secondary feasibility aim' : 'Secondary development aim'} />
+          <TextField label="Aim 2 Milestones" value={(currentPhaseData.aim2_milestones || []).join('\n')} onChange={v => update('aim2_milestones', v.split('\n').filter(s => s.trim()))} required multiline placeholder="Enter milestones (one per line)" />
+          <TextField label="Aim 3 Statement (Optional)" value={currentPhaseData.aim3_statement || ''} onChange={v => update('aim3_statement', v)} multiline placeholder="Third specific aim (if applicable)" />
+          <TextField label="Timeline Summary" value={currentPhaseData.timeline_summary || ''} onChange={v => update('timeline_summary', v)} required multiline placeholder={`${phaseTab === 'phase1' ? 'Phase I' : 'Phase II'} timeline`} />
+          <TextField label="Aim Interdependencies" value={currentPhaseData.interdependencies || ''} onChange={v => update('interdependencies', v)} required multiline placeholder="How do the aims relate to each other?" />
+        </div>
+      )
+    }
+
+    // Non-Fast Track
     const data = project.m3_specific_aims
     const update = (field: string, value: string | string[]) => {
       onUpdate({ m3_specific_aims: { ...data, [field]: value } })
@@ -133,6 +303,7 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
     )
   }
 
+  // Module 4: Team Mapping (shared for Fast Track)
   const renderM4 = () => {
     const data = project.m4_team_mapping
     const update = (field: string, value: unknown) => {
@@ -187,7 +358,53 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
     )
   }
 
+  // Module 5: Experimental Approach - with Fast Track phases
   const renderM5 = () => {
+    if (isFastTrack) {
+      const ftData = project.m5_fast_track
+      const currentPhaseData = phaseTab === 'phase1' ? ftData.phase1 : ftData.phase2
+      const phase1Complete = checkPhase1Fields(ftData.phase1)
+
+      const update = (field: string, value: string) => {
+        const updatedPhase = { ...currentPhaseData, [field]: value }
+        const isComplete = checkPhase1Fields(updatedPhase as Partial<M5ExperimentalApproach>)
+        onUpdate({
+          m5_fast_track: {
+            ...ftData,
+            [phaseTab]: updatedPhase,
+            [`${phaseTab}_complete`]: isComplete
+          }
+        })
+      }
+
+      return (
+        <div>
+          <PhaseTabs
+            activeTab={phaseTab}
+            onTabChange={setPhaseTab}
+            phase1Complete={phase1Complete}
+            phase2Locked={!phase1Complete && phaseTab !== 'phase1'}
+            moduleId={5}
+          />
+          <div className="flex items-center gap-2 mb-4">
+            <PhaseIndicator phase={phaseTab === 'phase1' ? 'I' : 'II'} />
+            <span className="text-sm text-neutral-600">
+              {phaseTab === 'phase1' ? 'Feasibility study methods' : 'Full-scale development methods'}
+            </span>
+          </div>
+          <TextField label="Methodology Overview" value={currentPhaseData.methodology_overview || ''} onChange={v => update('methodology_overview', v)} required multiline />
+          <TextField label="Experimental Design" value={currentPhaseData.experimental_design || ''} onChange={v => update('experimental_design', v)} required multiline />
+          <TextField label="Data Collection Methods" value={currentPhaseData.data_collection_methods || ''} onChange={v => update('data_collection_methods', v)} required multiline />
+          <TextField label="Analysis Plan" value={currentPhaseData.analysis_plan || ''} onChange={v => update('analysis_plan', v)} required multiline />
+          <TextField label="Statistical Approach" value={currentPhaseData.statistical_approach || ''} onChange={v => update('statistical_approach', v)} required multiline />
+          <TextField label="Expected Results" value={currentPhaseData.expected_results || ''} onChange={v => update('expected_results', v)} required multiline />
+          <TextField label="Potential Pitfalls" value={currentPhaseData.potential_pitfalls || ''} onChange={v => update('potential_pitfalls', v)} required multiline />
+          <TextField label="Alternative Approaches" value={currentPhaseData.alternative_approaches || ''} onChange={v => update('alternative_approaches', v)} required multiline />
+        </div>
+      )
+    }
+
+    // Non-Fast Track
     const data = project.m5_experimental_approach
     const update = (field: string, value: string) => {
       onUpdate({ m5_experimental_approach: { ...data, [field]: value } })
@@ -206,7 +423,63 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
     )
   }
 
+  // Module 6: Budget - with Fast Track phases
   const renderM6 = () => {
+    if (isFastTrack) {
+      const ftData = project.m6_fast_track
+      const currentPhaseData = phaseTab === 'phase1' ? ftData.phase1 : ftData.phase2
+      const phase1Complete = checkPhase1Fields(ftData.phase1)
+      const budgetCap = phaseTab === 'phase1' ? 275000 : 1750000
+
+      const updateField = (field: string, value: number | string) => {
+        const updatedPhase = { ...currentPhaseData, [field]: value }
+        const isComplete = checkPhase1Fields(updatedPhase as Partial<M6Budget>)
+        onUpdate({
+          m6_fast_track: {
+            ...ftData,
+            [phaseTab]: updatedPhase,
+            [`${phaseTab}_complete`]: isComplete
+          }
+        })
+      }
+
+      return (
+        <div>
+          <PhaseTabs
+            activeTab={phaseTab}
+            onTabChange={setPhaseTab}
+            phase1Complete={phase1Complete}
+            phase2Locked={!phase1Complete && phaseTab !== 'phase1'}
+            moduleId={6}
+          />
+          <div className="flex items-center gap-2 mb-4">
+            <PhaseIndicator phase={phaseTab === 'phase1' ? 'I' : 'II'} />
+            <span className="text-sm text-neutral-600">
+              Budget cap: <strong>${budgetCap.toLocaleString()}</strong>
+            </span>
+          </div>
+          {(currentPhaseData.direct_costs_total || 0) > budgetCap && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-800">
+              <AlertTriangle className="w-4 h-4" />
+              Budget exceeds {phaseTab === 'phase1' ? 'Phase I' : 'Phase II'} cap of ${budgetCap.toLocaleString()}
+            </div>
+          )}
+          <NumberField label="Total Direct Costs" value={currentPhaseData.direct_costs_total || 0} onChange={v => updateField('direct_costs_total', v)} required prefix="$" max={budgetCap} />
+          <NumberField label="Personnel Costs" value={currentPhaseData.personnel_costs || 0} onChange={v => updateField('personnel_costs', v)} required prefix="$" />
+          <NumberField label="Equipment Costs" value={currentPhaseData.equipment_costs || 0} onChange={v => updateField('equipment_costs', v)} prefix="$" />
+          <NumberField label="Supplies Costs" value={currentPhaseData.supplies_costs || 0} onChange={v => updateField('supplies_costs', v)} prefix="$" />
+          <NumberField label="Travel Costs" value={currentPhaseData.travel_costs || 0} onChange={v => updateField('travel_costs', v)} prefix="$" />
+          <NumberField label="Subaward Costs" value={currentPhaseData.subaward_costs || 0} onChange={v => updateField('subaward_costs', v)} prefix="$" />
+          <NumberField label="Small Business %" value={currentPhaseData.small_business_percent || 67} onChange={v => updateField('small_business_percent', v)} required suffix="%" />
+          {project.program_type === 'STTR' && (
+            <NumberField label="Research Institution %" value={currentPhaseData.research_institution_percent || 0} onChange={v => updateField('research_institution_percent', v)} required suffix="%" />
+          )}
+          <TextField label="Budget Justification" value={currentPhaseData.budget_justification || ''} onChange={v => updateField('budget_justification', v)} required multiline placeholder={`Justify ${phaseTab === 'phase1' ? 'Phase I' : 'Phase II'} budget allocations`} />
+        </div>
+      )
+    }
+
+    // Non-Fast Track
     const data = project.m6_budget
     const legacy = project.legacy_budget
     const updateField = (field: string, value: number | string) => {
@@ -239,7 +512,103 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
     )
   }
 
+  // Module 7: Regulatory - with Fast Track phases
   const renderM7 = () => {
+    if (isFastTrack) {
+      const ftData = project.m7_fast_track
+      const sharedData = ftData.shared || {}
+      const phase2Data = ftData.phase2_additional || {}
+      const sharedComplete = checkPhase1Fields(sharedData)
+
+      const updateShared = (field: string, value: unknown) => {
+        const updatedShared = { ...sharedData, [field]: value }
+        const isComplete = checkPhase1Fields(updatedShared as Partial<M7Regulatory>)
+        onUpdate({
+          m7_fast_track: {
+            ...ftData,
+            shared: updatedShared,
+            shared_complete: isComplete
+          }
+        })
+      }
+
+      const updatePhase2 = (field: string, value: string) => {
+        const updated = { ...phase2Data, [field]: value }
+        const isComplete = !!(updated.commercialization_plan?.trim())
+        onUpdate({
+          m7_fast_track: {
+            ...ftData,
+            phase2_additional: updated,
+            phase2_complete: isComplete
+          }
+        })
+      }
+
+      return (
+        <div>
+          <PhaseTabs
+            activeTab={phaseTab}
+            onTabChange={setPhaseTab}
+            phase1Complete={sharedComplete}
+            phase2Locked={!sharedComplete && phaseTab !== 'shared'}
+            moduleId={7}
+          />
+          
+          {phaseTab === 'shared' ? (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <PhaseIndicator phase="Shared" />
+                <span className="text-sm text-neutral-600">Applies to both phases</span>
+              </div>
+              <div className="mb-4">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" checked={sharedData.human_subjects_involved || false} onChange={e => updateShared('human_subjects_involved', e.target.checked)} className="w-4 h-4" />
+                  <span className="text-sm font-medium text-neutral-700">Human Subjects Involved</span>
+                </label>
+                {sharedData.human_subjects_involved && (
+                  <TextField label="IRB Approval Status" value={sharedData.irb_approval_status || ''} onChange={v => updateShared('irb_approval_status', v)} placeholder="Approved, Pending, N/A" />
+                )}
+              </div>
+              <div className="mb-4">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" checked={sharedData.vertebrate_animals_involved || false} onChange={e => updateShared('vertebrate_animals_involved', e.target.checked)} className="w-4 h-4" />
+                  <span className="text-sm font-medium text-neutral-700">Vertebrate Animals Involved</span>
+                </label>
+                {sharedData.vertebrate_animals_involved && (
+                  <TextField label="IACUC Approval Status" value={sharedData.iacuc_approval_status || ''} onChange={v => updateShared('iacuc_approval_status', v)} placeholder="Approved, Pending, N/A" />
+                )}
+              </div>
+              <div className="mb-4">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" checked={sharedData.biohazards_involved || false} onChange={e => updateShared('biohazards_involved', e.target.checked)} className="w-4 h-4" />
+                  <span className="text-sm font-medium text-neutral-700">Biohazards Involved</span>
+                </label>
+                {sharedData.biohazards_involved && (
+                  <TextField label="IBC Approval Status" value={sharedData.ibc_approval_status || ''} onChange={v => updateShared('ibc_approval_status', v)} placeholder="Approved, Pending, N/A" />
+                )}
+              </div>
+              <TextField label="Facilities Description" value={sharedData.facilities_description || ''} onChange={v => updateShared('facilities_description', v)} required multiline placeholder="Describe available facilities and equipment" />
+              <TextField label="Letters of Support" value={(sharedData.letters_of_support || []).join('\n')} onChange={v => updateShared('letters_of_support', v.split('\n').filter(s => s.trim()))} multiline placeholder="List letters of support (one per line)" />
+            </div>
+          ) : (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <PhaseIndicator phase="II" />
+                <span className="text-sm text-neutral-600">Phase II specific requirements</span>
+              </div>
+              <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg mb-4">
+                <p className="text-sm text-purple-800">Phase II applications require additional commercialization documentation.</p>
+              </div>
+              <TextField label="Commercialization Plan" value={phase2Data.commercialization_plan || ''} onChange={v => updatePhase2('commercialization_plan', v)} required multiline placeholder="Detailed plan for commercializing your technology" />
+              <TextField label="Market Analysis" value={phase2Data.market_analysis || ''} onChange={v => updatePhase2('market_analysis', v)} multiline placeholder="Target market size and competitive landscape" />
+              <TextField label="Manufacturing Plan" value={phase2Data.manufacturing_plan || ''} onChange={v => updatePhase2('manufacturing_plan', v)} multiline placeholder="How will you scale production?" />
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    // Non-Fast Track
     const data = project.m7_regulatory
     const update = (field: string, value: unknown) => {
       onUpdate({ m7_regulatory: { ...data, [field]: value } })
@@ -279,6 +648,7 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
     )
   }
 
+  // Module 8: Compilation (shared, validates both phases)
   const renderM8 = () => {
     const data = project.m8_compilation
     const update = (field: string, value: unknown) => {
@@ -295,7 +665,17 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
       )
     }
 
-    const checklistItems = [
+    const checklistItems = isFastTrack ? [
+      'Phase I specific aims defined',
+      'Phase II specific aims defined',
+      'Phase I budget within $275K cap',
+      'Phase II budget within $1.75M cap',
+      'Team qualifications documented',
+      'Regulatory approvals addressed',
+      'Commercialization plan complete',
+      'Page limits verified',
+      'Format requirements met'
+    ] : [
       'All specific aims defined',
       'Budget within NIH caps',
       'Team qualifications documented',
@@ -306,6 +686,11 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
 
     return (
       <div>
+        {isFastTrack && (
+          <div className="mb-6 p-4 bg-primary-50 border border-primary-200 rounded-lg">
+            <p className="text-sm text-primary-800">Fast Track validation checks both Phase I and Phase II sections across all modules.</p>
+          </div>
+        )}
         <h4 className="text-sm font-semibold text-neutral-700 mb-3">Final Review Checklist</h4>
         {checklistItems.map(item => (
           <label key={item} className="flex items-center gap-2 mb-2">
@@ -359,13 +744,68 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
     )
   }
 
+  // Calculate progress for display
+  const getPhaseProgress = () => {
+    if (!isFastTrack || !hasPhases) return null
+    
+    let phase1Progress = 0
+    let phase2Progress = 0
+    
+    if (moduleId === 3) {
+      phase1Progress = project.m3_fast_track.phase1_complete ? 100 : 50
+      phase2Progress = project.m3_fast_track.phase2_complete ? 100 : 0
+    } else if (moduleId === 5) {
+      phase1Progress = project.m5_fast_track.phase1_complete ? 100 : 50
+      phase2Progress = project.m5_fast_track.phase2_complete ? 100 : 0
+    } else if (moduleId === 6) {
+      phase1Progress = project.m6_fast_track.phase1_complete ? 100 : 50
+      phase2Progress = project.m6_fast_track.phase2_complete ? 100 : 0
+    } else if (moduleId === 7) {
+      phase1Progress = project.m7_fast_track.shared_complete ? 100 : 50
+      phase2Progress = project.m7_fast_track.phase2_complete ? 100 : 0
+    }
+    
+    return { phase1Progress, phase2Progress }
+  }
+
+  const phaseProgress = getPhaseProgress()
+
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-neutral-900">{def?.name}</h2>
-        <p className="text-sm text-neutral-500 mt-1">
-          {moduleState.completed_fields.length} of {moduleState.required_fields.length} required fields completed
-        </p>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-neutral-900">{def?.name}</h2>
+          {isFastTrack && !hasPhases && (
+            <span className="text-xs bg-neutral-100 text-neutral-600 px-2 py-1 rounded">Shared across phases</span>
+          )}
+        </div>
+        {!hasPhases && (
+          <p className="text-sm text-neutral-500 mt-1">
+            {moduleState.completed_fields.length} of {moduleState.required_fields.length} required fields completed
+          </p>
+        )}
+        {hasPhases && phaseProgress && (
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="p-2 bg-blue-50 rounded-lg">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-medium text-blue-800">Phase I</span>
+                <span className="text-xs text-blue-600">{phaseProgress.phase1Progress}%</span>
+              </div>
+              <div className="h-1.5 bg-blue-100 rounded-full overflow-hidden">
+                <div className="h-full bg-blue-500 transition-all" style={{ width: `${phaseProgress.phase1Progress}%` }} />
+              </div>
+            </div>
+            <div className="p-2 bg-purple-50 rounded-lg">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-medium text-purple-800">Phase II</span>
+                <span className="text-xs text-purple-600">{phaseProgress.phase2Progress}%</span>
+              </div>
+              <div className="h-1.5 bg-purple-100 rounded-full overflow-hidden">
+                <div className="h-full bg-purple-500 transition-all" style={{ width: `${phaseProgress.phase2Progress}%` }} />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       {moduleId === 1 && renderM1()}

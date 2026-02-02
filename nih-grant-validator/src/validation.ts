@@ -58,6 +58,10 @@ export function createNewProject(): ProjectSchemaV2 {
       phase2_success_documented: false
     },
     direct_phase2_feasibility: {},
+    m3_fast_track: { phase1: {}, phase2: {}, phase1_complete: false, phase2_complete: false },
+    m5_fast_track: { phase1: {}, phase2: {}, phase1_complete: false, phase2_complete: false },
+    m6_fast_track: { phase1: {}, phase2: {}, phase1_complete: false, phase2_complete: false },
+    m7_fast_track: { shared: {}, phase2_additional: {}, shared_complete: false, phase2_complete: false },
     legacy_budget: {
       directCosts: 0,
       personnelCosts: 0,

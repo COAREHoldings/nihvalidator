@@ -63,6 +63,14 @@ export interface M3SpecificAims {
   interdependencies: string
 }
 
+// M3 Fast Track Phase-specific
+export interface M3FastTrack {
+  phase1: Partial<M3SpecificAims>
+  phase2: Partial<M3SpecificAims>
+  phase1_complete: boolean
+  phase2_complete: boolean
+}
+
 // M4: Team Mapping (5 fields)
 export interface M4TeamMapping {
   pi_name: string
@@ -84,6 +92,14 @@ export interface M5ExperimentalApproach {
   alternative_approaches: string
 }
 
+// M5 Fast Track Phase-specific
+export interface M5FastTrack {
+  phase1: Partial<M5ExperimentalApproach>
+  phase2: Partial<M5ExperimentalApproach>
+  phase1_complete: boolean
+  phase2_complete: boolean
+}
+
 // M6: Budget & Justification (7 fields) - DO NOT MODIFY calculation engine
 export interface M6Budget {
   direct_costs_total: number
@@ -98,6 +114,14 @@ export interface M6Budget {
   budget_justification: string
 }
 
+// M6 Fast Track Phase-specific
+export interface M6FastTrack {
+  phase1: Partial<M6Budget>
+  phase2: Partial<M6Budget>
+  phase1_complete: boolean
+  phase2_complete: boolean
+}
+
 // M7: Regulatory & Supporting (8 fields, conditional)
 export interface M7Regulatory {
   human_subjects_involved: boolean
@@ -108,6 +132,21 @@ export interface M7Regulatory {
   ibc_approval_status: string
   letters_of_support: string[]
   facilities_description: string
+}
+
+// M7 Fast Track Phase II additional fields
+export interface M7Phase2Additional {
+  commercialization_plan: string
+  market_analysis: string
+  manufacturing_plan: string
+}
+
+// M7 Fast Track Phase-specific
+export interface M7FastTrack {
+  shared: Partial<M7Regulatory>
+  phase2_additional: Partial<M7Phase2Additional>
+  shared_complete: boolean
+  phase2_complete: boolean
 }
 
 // M8: Compilation & Review (6 fields)
@@ -171,6 +210,12 @@ export interface ProjectSchemaV2 {
   m6_budget: Partial<M6Budget>
   m7_regulatory: Partial<M7Regulatory>
   m8_compilation: Partial<M8Compilation>
+  
+  // Fast Track Phase-specific data
+  m3_fast_track: M3FastTrack
+  m5_fast_track: M5FastTrack
+  m6_fast_track: M6FastTrack
+  m7_fast_track: M7FastTrack
   
   // Lifecycle-specific
   prior_phase: PriorPhaseData
