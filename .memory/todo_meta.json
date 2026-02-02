@@ -5,14 +5,14 @@
         "id": "1",
         "content": "Design NIH SBIR/STTR Grant Validator UI",
         "details": "Multi-step form wizard, validation displays, budget calculator layout",
-        "status": "pending",
+        "status": "completed",
         "priority": "high"
       },
       "2": {
         "id": "2",
         "content": "Build Option A - Frontend Validation App",
         "details": "React app with lifecycle validation, budget checks, completeness validation, JSON export",
-        "status": "pending",
+        "status": "completed",
         "priority": "high"
       },
       "3": {
