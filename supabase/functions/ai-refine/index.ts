@@ -12,7 +12,10 @@ Deno.serve(async (req) => {
     }
 
     try {
-        const { action, text, fieldName, fieldContext, sectionType, grantType, moduleContext } = await req.json();
+        const requestData = await req.json();
+        const { action, text, fieldName, fieldContext, sectionType, grantType, moduleContext,
+                field_name, current_value, context, instructions, content, target_words, section,
+                responses, is_phase2b } = requestData;
 
         if (!action) {
             throw new Error('Action is required');
@@ -168,6 +171,57 @@ Format response as JSON:
 - "scoringFactors": {"positive": [], "negative": []}
 - "improvementPotential": How much the score could improve with revisions`;
                 userPrompt = `Grant Type: ${grantType || 'Phase I'}\nSection: ${sectionType || 'Specific Aims'}\n\nContent to score:\n${text}`;
+                break;
+
+            case 'commercialization_narrative':
+                systemPrompt = `You are an expert NIH SBIR/STTR commercialization plan writer. Convert structured responses into a clear, NIH-compliant narrative.
+
+CRITICAL RULES:
+- Remove ALL promotional/hype language ("revolutionary", "game-changing", "best-in-class")
+- Use factual, evidence-based statements only
+- Flag any claims without supporting data
+- Maintain professional, conservative tone
+- Emphasize measurable outcomes and realistic timelines
+${is_phase2b ? '- Apply stricter validation for Phase IIB: require investor documentation, regulatory readiness' : ''}
+
+Format response as JSON:
+{
+  "result": "The formatted NIH-compliant narrative",
+  "flaggedClaims": ["List of claims that need supporting evidence"],
+  "removedHype": ["List of promotional phrases that were removed or toned down"]
+}`;
+                userPrompt = `Section: ${section}
+Grant Type: ${grantType || 'Phase II'}
+${is_phase2b ? 'Phase IIB Application - Stricter validation required' : ''}
+
+User Responses:
+${responses ? responses.map((r: {question: string, answer: string}) => `Q: ${r.question}\nA: ${r.answer}`).join('\n\n') : ''}
+
+Instructions: ${instructions || 'Generate NIH-compliant narrative'}`;
+                break;
+
+            case 'compress_narrative':
+                systemPrompt = `You are an expert editor specializing in NIH grant applications. Compress the provided text to meet page limits while preserving all essential information.
+
+Rules:
+- Maintain all critical facts and data
+- Remove redundancy and wordiness
+- Keep NIH-required elements
+- Preserve the professional tone
+- Target word count: ${target_words || 500} words
+
+Format response as JSON:
+{
+  "result": "The compressed text",
+  "originalWords": number,
+  "newWords": number,
+  "removedElements": ["List of elements removed or condensed"]
+}`;
+                userPrompt = `Section: ${section}
+Target word count: ${target_words || 500}
+
+Content to compress:
+${content || text}`;
                 break;
 
             default:

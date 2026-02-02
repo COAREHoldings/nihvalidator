@@ -19,7 +19,7 @@ export function createInitialModuleStates(): ModuleState[] {
     required_fields: def.required_fields,
     completed_fields: [],
     status: 'incomplete' as ModuleStatus,
-    locked: idx === 7, // M8 locked by default
+    locked: idx === 7 || idx === 8, // M8 and M9 locked by default
     last_updated: now
   }))
 }
@@ -50,6 +50,20 @@ export function createNewProject(): ProjectSchemaV2 {
     m6_budget: {},
     m7_regulatory: {},
     m8_compilation: {},
+    m9_commercialization: {
+      section1_value: {},
+      section2_company: {},
+      section3_market: {},
+      section4_ip: {},
+      section5_finance: {},
+      section6_revenue: {},
+      total_word_count: 0,
+      page_count: 0,
+      validation_score: 0,
+      risk_flags: [],
+      section_weaknesses: []
+    },
+    phase1_commercialization: {},
     prior_phase: {
       awardNumber: '',
       completionDate: '',

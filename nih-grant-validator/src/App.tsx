@@ -5,10 +5,11 @@ import { ModuleEditor } from './components/ModuleEditor'
 import { GrantTypeSelector } from './components/GrantTypeSelector'
 import { PriorPhaseEditor } from './components/PriorPhaseEditor'
 import { AIRefinement } from './components/AIRefinement'
+import { CommercializationDirector } from './components/CommercializationDirector'
 import type { ProjectSchemaV2, ValidationResult } from './types'
 import { INSTITUTE_BUDGET_CAPS } from './types'
 import { createNewProject, updateModuleStates, runFullValidation, checkAIGating, getBudgetCap } from './validation'
-import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight } from 'lucide-react'
+import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, Briefcase } from 'lucide-react'
 
 type AppMode = 'modules' | 'ai-refinement' | 'results'
 type ConfigTab = 'grant-type' | 'lifecycle'
@@ -61,6 +62,11 @@ export default function App() {
   // Get budget cap for display
   const institute = project.institute || 'Standard NIH'
   const budgetCap = project.grant_type ? getBudgetCap(institute, project.grant_type) : 0
+
+  // Check if commercialization module should be visible
+  const showCommercializationModule = project.grant_type && ['Phase II', 'Fast Track', 'Direct to Phase II', 'Phase IIB'].includes(project.grant_type)
+  const isPhaseI = project.grant_type === 'Phase I'
+  const totalModules = showCommercializationModule ? 9 : 8
 
   if (!started) {
     return <Hero onStart={() => setStarted(true)} />
@@ -142,7 +148,7 @@ export default function App() {
                 </span>
                 <ChevronRight className="w-3 h-3" />
                 <span className={`px-2 py-0.5 rounded ${!showConfig ? 'bg-primary-100 text-primary-700 font-medium' : 'bg-neutral-100'}`}>
-                  Steps 1-8: Modules
+                  Steps 1-{showCommercializationModule ? '9' : '8'}: Modules
                 </span>
               </div>
             </div>
@@ -150,10 +156,10 @@ export default function App() {
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-neutral-700">Overall Progress</span>
-                <span className="text-sm text-neutral-500">{overallProgress}/8 modules</span>
+                <span className="text-sm text-neutral-500">{overallProgress}/{totalModules} modules</span>
               </div>
               <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
-                <div className="h-full bg-primary-500 transition-all" style={{ width: `${(overallProgress / 8) * 100}%` }} />
+                <div className="h-full bg-primary-500 transition-all" style={{ width: `${(overallProgress / totalModules) * 100}%` }} />
               </div>
             </div>
             
@@ -193,10 +199,28 @@ export default function App() {
                 </div>
               )}
               <ModuleNav 
-                modules={project.module_states} 
+                modules={project.module_states.filter(m => showCommercializationModule ? true : m.module_id <= 8)} 
                 activeModule={activeModule} 
                 onSelectModule={id => { setShowConfig(false); setActiveModule(id) }} 
               />
+              
+              {/* Commercialization Module Button */}
+              {showCommercializationModule && (
+                <button
+                  onClick={() => { setShowConfig(false); setActiveModule(9) }}
+                  className={`w-full mt-2 p-3 rounded-lg border text-left flex items-center gap-3 transition-all ${
+                    activeModule === 9 && !showConfig
+                      ? 'border-primary-500 bg-primary-50'
+                      : 'border-purple-200 bg-purple-50 hover:border-purple-300'
+                  }`}
+                >
+                  <Briefcase className="w-5 h-5 text-purple-600" />
+                  <div className="flex-1">
+                    <span className="font-medium text-sm text-purple-800">Commercialization Director</span>
+                    <p className="text-xs text-purple-600">NIH 12-page plan (Required)</p>
+                  </div>
+                </button>
+              )}
             </div>
 
             <button
@@ -392,6 +416,11 @@ export default function App() {
                       </div>
                     )}
                   </div>
+                ) : activeModule === 9 && showCommercializationModule ? (
+                  <CommercializationDirector
+                    project={project}
+                    onUpdate={updateProject}
+                  />
                 ) : (
                   <ModuleEditor
                     project={project}

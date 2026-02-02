@@ -1,0 +1,410 @@
+# MINIMAX ENGINEERING SPECIFICATION
+
+## Commercialization Director (NIH SBIR/STTR – Phase II, Direct Phase II, Fast Track, Phase IIB)
+
+---
+
+## OBJECTIVE
+
+Implement an NIH-aligned Commercialization Plan builder that activates ONLY for:
+
+* Phase II
+* Direct-to-Phase II
+* Fast Track (Phase I/II combined)
+* Phase IIB
+
+The system must NOT require a 12-page commercialization plan for Phase I.
+
+For Phase I:
+
+* Provide a lightweight "Commercialization Discussion" section embedded in Research Strategy.
+
+---
+
+# ACTIVATION LOGIC
+
+If user selects:
+
+* Phase II
+* Direct Phase II
+* Fast Track
+* Phase IIB
+
+→ Enable Commercialization Director module.
+
+If user selects Phase I only:
+→ Disable 12-page Commercialization Plan module.
+→ Enable short commercialization discussion prompts inside Research Plan.
+
+---
+
+# NIH REQUIRED HEADINGS (MUST BE PRESERVED VERBATIM)
+
+The compiled document must include EXACTLY these headings in this order:
+
+1. Value of the SBIR/STTR Project, Expected Outcomes, and Impact
+2. Company
+3. Market, Customer, and Competition
+4. Intellectual Property Protection
+5. Finance Plan
+6. Revenue Stream
+
+System must prevent renaming of headings.
+
+---
+
+# MODULE DESIGN (QUESTION-DRIVEN + AI-ASSISTED)
+
+Each module must:
+
+* Prompt structured questions
+* Capture structured responses
+* Use AI to refine and format narrative
+* Maintain NIH tone (non-promotional)
+* Track page usage dynamically
+* Allow user editing and approval
+
+---
+
+## MODULE 1
+
+### Value of the SBIR/STTR Project, Expected Outcomes, and Impact
+
+Prompt user:
+
+* What product/service will result?
+* What unmet need does it address?
+* What outcomes will Phase II achieve?
+* What measurable impact is expected?
+
+AI must:
+
+* Convert structured responses into clear narrative
+* Remove hype language
+* Emphasize measurable outcomes
+* Flag unsupported impact claims
+
+Recommended allocation: 1.5–2 pages
+
+---
+
+## MODULE 2
+
+### Company
+
+Prompt user:
+
+* Legal entity status
+* Management team
+* Technical expertise
+* Prior funding
+* Commercialization experience
+
+AI must:
+
+* Highlight execution credibility
+* Avoid exaggeration
+* Align team to commercialization goals
+
+Recommended allocation: 1–1.5 pages
+
+---
+
+## MODULE 3
+
+### Market, Customer, and Competition
+
+Prompt user:
+
+* Who is the paying customer?
+* Who is the end user?
+* What alternatives exist?
+* Why will customers switch?
+* Estimated market size assumptions?
+
+AI must:
+
+* Structure TAM/SAM/SOM clearly
+* Display assumptions explicitly
+* Avoid inflated market claims
+* Generate competitive differentiation matrix
+
+Recommended allocation: 2–3 pages
+
+---
+
+## MODULE 4
+
+### Intellectual Property Protection
+
+Prompt user:
+
+* Patents filed or issued?
+* Licensing agreements?
+* Freedom-to-operate review?
+* Exclusivity timeline?
+
+AI must:
+
+* Draft structured IP strategy narrative
+* Flag missing protection gaps
+* Avoid unsupported claims of "strong IP"
+
+Recommended allocation: 1 page
+
+---
+
+## MODULE 5
+
+### Finance Plan
+
+Prompt user:
+
+* Total capital required post-award?
+* Current funding secured?
+* Investor commitments?
+* Matching funds (for Phase IIB)?
+* Burn rate and runway?
+
+AI must:
+
+* Align financing needs with milestones
+* Detect unrealistic funding assumptions
+* Emphasize investor validation for Phase IIB
+
+Recommended allocation: 2–3 pages
+
+---
+
+## MODULE 6
+
+### Revenue Stream
+
+Prompt user:
+
+* Revenue model (licensing, sales, acquisition)?
+* Pricing assumptions?
+* Time to revenue?
+* Break-even projection?
+
+AI must:
+
+* Display revenue formulas
+* Avoid exaggerated projections
+* Ensure consistency with market size and finance plan
+
+Recommended allocation: 2 pages
+
+---
+
+# PAGE LIMIT ENFORCEMENT ENGINE
+
+Create:
+
+`/lib/commercializationPageEngine.ts`
+
+Requirements:
+
+* Enforce maximum 12-page limit
+* Approximate 500–600 words per page
+* Live page counter display
+* Show section-by-section allocation
+
+If limit exceeded:
+
+* Display warning
+* Offer AI-assisted compression tool
+* No silent trimming allowed
+
+---
+
+# PHASE-SPECIFIC DEPTH LOGIC
+
+Phase II:
+
+* Standard commercialization depth required
+
+Fast Track:
+
+* Must integrate Phase I outcomes into commercialization narrative
+
+Phase IIB:
+
+* Require expanded investor validation fields
+* Require documentation of third-party funding commitments
+* Require advanced regulatory readiness narrative
+
+System must dynamically increase validation strictness for Phase IIB.
+
+---
+
+# AI BEHAVIOR RULES
+
+AI must:
+
+* Not fabricate market statistics
+* Flag missing data
+* Avoid marketing fluff
+* Use structured outputs
+* Allow full user edits
+* Provide confidence indicators
+
+---
+
+# VALIDATION ENGINE
+
+System must check:
+
+* All six NIH headings present
+* Page limit compliance
+* Logical alignment between:
+
+  * Market and revenue
+  * Finance and milestones
+  * IP and competitive claims
+
+Return:
+
+* Commercialization Strength Score (0–100)
+* Risk Flags
+* Section Weakness Summary
+
+---
+
+# OUTPUT
+
+Export as:
+
+* NIH-formatted Word document
+* PDF version
+
+Preserve NIH headings verbatim.
+
+---
+
+# STRATEGIC OUTCOME
+
+Commercialization Director becomes a structured, NIH-compliant, AI-assisted engine that:
+
+* Activates only when required by mechanism
+* Enforces the 12-page limit
+* Preserves NIH-required headings
+* Supports Phase II and Phase IIB maturity expectations
+
+---
+
+# UNIVERSAL COMPILATION & FINAL AUDIT ENGINE
+
+All compilation actions — regardless of phase (Phase I, Phase II, Fast Track, Phase IIB) — must automatically trigger a Universal Audit Layer before export.
+
+This applies to:
+
+* Research Strategy
+* Budget
+* Commercialization Plan (if applicable)
+* Milestones
+* Attachments
+
+---
+
+## AUTOMATED POST-COMPILATION REVIEW SEQUENCE
+
+When user clicks "Compile Final Application":
+
+System must automatically run:
+
+1. Structural Completeness Audit
+
+   * Verify all required sections for selected phase are present
+   * Identify missing required attachments
+   * Flag improperly labeled headings
+
+2. Cross-Module Consistency Check
+
+   * Research Aims ↔ Budget alignment
+   * Budget ↔ Milestones alignment
+   * Commercialization ↔ Revenue logic alignment
+   * IP claims ↔ Competitive claims alignment
+
+3. Phase-Specific Compliance Validation
+
+   * Phase I: Feasibility focus verified
+   * Phase II: Commercialization plan present and complete
+   * Fast Track: Phase transition logic validated
+   * Phase IIB: Investor evidence and advanced regulatory planning verified
+
+4. AI Reviewer Simulation
+
+   * Scientific Reviewer critique
+   * Commercialization Reviewer critique (if applicable)
+   * Budget Reviewer critique
+
+Each reviewer returns:
+
+* Top 3 weaknesses
+* Major risk category
+* Suggested improvements
+
+5. Missing Elements Summary
+
+   * Clear checklist of what is included
+   * Clear checklist of what is missing
+   * Risk-level classification (Low / Moderate / High)
+
+---
+
+## FINAL AI REVIEW & SUGGESTION MODE
+
+After automated checks, AI must generate:
+
+* Executive Summary of strengths
+* Executive Summary of weaknesses
+* Prioritized improvement suggestions
+* Optional section-level rewrite recommendations
+
+All suggestions must:
+
+* Be editable
+* Not overwrite existing content automatically
+* Clearly label AI-generated recommendations
+
+---
+
+## SUBMISSION READINESS SCORE
+
+Generate unified score (0–100) based on:
+
+* Structural completeness (25%)
+* Scientific rigor (25%)
+* Budget compliance (20%)
+* Commercialization strength (20%)
+* Cross-module consistency (10%)
+
+Return plain-English explanation of deductions.
+
+No funding probability percentages allowed.
+
+---
+
+## EXPORT GATE CONTROL
+
+Before final export:
+
+System must display:
+
+☐ All required sections present
+☐ Compliance checks complete
+☐ AI review completed
+☐ I have reviewed flagged weaknesses
+
+User must confirm before final document generation.
+
+---
+
+# STRATEGIC OUTCOME
+
+Every compilation action becomes a structured pre-submission audit event, ensuring that no grant — regardless of phase — is exported without a full structural, financial, commercialization, and AI-driven reviewer evaluation.
+
+---
+
+END OF SPECIFICATION

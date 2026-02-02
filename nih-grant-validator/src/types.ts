@@ -195,6 +195,87 @@ export interface M8Compilation {
   export_timestamp: string
 }
 
+// M9: Commercialization Director (NIH Required Sections)
+export interface M9Section1ValueOutcomes {
+  product_service_description: string
+  unmet_need: string
+  phase2_outcomes: string
+  measurable_impact: string
+  ai_narrative: string
+  ai_approved: boolean
+}
+
+export interface M9Section2Company {
+  legal_entity_status: string
+  management_team: string
+  technical_expertise: string
+  prior_funding: string
+  commercialization_experience: string
+  ai_narrative: string
+  ai_approved: boolean
+}
+
+export interface M9Section3Market {
+  paying_customer: string
+  end_user: string
+  alternatives_exist: string
+  switch_reason: string
+  market_size_assumptions: string
+  tam_sam_som: string
+  competitive_matrix: string
+  ai_narrative: string
+  ai_approved: boolean
+}
+
+export interface M9Section4IP {
+  patents_filed_issued: string
+  licensing_agreements: string
+  freedom_to_operate: string
+  exclusivity_timeline: string
+  ai_narrative: string
+  ai_approved: boolean
+}
+
+export interface M9Section5Finance {
+  total_capital_required: string
+  current_funding_secured: string
+  investor_commitments: string
+  matching_funds_phase2b: string
+  burn_rate_runway: string
+  ai_narrative: string
+  ai_approved: boolean
+}
+
+export interface M9Section6Revenue {
+  revenue_model: string
+  pricing_assumptions: string
+  time_to_revenue: string
+  break_even_projection: string
+  ai_narrative: string
+  ai_approved: boolean
+}
+
+export interface M9CommercializationPlan {
+  section1_value: Partial<M9Section1ValueOutcomes>
+  section2_company: Partial<M9Section2Company>
+  section3_market: Partial<M9Section3Market>
+  section4_ip: Partial<M9Section4IP>
+  section5_finance: Partial<M9Section5Finance>
+  section6_revenue: Partial<M9Section6Revenue>
+  total_word_count: number
+  page_count: number
+  validation_score: number
+  risk_flags: string[]
+  section_weaknesses: string[]
+}
+
+// Phase I lightweight commercialization discussion
+export interface Phase1CommercializationDiscussion {
+  commercial_potential: string
+  target_market_brief: string
+  competitive_advantage: string
+}
+
 // Direct Phase II Feasibility Fields
 export interface DirectPhase2Feasibility {
   preliminary_data_summary: string
@@ -247,6 +328,10 @@ export interface ProjectSchemaV2 {
   m6_budget: Partial<M6Budget>
   m7_regulatory: Partial<M7Regulatory>
   m8_compilation: Partial<M8Compilation>
+  m9_commercialization: Partial<M9CommercializationPlan>
+  
+  // Phase I lightweight commercialization
+  phase1_commercialization: Partial<Phase1CommercializationDiscussion>
   
   // Fast Track Phase-specific data
   m3_fast_track: M3FastTrack
@@ -359,8 +444,35 @@ export const MODULE_DEFINITIONS: { id: number; name: string; required_fields: st
     id: 8,
     name: 'Compilation & Review',
     required_fields: ['final_review_checklist', 'page_limit_compliance', 'format_compliance', 'submission_readiness']
+  },
+  {
+    id: 9,
+    name: 'Commercialization Director',
+    required_fields: ['section1_value', 'section2_company', 'section3_market', 'section4_ip', 'section5_finance', 'section6_revenue']
   }
 ]
+
+// NIH Commercialization Section Headings (verbatim, must be preserved)
+export const NIH_COMMERCIALIZATION_HEADINGS = [
+  '1. Value of the SBIR/STTR Project, Expected Outcomes, and Impact',
+  '2. Company',
+  '3. Market, Customer, and Competition',
+  '4. Intellectual Property Protection',
+  '5. Finance Plan',
+  '6. Revenue Stream'
+]
+
+export const COMMERCIALIZATION_PAGE_LIMITS = {
+  section1: { min: 1.5, max: 2, label: 'Value & Outcomes' },
+  section2: { min: 1, max: 1.5, label: 'Company' },
+  section3: { min: 2, max: 3, label: 'Market & Competition' },
+  section4: { min: 1, max: 1, label: 'IP Protection' },
+  section5: { min: 2, max: 3, label: 'Finance Plan' },
+  section6: { min: 2, max: 2, label: 'Revenue Stream' },
+  total: 12
+}
+
+export const WORDS_PER_PAGE = 550 // ~500-600 average
 
 // Direct Phase II Required Fields
 export const DIRECT_PHASE2_REQUIRED_FIELDS = [

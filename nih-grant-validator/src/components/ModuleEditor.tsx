@@ -560,6 +560,14 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
     const update = (field: string, value: string) => {
       onUpdate({ m5_experimental_approach: { ...data, [field]: value } })
     }
+    
+    // Phase I lightweight commercialization discussion
+    const isPhaseI = project.grant_type === 'Phase I'
+    const p1CommData = project.phase1_commercialization || {}
+    const updateP1Comm = (field: string, value: string) => {
+      onUpdate({ phase1_commercialization: { ...p1CommData, [field]: value } })
+    }
+    
     return (
       <div>
         <TextField label="Methodology Overview" value={data.methodology_overview || ''} onChange={v => update('methodology_overview', v)} required multiline />
@@ -570,6 +578,36 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
         <TextField label="Expected Results" value={data.expected_results || ''} onChange={v => update('expected_results', v)} required multiline />
         <TextField label="Potential Pitfalls" value={data.potential_pitfalls || ''} onChange={v => update('potential_pitfalls', v)} required multiline />
         <TextField label="Alternative Approaches" value={data.alternative_approaches || ''} onChange={v => update('alternative_approaches', v)} required multiline />
+        
+        {isPhaseI && (
+          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h4 className="font-semibold text-blue-800 mb-3">Commercialization Discussion (Phase I)</h4>
+            <p className="text-sm text-blue-700 mb-4">
+              While Phase I does not require a full commercialization plan, NIH reviewers expect a brief discussion of commercial potential within your Research Strategy.
+            </p>
+            <TextField 
+              label="Commercial Potential" 
+              value={p1CommData.commercial_potential || ''} 
+              onChange={v => updateP1Comm('commercial_potential', v)} 
+              multiline 
+              placeholder="Describe the potential commercial applications of your technology"
+            />
+            <TextField 
+              label="Target Market (Brief)" 
+              value={p1CommData.target_market_brief || ''} 
+              onChange={v => updateP1Comm('target_market_brief', v)} 
+              multiline 
+              placeholder="Identify your initial target market and customer segments"
+            />
+            <TextField 
+              label="Competitive Advantage" 
+              value={p1CommData.competitive_advantage || ''} 
+              onChange={v => updateP1Comm('competitive_advantage', v)} 
+              multiline 
+              placeholder="What differentiates your solution from existing alternatives?"
+            />
+          </div>
+        )}
       </div>
     )
   }
