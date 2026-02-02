@@ -68,6 +68,12 @@ interface PackageAuditResult {
     validationResults: Record<string, { score: number; findings: { issue: string; severity: string; location: string }[] }>
     conditionalDetection: Record<string, { detected: boolean; details: string }>
   }
+  administrativeCompliance?: {
+    documents: Record<string, { estimatedPages: number; pageLimit: number; status: 'pass' | 'warning' | 'fail'; issues: string[] }>
+    summary: { pass: number; warning: number; fail: number }
+    formatReminders: string[]
+    agencyAlerts: string[]
+  }
   suggestions?: {
     prioritized_improvements: { priority: number; area: string; issue: string; suggestion: string; impact: string }[]
     quick_wins: string[]
@@ -75,6 +81,18 @@ interface PackageAuditResult {
     reviewer_tips: string[]
   }
 }
+
+const INSTITUTES = [
+  { value: '', label: 'Select Institute (Optional)' },
+  { value: 'NCI', label: 'NCI - National Cancer Institute' },
+  { value: 'NIAID', label: 'NIAID - Allergy and Infectious Diseases' },
+  { value: 'NHLBI', label: 'NHLBI - Heart, Lung, and Blood' },
+  { value: 'NINDS', label: 'NINDS - Neurological Disorders' },
+  { value: 'NIDDK', label: 'NIDDK - Diabetes and Digestive' },
+  { value: 'NIA', label: 'NIA - Aging' },
+  { value: 'NIMH', label: 'NIMH - Mental Health' },
+  { value: 'NIGMS', label: 'NIGMS - General Medical Sciences' },
+]
 
 const MECHANISMS: { value: Mechanism; label: string; description: string }[] = [
   { value: 'Phase I', label: 'Phase I', description: 'Feasibility study (up to $275K)' },
@@ -100,10 +118,11 @@ interface AuditModeProps {
 
 export function AuditMode({ onBack }: AuditModeProps) {
   const [mechanism, setMechanism] = useState<Mechanism | null>(null)
+  const [institute, setInstitute] = useState('')
   const [categories, setCategories] = useState<DocumentCategory[]>(createInitialCategories())
   const [isProcessing, setIsProcessing] = useState(false)
   const [packageAudit, setPackageAudit] = useState<PackageAuditResult | null>(null)
-  const [activeTab, setActiveTab] = useState<'individual' | 'package'>('individual')
+  const [activeTab, setActiveTab] = useState<'individual' | 'package' | 'compliance'>('individual')
   const [expandedDocs, setExpandedDocs] = useState<Set<string>>(new Set())
   const [parsingFile, setParsingFile] = useState<string | null>(null)
   const [generatingSuggestions, setGeneratingSuggestions] = useState(false)
@@ -343,7 +362,7 @@ export function AuditMode({ onBack }: AuditModeProps) {
       })
 
       const { data, error } = await supabase.functions.invoke('audit-grant', {
-        body: { documents: documentsObj, mechanism, generateSuggestions: false }
+        body: { documents: documentsObj, mechanism, institute, generateSuggestions: false }
       })
 
       if (error) throw error
@@ -373,7 +392,7 @@ export function AuditMode({ onBack }: AuditModeProps) {
       })
 
       const { data, error } = await supabase.functions.invoke('audit-grant', {
-        body: { documents: documentsObj, mechanism, generateSuggestions: true }
+        body: { documents: documentsObj, mechanism, institute, generateSuggestions: true }
       })
 
       if (error) throw error
@@ -499,6 +518,26 @@ export function AuditMode({ onBack }: AuditModeProps) {
                 ))}
               </div>
             </div>
+
+            {/* Institute Selection (Optional) */}
+            {mechanism && (
+              <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+                <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
+                  <span className="w-6 h-6 bg-neutral-300 text-white rounded-full text-sm flex items-center justify-center">*</span>
+                  Target Institute (Optional)
+                </h2>
+                <select
+                  value={institute}
+                  onChange={(e) => setInstitute(e.target.value)}
+                  className="w-full md:w-1/2 px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
+                >
+                  {INSTITUTES.map(inst => (
+                    <option key={inst.value} value={inst.value}>{inst.label}</option>
+                  ))}
+                </select>
+                <p className="text-xs text-neutral-500 mt-2">Some institutes have specific requirements. Select for tailored compliance alerts.</p>
+              </div>
+            )}
 
             {/* Document Upload */}
             {mechanism && (
@@ -742,7 +781,15 @@ export function AuditMode({ onBack }: AuditModeProps) {
                   activeTab === 'individual' ? 'bg-primary-500 text-white' : 'text-neutral-600 hover:bg-neutral-100'
                 }`}
               >
-                Individual Document Audits
+                Individual Audits
+              </button>
+              <button
+                onClick={() => setActiveTab('compliance')}
+                className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                  activeTab === 'compliance' ? 'bg-primary-500 text-white' : 'text-neutral-600 hover:bg-neutral-100'
+                }`}
+              >
+                Admin Compliance
               </button>
               <button
                 onClick={() => setActiveTab('package')}

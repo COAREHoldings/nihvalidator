@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { documents, mechanism, generateSuggestions } = await req.json();
+    const { documents, mechanism, generateSuggestions, institute } = await req.json();
 
     if (!documents || !mechanism) {
       throw new Error('Documents and mechanism are required');
@@ -20,6 +20,136 @@ Deno.serve(async (req) => {
     if (!openaiKey) {
       throw new Error('OpenAI API key not configured');
     }
+
+    // NIH Page limits by document type and mechanism
+    const pageLimits: Record<string, Record<string, number>> = {
+      'specific_aims': { 'Phase I': 1, 'Phase II': 1, 'Direct-to-Phase II': 1, 'Fast Track': 1, 'Phase IIB': 1 },
+      'research_strategy': { 'Phase I': 6, 'Phase II': 12, 'Direct-to-Phase II': 12, 'Fast Track': 12, 'Phase IIB': 12 },
+      'commercialization_plan': { 'Phase I': 0, 'Phase II': 12, 'Direct-to-Phase II': 12, 'Fast Track': 12, 'Phase IIB': 12 },
+      'biosketches': { 'Phase I': 5, 'Phase II': 5, 'Direct-to-Phase II': 5, 'Fast Track': 5, 'Phase IIB': 5 },
+      'budget': { 'Phase I': 999, 'Phase II': 999, 'Direct-to-Phase II': 999, 'Fast Track': 999, 'Phase IIB': 999 },
+      'letters_of_support': { 'Phase I': 999, 'Phase II': 999, 'Direct-to-Phase II': 999, 'Fast Track': 999, 'Phase IIB': 999 },
+      'milestones': { 'Phase I': 999, 'Phase II': 999, 'Direct-to-Phase II': 999, 'Fast Track': 999, 'Phase IIB': 999 },
+    };
+
+    // NIH formatting requirements
+    const formattingRequirements = {
+      minFontSize: 11,
+      allowedFonts: ['Arial', 'Helvetica', 'Palatino', 'Georgia', 'Palatino Linotype', 'Times New Roman'],
+      minMargins: 0.5, // inches
+      maxLinesPerInch: 6,
+      maxCharsPerInch: 15,
+    };
+
+    // Agency-specific alerts
+    const agencyAlerts: Record<string, string[]> = {
+      'NCI': ['NCI requires cancer relevance statement', 'Check NCI-specific review criteria for your division'],
+      'NIAID': ['NIAID has specific milestones format', 'Include pathogen/disease model justification'],
+      'NHLBI': ['NHLBI emphasizes team science approach', 'Include cardiovascular/lung/blood disease relevance'],
+      'NINDS': ['NINDS requires neurological disease model justification'],
+      'NIDDK': ['NIDDK emphasizes translational potential'],
+      'Default': [],
+    };
+
+    // Estimate page count from text (approx 3000 chars per page with standard formatting)
+    const estimatePages = (text: string): number => {
+      if (!text) return 0;
+      const charsPerPage = 3000; // Conservative estimate for 11pt font, 1-inch margins
+      return Math.ceil(text.length / charsPerPage);
+    };
+
+    // Check for formatting indicators in text
+    const checkFormattingIndicators = (text: string): { warnings: string[], detected: Record<string, boolean> } => {
+      const warnings: string[] = [];
+      const detected: Record<string, boolean> = {};
+      
+      // Check for small font indicators (numbers like 8pt, 9pt, 10pt)
+      if (/\b[89](\s*pt|point)/i.test(text)) {
+        warnings.push('Possible small font detected (below 11pt minimum)');
+        detected['smallFont'] = true;
+      }
+      
+      // Check for dense text patterns (very long lines without breaks)
+      const lines = text.split('\n');
+      const denseLines = lines.filter(l => l.length > 200).length;
+      if (denseLines > lines.length * 0.3) {
+        warnings.push('High text density detected - may exceed 15 characters per inch');
+        detected['densityIssue'] = true;
+      }
+      
+      // Check for figure/table references without clear labeling
+      const figureRefs = (text.match(/figure\s*\d+/gi) || []).length;
+      const tableRefs = (text.match(/table\s*\d+/gi) || []).length;
+      if (figureRefs > 0 || tableRefs > 0) {
+        detected['hasFigures'] = figureRefs > 0;
+        detected['hasTables'] = tableRefs > 0;
+        warnings.push(`Contains ${figureRefs} figure(s) and ${tableRefs} table(s) - ensure legibility at printed size`);
+      }
+      
+      return { warnings, detected };
+    };
+
+    // Run administrative compliance checks
+    const runComplianceChecks = (docs: Record<string, string>, mech: string) => {
+      const results: Record<string, { 
+        estimatedPages: number, 
+        pageLimit: number, 
+        status: 'pass' | 'warning' | 'fail',
+        issues: string[] 
+      }> = {};
+      
+      const overallIssues: string[] = [];
+      let passCount = 0;
+      let warningCount = 0;
+      let failCount = 0;
+
+      for (const [docType, content] of Object.entries(docs)) {
+        const limit = pageLimits[docType]?.[mech] || 999;
+        const estimated = estimatePages(content);
+        const { warnings } = checkFormattingIndicators(content);
+        const issues: string[] = [...warnings];
+        
+        let status: 'pass' | 'warning' | 'fail' = 'pass';
+        
+        if (limit < 999) {
+          if (estimated > limit) {
+            status = 'fail';
+            issues.unshift(`Estimated ${estimated} pages exceeds ${limit}-page limit`);
+            failCount++;
+          } else if (estimated > limit * 0.9) {
+            status = 'warning';
+            issues.unshift(`Near page limit: ${estimated}/${limit} pages (may be tight)`);
+            warningCount++;
+          } else {
+            passCount++;
+          }
+        } else {
+          passCount++;
+        }
+        
+        if (warnings.length > 0 && status === 'pass') {
+          status = 'warning';
+          warningCount++;
+        }
+        
+        results[docType] = { estimatedPages: estimated, pageLimit: limit, status, issues };
+      }
+
+      // Add general formatting reminders
+      overallIssues.push('Verify: Arial, Helvetica, Palatino, or Georgia font at 11pt minimum');
+      overallIssues.push('Verify: Margins at least 0.5 inches on all sides');
+      overallIssues.push('Verify: No more than 6 lines per vertical inch');
+      overallIssues.push('Verify: No more than 15 characters per horizontal inch');
+      
+      return {
+        documents: results,
+        summary: { pass: passCount, warning: warningCount, fail: failCount },
+        formatReminders: overallIssues,
+        agencyAlerts: agencyAlerts[institute] || agencyAlerts['Default'],
+      };
+    };
+
+    const complianceResults = runComplianceChecks(documents, mechanism);
 
     // Phase requirement matrix
     const requirementMatrix: Record<string, { required: string[]; recommended: string[]; conditional: Record<string, string[]> }> = {
@@ -271,6 +401,7 @@ Return a JSON object with:
       mechanism,
       requirements,
       audit: auditResult,
+      administrativeCompliance: complianceResults,
       suggestions,
       disclaimer: 'ADVISORY PRE-SUBMISSION AUDIT - This is NOT an official NIH review. Results are for guidance only.',
       timestamp: new Date().toISOString()
