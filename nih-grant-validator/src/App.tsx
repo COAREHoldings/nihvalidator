@@ -6,12 +6,17 @@ import { PriorPhaseStep } from './components/PriorPhaseStep'
 import { ChecklistStep } from './components/ChecklistStep'
 import { BudgetStep } from './components/BudgetStep'
 import { ResultsPanel } from './components/ResultsPanel'
+import { AIRefinement } from './components/AIRefinement'
 import type { GrantData, ValidationResult } from './types'
+import { ClipboardCheck, Sparkles } from 'lucide-react'
 
 const STEPS = ['Grant Type', 'Prior Phase', 'Checklist', 'Budget', 'Results']
 
+type AppMode = 'validator' | 'ai-refinement'
+
 export default function App() {
   const [started, setStarted] = useState(false)
+  const [mode, setMode] = useState<AppMode>('validator')
   const [step, setStep] = useState(0)
   const [data, setData] = useState<GrantData>({
     grantType: null,
@@ -57,7 +62,6 @@ export default function App() {
     const errors: ValidationResult['errors'] = []
     const warnings: ValidationResult['warnings'] = []
 
-    // Lifecycle validation
     if (data.grantType === 'Phase II' && !data.priorPhase.awardNumber) {
       errors.push({ code: 'LIFECYCLE_002', message: 'Missing Phase I award documentation', field: 'priorPhase.awardNumber' })
     }
@@ -68,18 +72,15 @@ export default function App() {
       errors.push({ code: 'LIFECYCLE_002', message: 'Missing non-SBIR/STTR feasibility funding documentation', field: 'priorPhase.fundingSource' })
     }
 
-    // Budget caps
     const budgetCap = data.grantType === 'Phase I' ? 275000 : data.grantType === 'Phase II' || data.grantType === 'Direct to Phase II' || data.grantType === 'Phase IIB' ? 1750000 : 275000
     if (data.budget.directCosts > budgetCap) {
       errors.push({ code: 'BUDGET_001', message: `Direct costs exceed ${data.grantType} cap of $${budgetCap.toLocaleString()}`, field: 'budget.directCosts' })
     }
 
-    // Fast Track budget (combined)
     if (data.grantType === 'Fast Track' && data.budget.directCosts > 2025000) {
       errors.push({ code: 'BUDGET_001', message: 'Fast Track combined budget exceeds $2,025,000 limit', field: 'budget.directCosts' })
     }
 
-    // SBIR percentages
     if (data.programType === 'SBIR') {
       const minPercent = data.grantType === 'Phase I' || data.grantType === 'Fast Track' ? 67 : 50
       if (data.budget.smallBusinessPercent < minPercent) {
@@ -87,7 +88,6 @@ export default function App() {
       }
     }
 
-    // STTR percentages
     if (data.programType === 'STTR') {
       if (data.budget.smallBusinessPercent < 40) {
         errors.push({ code: 'BUDGET_002', message: 'STTR requires minimum 40% small business effort', field: 'budget.smallBusinessPercent' })
@@ -97,13 +97,11 @@ export default function App() {
       }
     }
 
-    // Arithmetic check
     const calculatedTotal = data.budget.personnelCosts + data.budget.subawardCosts
     if (calculatedTotal > data.budget.directCosts) {
       errors.push({ code: 'BUDGET_003', message: 'Personnel + Subaward costs exceed total direct costs', field: 'budget' })
     }
 
-    // Structural completeness
     const requiredComponents = ['specificAims', 'researchStrategy', 'budget', 'biosketches', 'facilities']
     const phase2Components = ['progressReport', 'commercializationPlan', 'marketAnalysis']
     
@@ -129,7 +127,6 @@ export default function App() {
       })
     }
 
-    // Warnings
     if (data.budget.directCosts > budgetCap * 0.95 && data.budget.directCosts <= budgetCap) {
       warnings.push({ code: 'BUDGET_WARN', message: 'Budget is within 5% of NIH cap', field: 'budget.directCosts' })
     }
@@ -139,7 +136,6 @@ export default function App() {
   }
 
   const reset = () => {
-    setStarted(false)
     setStep(0)
     setData({
       grantType: null,
@@ -159,21 +155,41 @@ export default function App() {
     <div className="min-h-screen bg-neutral-50">
       <header className="sticky top-0 z-50 bg-white border-b border-neutral-200 h-20 flex items-center px-6">
         <h1 className="text-xl font-semibold text-neutral-900">NIH SBIR/STTR Validator</h1>
-        <button onClick={reset} className="ml-auto text-sm text-neutral-500 hover:text-neutral-900 transition-colors">
-          Reset
-        </button>
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            onClick={() => { setMode('validator'); reset() }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${mode === 'validator' ? 'bg-primary-500 text-white' : 'text-neutral-600 hover:bg-neutral-100'}`}
+          >
+            <ClipboardCheck className="w-4 h-4" />
+            <span className="hidden sm:inline">Validator</span>
+          </button>
+          <button
+            onClick={() => setMode('ai-refinement')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${mode === 'ai-refinement' ? 'bg-primary-500 text-white' : 'text-neutral-600 hover:bg-neutral-100'}`}
+          >
+            <Sparkles className="w-4 h-4" />
+            <span className="hidden sm:inline">AI Refinement</span>
+          </button>
+        </div>
       </header>
 
       <main className="container max-w-4xl mx-auto py-12 px-6">
-        <Stepper steps={STEPS} current={step} skipStep={!needsPriorPhase ? 1 : undefined} />
-
-        <div className="mt-12 bg-white rounded-lg shadow-card p-8 md:p-16">
-          {step === 0 && <GrantTypeStep data={data} updateData={updateData} onNext={goNext} />}
-          {step === 1 && <PriorPhaseStep data={data} updateData={updateData} onNext={goNext} onBack={goBack} />}
-          {step === 2 && <ChecklistStep data={data} updateData={updateData} onNext={goNext} onBack={goBack} />}
-          {step === 3 && <BudgetStep data={data} updateData={updateData} onNext={goNext} onBack={goBack} />}
-          {step === 4 && validationResult && <ResultsPanel result={validationResult} onReset={reset} />}
-        </div>
+        {mode === 'ai-refinement' ? (
+          <div className="bg-white rounded-lg shadow-card p-8 md:p-16">
+            <AIRefinement />
+          </div>
+        ) : (
+          <>
+            <Stepper steps={STEPS} current={step} skipStep={!needsPriorPhase ? 1 : undefined} />
+            <div className="mt-12 bg-white rounded-lg shadow-card p-8 md:p-16">
+              {step === 0 && <GrantTypeStep data={data} updateData={updateData} onNext={goNext} />}
+              {step === 1 && <PriorPhaseStep data={data} updateData={updateData} onNext={goNext} onBack={goBack} />}
+              {step === 2 && <ChecklistStep data={data} updateData={updateData} onNext={goNext} onBack={goBack} />}
+              {step === 3 && <BudgetStep data={data} updateData={updateData} onNext={goNext} onBack={goBack} />}
+              {step === 4 && validationResult && <ResultsPanel result={validationResult} onReset={reset} />}
+            </div>
+          </>
+        )}
       </main>
     </div>
   )

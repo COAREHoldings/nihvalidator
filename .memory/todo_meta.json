@@ -19,7 +19,7 @@
         "id": "3",
         "content": "Add Option C - AI Refinement Features",
         "details": "LLM integration for narrative feedback, section scoring (requires API key)",
-        "status": "pending",
+        "status": "completed",
         "priority": "medium"
       }
     }
