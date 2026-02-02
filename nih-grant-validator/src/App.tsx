@@ -9,8 +9,9 @@ import { CommercializationDirector } from './components/CommercializationDirecto
 import type { ProjectSchemaV2, ValidationResult } from './types'
 import { INSTITUTE_BUDGET_CAPS } from './types'
 import { createNewProject, updateModuleStates, runFullValidation, checkAIGating, getBudgetCap } from './validation'
-import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, Briefcase, Upload } from 'lucide-react'
+import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, Briefcase, Upload, FileText } from 'lucide-react'
 import { DocumentImport } from './components/DocumentImport'
+import { SpecificAimsGenerator } from './components/SpecificAimsGenerator'
 
 type AppMode = 'modules' | 'ai-refinement' | 'results'
 type ConfigTab = 'grant-type' | 'lifecycle'
@@ -24,6 +25,7 @@ export default function App() {
   const [project, setProject] = useState<ProjectSchemaV2>(() => createNewProject())
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const [showImport, setShowImport] = useState(false)
+  const [showAimsGenerator, setShowAimsGenerator] = useState(false)
 
   // Update module states when project changes
   useEffect(() => {
@@ -69,6 +71,38 @@ export default function App() {
   const showCommercializationModule = project.grant_type && ['Phase II', 'Fast Track', 'Direct to Phase II', 'Phase IIB'].includes(project.grant_type)
   const isPhaseI = project.grant_type === 'Phase I'
   const totalModules = showCommercializationModule ? 9 : 8
+
+  // Check if Modules 1-4 are complete (required for Specific Aims generation)
+  const checkModules1to4Complete = (): boolean => {
+    const isFastTrack = project.grant_type === 'Fast Track'
+    
+    // Module 1: Title & Concept - must have key fields
+    const m1Complete = !!(project.m1_title_concept.project_title && 
+      project.m1_title_concept.problem_statement && 
+      project.m1_title_concept.proposed_solution)
+    
+    // Module 2: Hypothesis - must have key fields
+    const m2Complete = !!(project.m2_hypothesis.central_hypothesis && 
+      project.m2_hypothesis.supporting_rationale)
+    
+    // Module 3: Specific Aims - check based on grant type
+    let m3Complete = false
+    if (isFastTrack) {
+      // For Fast Track, check phase-specific aims
+      const phase1Has = !!(project.m3_fast_track.phase1.aim1_statement || project.m3_specific_aims.aim1_statement)
+      const phase2Has = !!(project.m3_fast_track.phase2.aim1_statement)
+      m3Complete = phase1Has || phase2Has
+    } else {
+      m3Complete = !!(project.m3_specific_aims.aim1_statement)
+    }
+    
+    // Module 4: Team - must have PI info
+    const m4Complete = !!(project.m4_team_mapping.pi_name)
+    
+    return m1Complete && m2Complete && m3Complete && m4Complete
+  }
+  
+  const canGenerateAims = configComplete && checkModules1to4Complete()
 
   if (!started) {
     return <Hero onStart={() => setStarted(true)} />
@@ -232,10 +266,21 @@ export default function App() {
               )}
             </div>
 
+            {/* Generate Specific Aims Button */}
+            <button
+              onClick={() => setShowAimsGenerator(true)}
+              disabled={!canGenerateAims}
+              className="mt-6 w-full px-4 py-3 bg-indigo-500 text-white font-semibold rounded-lg hover:bg-indigo-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              title={!canGenerateAims ? 'Complete Modules 1-4 to generate Specific Aims' : 'Generate NIH Specific Aims page'}
+            >
+              <FileText className="w-5 h-5" />
+              Generate Specific Aims
+            </button>
+
             <button
               onClick={runValidation}
               disabled={!canValidate}
-              className="mt-6 w-full px-4 py-3 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="mt-3 w-full px-4 py-3 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <FileCheck className="w-5 h-5" />
               Run Validation
@@ -448,6 +493,13 @@ export default function App() {
         <DocumentImport
           onImport={updateProject}
           onClose={() => setShowImport(false)}
+        />
+      )}
+
+      {showAimsGenerator && (
+        <SpecificAimsGenerator
+          project={project}
+          onClose={() => setShowAimsGenerator(false)}
         />
       )}
     </div>
