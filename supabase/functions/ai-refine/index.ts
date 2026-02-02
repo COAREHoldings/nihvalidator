@@ -12,10 +12,10 @@ Deno.serve(async (req) => {
     }
 
     try {
-        const { action, text, sectionType, grantType } = await req.json();
+        const { action, text, fieldName, fieldContext, sectionType, grantType, moduleContext } = await req.json();
 
-        if (!action || !text) {
-            throw new Error('Action and text are required');
+        if (!action) {
+            throw new Error('Action is required');
         }
 
         const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -27,6 +27,84 @@ Deno.serve(async (req) => {
         let userPrompt = '';
 
         switch (action) {
+            case 'field_suggest':
+                systemPrompt = `You are an expert NIH SBIR/STTR grant writing consultant. Analyze the provided field content and suggest an improved version.
+
+Your suggestions should:
+- Maintain the original intent and key information
+- Improve clarity, conciseness, and impact
+- Use language appropriate for NIH grant applications
+- Align with NIH review criteria
+- Be specific and actionable
+
+Format your response as JSON:
+{
+  "suggestion": "The improved text for this field",
+  "rationale": "Brief explanation of what was improved (2-3 sentences)",
+  "confidence": "high" | "medium" | "low"
+}`;
+                userPrompt = `Field: ${fieldName || 'Unknown'}
+Section Context: ${sectionType || 'General'}
+Grant Type: ${grantType || 'Phase I'}
+${fieldContext ? `Field Description: ${fieldContext}` : ''}
+${moduleContext ? `Related Module Content: ${moduleContext}` : ''}
+
+Current content to improve:
+${text || '(empty)'}`;
+                break;
+
+            case 'draft_generate':
+                systemPrompt = `You are an expert NIH SBIR/STTR grant writing consultant. Generate a first draft for the specified field based on the provided context.
+
+Your draft should:
+- Be appropriate for the field type and NIH requirements
+- Use professional scientific language
+- Be comprehensive but concise
+- Follow NIH grant writing best practices
+- Include placeholders like [SPECIFIC DETAIL] where user input is needed
+
+Format your response as JSON:
+{
+  "draft": "The generated draft content",
+  "notes": "Brief guidance on what the user should customize (2-3 bullet points)",
+  "placeholders": ["List of placeholders that need user input"]
+}`;
+                userPrompt = `Generate a draft for:
+Field: ${fieldName || 'Unknown'}
+Section: ${sectionType || 'General'}
+Grant Type: ${grantType || 'Phase I'}
+${fieldContext ? `Field Requirements: ${fieldContext}` : ''}
+${moduleContext ? `Context from other modules:\n${moduleContext}` : ''}`;
+                break;
+
+            case 'compliance_check':
+                systemPrompt = `You are an NIH SBIR/STTR compliance expert. Review the text for compliance issues as the user types.
+
+Check for:
+1. Prohibited language (funding guarantees, certainty statements)
+2. Overstatements or unsupported claims
+3. Inappropriate terminology
+4. Missing required elements
+
+Format response as JSON:
+{
+  "issues": [
+    {
+      "text": "The problematic phrase",
+      "problem": "Why it's problematic",
+      "suggestion": "How to fix it",
+      "severity": "error" | "warning" | "info"
+    }
+  ],
+  "isCompliant": true | false
+}`;
+                userPrompt = `Field: ${fieldName || 'Unknown'}
+Grant Type: ${grantType || 'Phase I'}
+
+Text to check:
+${text || ''}`;
+                break;
+
             case 'refine':
                 systemPrompt = `You are an expert NIH SBIR/STTR grant writing consultant. Analyze the provided grant section and provide specific, actionable improvement suggestions. Focus on:
 - Clarity and conciseness
