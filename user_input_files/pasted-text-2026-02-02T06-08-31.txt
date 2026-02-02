@@ -1,0 +1,334 @@
+# MINIMAX ENGINEERING SPECIFICATION
+
+## Grant Audit Engine (Phase I, Phase II, Fast Track, Phase IIB)
+
+### Project: GrantMother / GrantMaster
+
+---
+
+## OBJECTIVE
+
+Build a Grant Audit Engine that allows users to upload completed or partially completed grant applications (Phase I, Phase II, Fast Track, Phase IIB) for structured validation, scoring, and reviewer-style feedback.
+
+This engine is evaluation-focused, not drafting-focused.
+
+It must:
+
+1. Parse uploaded documents
+2. Map content to required NIH/SBIR structure
+3. Run phase-specific validation logic
+4. Score scientific, structural, and commercialization strength
+5. Simulate reviewer feedback
+6. Provide targeted improvement suggestions (optional)
+
+---
+
+# SYSTEM ENTRY PATH
+
+Add new dashboard option:
+
+"Upload & Validate Existing Grant"
+
+Route:
+`/modules/GrantAudit`
+
+---
+
+# PHASE 1 — DOCUMENT INGESTION & PARSING
+
+## Supported Upload Types
+
+* PDF (.pdf)
+* Word (.docx)
+* Budget spreadsheets (.xlsx)
+
+## Upload Categories
+
+User selects phase type:
+
+* Phase I
+* Phase II
+* Fast Track
+* Phase IIB
+
+User uploads:
+
+* Title Page
+* Research Strategy
+* Commercialization Plan (if applicable)
+* Budget + Justification
+* Biosketches
+* Letters of Support
+* Milestones document (if separate)
+
+---
+
+## Parsing Requirements
+
+1. Extract headings and subheadings
+
+2. Identify NIH-standard sections:
+
+   * Significance
+   * Innovation
+   * Approach
+   * Preliminary Data
+   * Statistical Analysis
+   * Milestones
+   * Commercialization Plan
+
+3. Convert extracted content into structured JSON format:
+
+{
+phase: "Phase I",
+sections: {
+significance: {...},
+innovation: {...},
+approach: {...},
+commercialization: {...},
+budget: {...}
+}
+}
+
+4. Allow manual correction if section detection fails.
+
+---
+
+# PHASE 2 — STRUCTURAL VALIDATION ENGINE
+
+Create:
+
+`/lib/grantAuditEngine.ts`
+
+This engine must:
+
+1. Detect missing required sections
+2. Identify incomplete subsections
+3. Flag structural inconsistencies
+4. Check alignment:
+
+   * Hypothesis ↔ Aims
+   * Aims ↔ Experiments
+   * Milestones ↔ Budget
+
+Return:
+
+* Missing Elements List
+* Structural Risk Flags
+* Alignment Warnings
+
+---
+
+# PHASE 3 — PHASE-SPECIFIC RULE SETS
+
+Create rule matrices per phase.
+
+## Phase I Validation Rules
+
+* Feasibility focus present
+* Clear go/no-go milestones
+* Limited but appropriate preliminary data
+* Budget within Phase I cap
+* Defined commercialization pathway
+
+## Phase II Validation Rules
+
+* Strong preliminary data included
+* Expanded validation plan
+* Regulatory awareness
+* Customer discovery evidence
+* Revenue pathway clarity
+
+## Fast Track Validation Rules
+
+* Clear Phase I → Phase II transition criteria
+* Milestone-triggered advancement
+* Integrated commercialization strategy
+* Continuity in aims and budget logic
+
+## Phase IIB Validation Rules
+
+* Evidence of partner engagement
+* Matching funds documentation
+* Advanced regulatory pathway
+* Manufacturing scale-up plan
+* Late-stage commercialization readiness
+
+Each rule set must produce weighted scoring outputs.
+
+---
+
+# SCORING FRAMEWORK
+
+## 1. Structural Completeness Score (0–100)
+
+Based on:
+
+* Required section presence (40%)
+* Logical continuity (30%)
+* Milestone clarity (30%)
+
+## 2. Scientific Rigor Score (0–100)
+
+Based on:
+
+* Hypothesis clarity (20%)
+* Aim independence (20%)
+* Experimental detail (20%)
+* Statistical adequacy (20%)
+* Risk mitigation strength (20%)
+
+## 3. Commercialization Strength Score (SBIR only)
+
+Based on:
+
+* Market definition (25%)
+* Competitive landscape (25%)
+* Customer validation (25%)
+* Revenue pathway realism (25%)
+
+## 4. Budget Compliance Score (0–100)
+
+Based on:
+
+* Budget cap compliance
+* Personnel justification
+* Subcontract allocation logic
+* Alignment with milestones
+
+---
+
+# REVIEWER SIMULATION MODE
+
+Add toggle: "Simulate Study Section"
+
+Simulate:
+
+1. Scientific Reviewer
+2. Commercialization Reviewer
+3. Budget Reviewer
+
+Each returns:
+
+* Top 3 weaknesses
+* Major funding risk
+* Overall impact score estimate
+
+No exaggerated funding probability statements allowed.
+
+---
+
+# WEAKNESS HEATMAP
+
+Visual risk display:
+
+Red → High Risk
+Yellow → Moderate Risk
+Green → Strong
+
+Categories:
+
+* Hypothesis Logic
+* Aim Structure
+* Statistical Design
+* Innovation Credibility
+* Market Validation
+* Regulatory Readiness
+* Budget Alignment
+
+---
+
+# OPTIONAL TARGETED IMPROVEMENT MODE
+
+After audit, user may enable:
+
+* Suggest targeted improvements
+* Rewrite specific sections
+* Strengthen commercialization
+* Improve statistical rigor language
+
+Rewrite must occur at section level only.
+No automatic full-document overwrite.
+
+---
+
+# CITATION SAFETY PROTOCOL
+
+Audit must:
+
+* Flag unsupported claims
+* Insert "Citation Needed" markers
+* Identify vague language such as:
+
+  * "novel"
+  * "first-in-class"
+  * "unprecedented"
+
+Strict no fabricated references policy.
+
+---
+
+# DATA STORAGE REQUIREMENT
+
+All parsed content and audit results must be stored in structured JSON.
+
+No static text-only storage.
+
+Must support:
+
+* Future re-scoring
+* Cross-version comparisons
+* Historical audit tracking
+
+---
+
+# USER FLOW
+
+User logs in →
+Selects phase →
+Uploads documents →
+System parses →
+Structural validation runs →
+Phase rule matrix applied →
+Scores generated →
+Reviewer simulation runs →
+Heatmap displayed →
+Optional targeted improvements enabled →
+Downloadable audit report generated.
+
+---
+
+# EXPORT REQUIREMENT
+
+Generate downloadable:
+
+* Audit Summary PDF
+* Detailed Risk Report
+* Section-by-section feedback
+
+Clearly label report as advisory analysis.
+
+---
+
+# NON-NEGOTIABLE RULES
+
+* No fabricated citations
+* No inflated funding probability claims
+* Scoring must be explainable
+* All feedback must remain editable
+* Maintain Supabase compatibility
+* Do not disrupt existing authentication or build modules
+
+---
+
+# STRATEGIC OUTCOME
+
+This Audit Engine transforms the platform into:
+
+A Digital Pre-Submission Study Section Simulator.
+
+It supports advanced investigators, biotech founders, consultants, and institutions seeking rigorous pre-review validation.
+
+---
+
+END OF SPECIFICATION

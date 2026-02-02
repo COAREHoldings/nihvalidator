@@ -1,9 +1,9 @@
 import type {
   ProjectSchemaV2, ProjectSchemaV1, ModuleState, ModuleStatus,
   ModuleValidationResult, AIGatingResult, LifecycleValidationResult,
-  ValidationError, ValidationResult, GrantType, FOAConfig
+  ValidationError, ValidationResult, GrantType, FOAConfig, NIHInstitute
 } from './types'
-import { MODULE_DEFINITIONS, DIRECT_PHASE2_REQUIRED_FIELDS } from './types'
+import { MODULE_DEFINITIONS, DIRECT_PHASE2_REQUIRED_FIELDS, INSTITUTE_BUDGET_CAPS } from './types'
 
 // Generate unique project ID
 function generateProjectId(): string {
@@ -34,6 +34,7 @@ export function createNewProject(): ProjectSchemaV2 {
     updated_at: now,
     grant_type: null,
     program_type: 'SBIR',
+    institute: 'Standard NIH',
     foa_config: {
       direct_phase2_allowed: true,
       fast_track_allowed: true,
@@ -300,22 +301,37 @@ export function validateLifecycle(project: ProjectSchemaV2): LifecycleValidation
   }
 }
 
+// Get budget cap for institute and grant type
+export function getBudgetCap(institute: NIHInstitute, grantType: GrantType | null, phase?: 'phase1' | 'phase2'): number {
+  const caps = INSTITUTE_BUDGET_CAPS[institute] || INSTITUTE_BUDGET_CAPS['Standard NIH']
+  
+  if (grantType === 'Phase I') return caps.phase1
+  if (grantType === 'Phase II' || grantType === 'Direct to Phase II') return caps.phase2
+  if (grantType === 'Phase IIB') return caps.phase2b || caps.phase2
+  if (grantType === 'Fast Track') {
+    if (phase === 'phase1') return caps.phase1
+    if (phase === 'phase2') return caps.phase2
+    return caps.phase1 + caps.phase2
+  }
+  return caps.phase1
+}
+
 // Budget Validation (DO NOT MODIFY calculation engine)
 export function validateBudget(project: ProjectSchemaV2): ValidationError[] {
   const errors: ValidationError[] = []
   const budget = project.legacy_budget
   const grantType = project.grant_type
+  const institute = project.institute || 'Standard NIH'
   
-  const budgetCap = grantType === 'Phase I' ? 275000 
-    : (grantType === 'Phase II' || grantType === 'Direct to Phase II' || grantType === 'Phase IIB') ? 1750000 
-    : 275000
+  const budgetCap = getBudgetCap(institute, grantType)
   
   if (budget.directCosts > budgetCap) {
-    errors.push({ code: 'BUDGET_001', message: `Direct costs exceed ${grantType} cap of $${budgetCap.toLocaleString()}`, field: 'budget.directCosts' })
+    errors.push({ code: 'BUDGET_001', message: `Direct costs exceed ${institute} ${grantType} cap of $${budgetCap.toLocaleString()}`, field: 'budget.directCosts' })
   }
   
-  if (grantType === 'Fast Track' && budget.directCosts > 2025000) {
-    errors.push({ code: 'BUDGET_001', message: 'Fast Track combined budget exceeds $2,025,000 limit', field: 'budget.directCosts' })
+  const fastTrackCap = getBudgetCap(institute, 'Fast Track')
+  if (grantType === 'Fast Track' && budget.directCosts > fastTrackCap) {
+    errors.push({ code: 'BUDGET_001', message: `Fast Track combined budget exceeds ${institute} limit of $${fastTrackCap.toLocaleString()}`, field: 'budget.directCosts' })
   }
   
   if (project.program_type === 'SBIR') {
@@ -358,10 +374,11 @@ export function runFullValidation(project: ProjectSchemaV2): ValidationResult {
   const warnings: ValidationError[] = []
   const budget = project.legacy_budget
   const grantType = project.grant_type
-  const budgetCap = grantType === 'Phase I' ? 275000 : 1750000
+  const institute = project.institute || 'Standard NIH'
+  const budgetCap = getBudgetCap(institute, grantType)
   
   if (budget.directCosts > budgetCap * 0.95 && budget.directCosts <= budgetCap) {
-    warnings.push({ code: 'BUDGET_WARN', message: 'Budget is within 5% of NIH cap', field: 'budget.directCosts' })
+    warnings.push({ code: 'BUDGET_WARN', message: `Budget is within 5% of ${institute} cap`, field: 'budget.directCosts' })
   }
   
   const criticalErrors = allErrors.filter(e => e.severity === 'critical' || !e.severity)

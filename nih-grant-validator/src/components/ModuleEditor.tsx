@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { ProjectSchemaV2, ModuleState, M3SpecificAims, M5ExperimentalApproach, M6Budget, M7Regulatory, M7Phase2Additional } from '../types'
 import { MODULE_DEFINITIONS } from '../types'
+import { getBudgetCap } from '../validation'
 import { Plus, Trash2, AlertTriangle, Lock, CheckCircle } from 'lucide-react'
 
 interface Props {
@@ -425,11 +426,13 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
 
   // Module 6: Budget - with Fast Track phases
   const renderM6 = () => {
+    const institute = project.institute || 'Standard NIH'
+    
     if (isFastTrack) {
       const ftData = project.m6_fast_track
       const currentPhaseData = phaseTab === 'phase1' ? ftData.phase1 : ftData.phase2
       const phase1Complete = checkPhase1Fields(ftData.phase1)
-      const budgetCap = phaseTab === 'phase1' ? 275000 : 1750000
+      const budgetCap = getBudgetCap(institute, 'Fast Track', phaseTab as 'phase1' | 'phase2')
 
       const updateField = (field: string, value: number | string) => {
         const updatedPhase = { ...currentPhaseData, [field]: value }
@@ -455,13 +458,13 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
           <div className="flex items-center gap-2 mb-4">
             <PhaseIndicator phase={phaseTab === 'phase1' ? 'I' : 'II'} />
             <span className="text-sm text-neutral-600">
-              Budget cap: <strong>${budgetCap.toLocaleString()}</strong>
+              {institute} Budget cap: <strong>${budgetCap.toLocaleString()}</strong>
             </span>
           </div>
           {(currentPhaseData.direct_costs_total || 0) > budgetCap && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-800">
               <AlertTriangle className="w-4 h-4" />
-              Budget exceeds {phaseTab === 'phase1' ? 'Phase I' : 'Phase II'} cap of ${budgetCap.toLocaleString()}
+              Budget exceeds {institute} {phaseTab === 'phase1' ? 'Phase I' : 'Phase II'} cap of ${budgetCap.toLocaleString()}
             </div>
           )}
           <NumberField label="Total Direct Costs" value={currentPhaseData.direct_costs_total || 0} onChange={v => updateField('direct_costs_total', v)} required prefix="$" max={budgetCap} />
@@ -482,6 +485,7 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
     // Non-Fast Track
     const data = project.m6_budget
     const legacy = project.legacy_budget
+    const budgetCap = getBudgetCap(institute, project.grant_type)
     const updateField = (field: string, value: number | string) => {
       onUpdate({ 
         m6_budget: { ...data, [field]: value },
@@ -497,7 +501,18 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
     }
     return (
       <div>
-        <NumberField label="Total Direct Costs" value={data.direct_costs_total || legacy.directCosts || 0} onChange={v => updateField('direct_costs_total', v)} required prefix="$" />
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <span className="text-sm text-blue-800">
+            {institute} {project.grant_type} budget cap: <strong>${budgetCap.toLocaleString()}</strong>
+          </span>
+        </div>
+        {(data.direct_costs_total || legacy.directCosts || 0) > budgetCap && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-800">
+            <AlertTriangle className="w-4 h-4" />
+            Budget exceeds {institute} {project.grant_type} cap of ${budgetCap.toLocaleString()}
+          </div>
+        )}
+        <NumberField label="Total Direct Costs" value={data.direct_costs_total || legacy.directCosts || 0} onChange={v => updateField('direct_costs_total', v)} required prefix="$" max={budgetCap} />
         <NumberField label="Personnel Costs" value={data.personnel_costs || legacy.personnelCosts || 0} onChange={v => updateField('personnel_costs', v)} required prefix="$" />
         <NumberField label="Equipment Costs" value={data.equipment_costs || 0} onChange={v => updateField('equipment_costs', v)} prefix="$" />
         <NumberField label="Supplies Costs" value={data.supplies_costs || 0} onChange={v => updateField('supplies_costs', v)} prefix="$" />

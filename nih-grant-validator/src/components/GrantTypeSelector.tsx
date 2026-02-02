@@ -1,26 +1,33 @@
-import type { GrantType, ProgramType, FOAConfig, ProjectSchemaV2 } from '../types'
-import { FileText, Rocket, Zap, Target, Award } from 'lucide-react'
+import type { GrantType, ProgramType, ProjectSchemaV2, NIHInstitute } from '../types'
+import { NIH_INSTITUTES, INSTITUTE_BUDGET_CAPS } from '../types'
+import { FileText, Rocket, Zap, Target, Award, Building2 } from 'lucide-react'
 
 interface Props {
   project: ProjectSchemaV2
   onUpdate: (updates: Partial<ProjectSchemaV2>) => void
 }
 
-const GRANT_TYPES: { type: GrantType; icon: typeof FileText; title: string; desc: string }[] = [
-  { type: 'Phase I', icon: FileText, title: 'Phase I', desc: 'Initial feasibility study ($275K cap)' },
-  { type: 'Phase II', icon: Target, title: 'Phase II', desc: 'Full R&D from Phase I success ($1.75M cap)' },
-  { type: 'Fast Track', icon: Zap, title: 'Fast Track', desc: 'Combined Phase I & II application' },
-  { type: 'Direct to Phase II', icon: Rocket, title: 'Direct to Phase II', desc: 'Skip Phase I with prior feasibility proof' },
-  { type: 'Phase IIB', icon: Award, title: 'Phase IIB', desc: 'Continuation from Phase II success' },
+const GRANT_TYPES: { type: GrantType; icon: typeof FileText; title: string; getDesc: (institute: NIHInstitute) => string }[] = [
+  { type: 'Phase I', icon: FileText, title: 'Phase I', getDesc: (inst) => `Initial feasibility study ($${(INSTITUTE_BUDGET_CAPS[inst].phase1 / 1000).toFixed(0)}K cap)` },
+  { type: 'Phase II', icon: Target, title: 'Phase II', getDesc: (inst) => `Full R&D from Phase I success ($${(INSTITUTE_BUDGET_CAPS[inst].phase2 / 1000000).toFixed(2)}M cap)` },
+  { type: 'Fast Track', icon: Zap, title: 'Fast Track', getDesc: () => 'Combined Phase I & II application' },
+  { type: 'Direct to Phase II', icon: Rocket, title: 'Direct to Phase II', getDesc: () => 'Skip Phase I with prior feasibility proof' },
+  { type: 'Phase IIB', icon: Award, title: 'Phase IIB', getDesc: (inst) => {
+    const cap = INSTITUTE_BUDGET_CAPS[inst].phase2b
+    return cap ? `Continuation from Phase II ($${(cap / 1000000).toFixed(1)}M cap)` : 'Continuation from Phase II success'
+  }},
 ]
 
 export function GrantTypeSelector({ project, onUpdate }: Props) {
   const foa = project.foa_config
+  const institute = project.institute || 'Standard NIH'
+  const caps = INSTITUTE_BUDGET_CAPS[institute]
   
   const isTypeAllowed = (type: GrantType) => {
     if (type === 'Direct to Phase II' && !foa.direct_phase2_allowed) return false
     if (type === 'Fast Track' && !foa.fast_track_allowed) return false
     if (type === 'Phase IIB' && !foa.phase2b_allowed) return false
+    if (type === 'Phase IIB' && !caps.phase2b) return false
     return true
   }
 
@@ -51,8 +58,41 @@ export function GrantTypeSelector({ project, onUpdate }: Props) {
         </div>
       </div>
 
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-neutral-700 mb-2">
+          <Building2 className="w-4 h-4 inline mr-1" />
+          NIH Institute
+        </label>
+        <select
+          value={institute}
+          onChange={e => onUpdate({ institute: e.target.value as NIHInstitute })}
+          className="w-full p-3 border border-neutral-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          {NIH_INSTITUTES.map(inst => (
+            <option key={inst.code} value={inst.code}>
+              {inst.code} - {inst.name}
+            </option>
+          ))}
+        </select>
+        {institute === 'NCI' && (
+          <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800 font-medium">NCI has higher budget caps:</p>
+            <ul className="text-sm text-blue-700 mt-1">
+              <li>Phase I: $400,000 (vs standard $275,000)</li>
+              <li>Phase II: $2,000,000 (vs standard $1,750,000)</li>
+              <li>Phase IIB: $4,500,000</li>
+            </ul>
+          </div>
+        )}
+        {institute !== 'NCI' && institute !== 'Standard NIH' && (
+          <p className="text-xs text-neutral-500 mt-2">
+            Using standard NIH budget caps: Phase I $275K, Phase II $1.75M
+          </p>
+        )}
+      </div>
+
       <div className="space-y-3">
-        {GRANT_TYPES.map(({ type, icon: Icon, title, desc }) => {
+        {GRANT_TYPES.map(({ type, icon: Icon, title, getDesc }) => {
           const allowed = isTypeAllowed(type)
           const selected = project.grant_type === type
           return (
@@ -71,10 +111,12 @@ export function GrantTypeSelector({ project, onUpdate }: Props) {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-neutral-900">{title}</h3>
-                  <p className="text-sm text-neutral-500">{desc}</p>
+                  <p className="text-sm text-neutral-500">{getDesc(institute)}</p>
                 </div>
                 {!allowed && (
-                  <span className="text-xs text-neutral-400 bg-neutral-100 px-2 py-1 rounded">Not allowed by FOA</span>
+                  <span className="text-xs text-neutral-400 bg-neutral-100 px-2 py-1 rounded">
+                    {type === 'Phase IIB' && !caps.phase2b ? 'Not available for this institute' : 'Not allowed by FOA'}
+                  </span>
                 )}
               </div>
             </button>
