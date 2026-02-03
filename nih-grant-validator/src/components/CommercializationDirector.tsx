@@ -3,8 +3,8 @@ import type { ProjectSchemaV2, M9CommercializationPlan, GrantType } from '../typ
 import { NIH_COMMERCIALIZATION_HEADINGS, COMMERCIALIZATION_PAGE_LIMITS, WORDS_PER_PAGE } from '../types'
 import { Sparkles, Loader2, Check, X, AlertTriangle, FileText, Download, ChevronDown, ChevronRight, Shield, TrendingUp } from 'lucide-react'
 
-const SUPABASE_URL = 'https://dvuhtfzsvcacyrlfettz.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2dWh0ZnpzdmNhY3lybGZldHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDk3OTYsImV4cCI6MjA4NTIyNTc5Nn0.vUtnPXeQrzU0kO0E7qK2qJtZ_RCqnXCEFSa60adHld0'
+const SUPABASE_URL = 'https://raqkwtjsxohnhtcacakb.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhcWt3dGpzeG9obmh0Y2FjYWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDIyNTQsImV4cCI6MjA4NTI3ODI1NH0.pDpNp4UlpCinhi6gl2qtKhT3t20uUGHU_FUxTxYjttI'
 
 interface Props {
   project: ProjectSchemaV2
