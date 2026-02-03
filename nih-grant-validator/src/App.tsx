@@ -2,20 +2,20 @@ import { useState, useCallback, useEffect } from 'react'
 import { Hero } from './components/Hero'
 import { ModuleNav } from './components/ModuleNav'
 import { ModuleEditor } from './components/ModuleEditor'
-import { GrantTypeSelector } from './components/GrantTypeSelector'
+import { ProjectCreationWizard } from './components/ProjectCreationWizard'
 import { PriorPhaseEditor } from './components/PriorPhaseEditor'
 import { AIRefinement } from './components/AIRefinement'
 import { CommercializationDirector } from './components/CommercializationDirector'
 import { AuditMode } from './components/AuditMode'
 import type { ProjectSchemaV2, ValidationResult } from './types'
-import { INSTITUTE_BUDGET_CAPS } from './types'
-import { createNewProject, updateModuleStates, runFullValidation, checkAIGating, getBudgetCap } from './validation'
+import { getBudgetCapForPhase, getInstituteConfig } from './compliance'
+import { updateModuleStates, runFullValidation, checkAIGating } from './validation'
 import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, ChevronLeft, Briefcase, Upload, FileText, Home, Menu, X, BookOpen, FileOutput, ListOrdered, AlertCircle } from 'lucide-react'
 import { DocumentImport } from './components/DocumentImport'
 import { SpecificAimsGenerator } from './components/SpecificAimsGenerator'
 
 type AppMode = 'modules' | 'ai-refinement' | 'results'
-type ConfigTab = 'grant-type' | 'lifecycle'
+type ConfigTab = 'lifecycle' | 'overview'
 type MainView = 'home' | 'build' | 'audit'
 
 export default function App() {
@@ -23,9 +23,10 @@ export default function App() {
   const [started, setStarted] = useState(false)
   const [mode, setMode] = useState<AppMode>('modules')
   const [activeModule, setActiveModule] = useState(1)
-  const [configTab, setConfigTab] = useState<ConfigTab>('grant-type')
-  const [showConfig, setShowConfig] = useState(true)
-  const [project, setProject] = useState<ProjectSchemaV2>(() => createNewProject())
+  const [configTab, setConfigTab] = useState<ConfigTab>('overview')
+  const [showConfig, setShowConfig] = useState(false) // Start with config hidden since wizard handles it
+  const [project, setProject] = useState<ProjectSchemaV2 | null>(null)
+  const [showWizard, setShowWizard] = useState(false)
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const [showImport, setShowImport] = useState(false)
   const [showAimsGenerator, setShowAimsGenerator] = useState(false)
@@ -37,28 +38,33 @@ export default function App() {
 
   // Update module states when project changes
   useEffect(() => {
+    if (!project) return
     const updatedStates = updateModuleStates(project)
     if (JSON.stringify(updatedStates) !== JSON.stringify(project.module_states)) {
-      setProject(prev => ({ ...prev, module_states: updatedStates, updated_at: new Date().toISOString() }))
+      setProject(prev => prev ? { ...prev, module_states: updatedStates, updated_at: new Date().toISOString() } : null)
     }
-  }, [project.m1_title_concept, project.m2_hypothesis, project.m3_specific_aims, project.m4_team_mapping, project.m5_experimental_approach, project.m6_budget, project.m7_regulatory, project.m8_compilation])
+  }, [project?.m1_title_concept, project?.m2_hypothesis, project?.m3_specific_aims, project?.m4_team_mapping, project?.m5_experimental_approach, project?.m6_budget, project?.m7_regulatory, project?.m8_compilation])
 
   const updateProject = useCallback((updates: Partial<ProjectSchemaV2>) => {
-    setProject(prev => ({ ...prev, ...updates, updated_at: new Date().toISOString() }))
+    setProject(prev => prev ? { ...prev, ...updates, updated_at: new Date().toISOString() } : null)
   }, [])
 
   const runValidation = () => {
+    if (!project) return
     const result = runFullValidation(project)
     setValidationResult(result)
     setMode('results')
   }
 
   const reset = () => {
-    setProject(createNewProject())
+    setProject(null)
     setValidationResult(null)
     setMode('modules')
     setActiveModule(1)
-    setShowConfig(true)
+    setShowConfig(false)
+    setStarted(false)
+    setMainView('home')
+    setShowWizard(true) // Show wizard to create a new project
   }
 
   const startModules = () => {
@@ -68,6 +74,7 @@ export default function App() {
 
   // Check if current module is incomplete
   const getCurrentModuleMissingFields = () => {
+    if (!project) return []
     const currentState = project.module_states.find(m => m.module_id === activeModule)
     if (!currentState) return []
     const missing = currentState.required_fields.filter(f => !currentState.completed_fields.includes(f))
@@ -113,22 +120,24 @@ export default function App() {
     setPendingNavigation(null)
   }
 
-  const aiGating = checkAIGating(project)
-  const overallProgress = project.module_states.filter(m => m.status === 'complete').length
-  const configComplete = project.grant_type !== null
-  const canValidate = configComplete
+  const aiGating = project ? checkAIGating(project) : { allowed: false, missing_modules: [], missing_fields: [] }
+  const overallProgress = project ? project.module_states.filter(m => m.status === 'complete').length : 0
+  const configComplete = project?.grant_type !== null && project?.grant_type !== undefined
+  const canValidate = configComplete && project !== null
 
   // Get budget cap for display
-  const institute = project.institute || 'Standard NIH'
-  const budgetCap = project.grant_type ? getBudgetCap(institute, project.grant_type) : 0
+  const institute = project?.institute || 'Standard NIH'
+  const budgetCap = project?.grant_type ? getBudgetCapForPhase(institute, project.grant_type) : 0
+  const instituteConfig = getInstituteConfig(institute)
 
   // Check if commercialization module should be visible
-  const showCommercializationModule = project.grant_type && ['Phase II', 'Fast Track', 'Direct to Phase II', 'Phase IIB'].includes(project.grant_type)
-  const isPhaseI = project.grant_type === 'Phase I'
+  const showCommercializationModule = project?.grant_type && ['Phase II', 'Fast Track', 'Direct to Phase II', 'Phase IIB'].includes(project.grant_type)
+  const isPhaseI = project?.grant_type === 'Phase I'
   const totalModules = showCommercializationModule ? 9 : 8
 
   // Check if Modules 1-4 are complete (required for Specific Aims generation)
   const checkModules1to4Complete = (): boolean => {
+    if (!project) return false
     const isFastTrack = project.grant_type === 'Fast Track'
     
     // Module 1: Title & Concept - must have key fields
@@ -159,13 +168,38 @@ export default function App() {
   
   const canGenerateAims = configComplete && checkModules1to4Complete()
 
+  // Handler for when wizard completes
+  const handleWizardComplete = (newProject: ProjectSchemaV2) => {
+    setProject(newProject)
+    setShowWizard(false)
+    setStarted(true)
+    setMainView('build')
+    setShowConfig(false)
+    setActiveModule(1)
+  }
+
+  // Handler for when wizard is cancelled
+  const handleWizardCancel = () => {
+    setShowWizard(false)
+  }
+
+  // Handler for "Get Started" - show wizard
+  const handleGetStarted = () => {
+    setShowWizard(true)
+  }
+
   // Show audit mode
   if (mainView === 'audit') {
     return <AuditMode onBack={() => setMainView('home')} />
   }
 
+  // Show wizard if active
+  if (showWizard) {
+    return <ProjectCreationWizard onComplete={handleWizardComplete} onCancel={handleWizardCancel} />
+  }
+
   if (!started && mainView === 'home') {
-    return <Hero onStart={() => { setStarted(true); setMainView('build') }} onAudit={() => setMainView('audit')} />
+    return <Hero onStart={handleGetStarted} onAudit={() => setMainView('audit')} />
   }
 
   const exportJSON = () => {
@@ -332,12 +366,12 @@ export default function App() {
         )}
 
         {/* Module Navigation Bar (when in modules mode) */}
-        {mode === 'modules' && !showConfig && configComplete && (
+        {mode === 'modules' && !showConfig && configComplete && project && (
           <div className="bg-neutral-50 border-t border-neutral-100">
             {/* Current Module Title */}
             <div className="h-10 flex items-center justify-center px-4 border-b border-neutral-100">
               <span className="text-sm font-semibold text-primary-700">
-                Module {activeModule}: {project.module_states[activeModule - 1]?.name || 'Unknown'}
+                Module {activeModule}: {project?.module_states[activeModule - 1]?.name || 'Unknown'}
               </span>
             </div>
             {/* Navigation Controls */}
@@ -356,9 +390,9 @@ export default function App() {
               {/* Module Pills with Labels */}
               <div className="flex items-center gap-1 overflow-x-auto max-w-[60%] scrollbar-hide">
                 {Array.from({ length: totalModules }, (_, i) => i + 1).map(num => {
-                  const moduleName = project.module_states[num - 1]?.name || `Module ${num}`;
+                  const moduleName = project?.module_states[num - 1]?.name || `Module ${num}`;
                   const shortName = moduleName.split(' ').slice(0, 2).join(' ');
-                  const isComplete = project.module_states[num - 1]?.status === 'complete';
+                  const isComplete = project?.module_states[num - 1]?.status === 'complete';
                   return (
                     <button
                       key={num}
@@ -450,7 +484,7 @@ export default function App() {
                 </span>
                 <p className={`text-xs ${configComplete ? 'text-green-600' : 'text-amber-600'}`}>
                   {configComplete 
-                    ? `${project.grant_type} | ${institute}` 
+                    ? `${project?.grant_type} | ${institute}` 
                     : 'Select grant type to continue'}
                 </p>
               </div>
@@ -464,7 +498,7 @@ export default function App() {
                 </div>
               )}
               <ModuleNav 
-                modules={project.module_states.filter(m => showCommercializationModule ? true : m.module_id <= 8)} 
+                modules={(project?.module_states || []).filter(m => showCommercializationModule ? true : m.module_id <= 8)} 
                 activeModule={activeModule} 
                 onSelectModule={id => handleModuleNavigation(id)} 
               />
@@ -647,14 +681,14 @@ export default function App() {
                   <select
                     value={showConfig ? '' : activeModule}
                     onChange={e => { setShowConfig(false); setActiveModule(Number(e.target.value)) }}
-                    disabled={!configComplete}
+                    disabled={!configComplete || !project}
                     className="flex-1 p-3 border border-neutral-200 rounded-lg text-sm disabled:opacity-50"
                   >
-                    {project.module_states.map(m => (
+                    {project?.module_states.map(m => (
                       <option key={m.module_id} value={m.module_id} disabled={m.locked}>
                         M{m.module_id}: {m.name} ({m.status})
                       </option>
-                    ))}
+                    )) || <option value="">No project</option>}
                   </select>
                 </div>
                 <button onClick={runValidation} disabled={!canValidate} className="w-full px-4 py-3 bg-primary-500 text-white font-semibold rounded-lg disabled:opacity-50">
@@ -666,7 +700,7 @@ export default function App() {
               {!showConfig && <ConfigSummary />}
 
               <div className="bg-white rounded-lg shadow-card p-6 md:p-10">
-                {showConfig ? (
+                {showConfig && project ? (
                   <div>
                     {/* Step indicator in main content */}
                     <div className="mb-6 pb-4 border-b border-neutral-200">
@@ -674,15 +708,15 @@ export default function App() {
                         <span className="w-6 h-6 rounded-full bg-primary-500 text-white text-xs font-bold flex items-center justify-center">0</span>
                         <h2 className="text-lg font-semibold text-neutral-900">Application Configuration</h2>
                       </div>
-                      <p className="text-sm text-neutral-500 ml-8">Select your grant type and NIH institute before proceeding to modules</p>
+                      <p className="text-sm text-neutral-500 ml-8">Review your grant configuration or edit lifecycle requirements</p>
                     </div>
 
                     <div className="flex gap-2 mb-6">
                       <button
-                        onClick={() => setConfigTab('grant-type')}
-                        className={`px-4 py-2 rounded-lg font-medium text-sm ${configTab === 'grant-type' ? 'bg-primary-500 text-white' : 'bg-neutral-100 text-neutral-700'}`}
+                        onClick={() => setConfigTab('overview')}
+                        className={`px-4 py-2 rounded-lg font-medium text-sm ${configTab === 'overview' ? 'bg-primary-500 text-white' : 'bg-neutral-100 text-neutral-700'}`}
                       >
-                        Grant Type
+                        Configuration Overview
                       </button>
                       <button
                         onClick={() => setConfigTab('lifecycle')}
@@ -692,56 +726,106 @@ export default function App() {
                       </button>
                     </div>
                     
-                    {configTab === 'grant-type' && <GrantTypeSelector project={project} onUpdate={updateProject} />}
-                    {configTab === 'lifecycle' && <PriorPhaseEditor project={project} onUpdate={updateProject} />}
+                    {configTab === 'overview' && (
+                      <div className="space-y-6">
+                        {/* Configuration Overview Panel */}
+                        <div className="bg-blue-50 rounded-lg p-6 border border-blue-100">
+                          <h3 className="text-lg font-semibold text-blue-900 mb-4">Grant Configuration</h3>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <p className="text-sm text-blue-600">Program Type</p>
+                              <p className="font-semibold text-blue-900">{project.program_type}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-blue-600">Grant Type</p>
+                              <p className="font-semibold text-blue-900">{project.grant_type}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-blue-600">NIH Institute</p>
+                              <p className="font-semibold text-blue-900">{institute}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-blue-600">Budget Cap</p>
+                              <p className="font-semibold text-green-700">${budgetCap.toLocaleString()}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-blue-600">Clinical Trial</p>
+                              <p className="font-semibold text-blue-900">{project.clinical_trial_included ? 'Yes' : 'No'}</p>
+                            </div>
+                            {project.foa_number && (
+                              <div>
+                                <p className="text-sm text-blue-600">FOA Number</p>
+                                <p className="font-semibold text-blue-900">{project.foa_number}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Compliance Requirements */}
+                        <div className="bg-neutral-50 rounded-lg p-6 border border-neutral-200">
+                          <h3 className="text-lg font-semibold text-neutral-800 mb-4">Compliance Requirements</h3>
+                          <ul className="space-y-2 text-sm text-neutral-700">
+                            {(project.grant_type === 'Phase I' || project.grant_type === 'Fast Track') && (
+                              <li className="flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                                Go/No-Go criteria required for Phase II transition
+                              </li>
+                            )}
+                            {project.grant_type !== 'Phase I' && (
+                              <li className="flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                                12-page commercialization plan required
+                              </li>
+                            )}
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                              {project.program_type === 'SBIR' 
+                                ? `Min ${project.grant_type === 'Phase I' ? '67' : '50'}% small business effort`
+                                : 'Min 40% small business, 30% research institution'
+                              }
+                            </li>
+                            <li className="flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                              Statistical rigor required (power ≥80%, n= specified)
+                            </li>
+                          </ul>
+                        </div>
+
+                        <p className="text-sm text-neutral-500 italic">
+                          To change grant type, institute, or clinical trial status, click Reset and create a new project.
+                        </p>
+                      </div>
+                    )}
+                    {configTab === 'lifecycle' && <PriorPhaseEditor project={project} onUpdate={updateProject} />}}
 
                     {/* Continue Button */}
-                    {configComplete && (
-                      <div className="mt-8 pt-6 border-t border-neutral-200">
-                        <div className="p-4 bg-green-50 border border-green-200 rounded-lg mb-4">
-                          <div className="flex items-start gap-3">
-                            <CheckCircle className="w-6 h-6 text-green-600 mt-0.5" />
-                            <div>
-                              <h3 className="font-semibold text-green-800">Configuration Complete</h3>
-                              <p className="text-sm text-green-700 mt-1">
-                                <strong>{project.program_type} {project.grant_type}</strong> application for <strong>{institute}</strong>
-                                {budgetCap > 0 && <span> with a <strong>${budgetCap.toLocaleString()}</strong> budget cap</span>}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          onClick={startModules}
-                          className="w-full px-6 py-4 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors flex items-center justify-center gap-2 text-lg"
-                        >
-                          Continue to Module 1: Title & Concept <ArrowRight className="w-5 h-5" />
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Prompt to complete config */}
-                    {!configComplete && (
-                      <div className="mt-8 pt-6 border-t border-neutral-200">
-                        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                          <div className="flex items-start gap-3">
-                            <Settings className="w-6 h-6 text-amber-600 mt-0.5" />
-                            <div>
-                              <h3 className="font-semibold text-amber-800">Select Grant Type to Continue</h3>
-                              <p className="text-sm text-amber-700 mt-1">
-                                Choose a grant type above to unlock the application modules.
-                              </p>
-                            </div>
+                    <div className="mt-8 pt-6 border-t border-neutral-200">
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-lg mb-4">
+                        <div className="flex items-start gap-3">
+                          <CheckCircle className="w-6 h-6 text-green-600 mt-0.5" />
+                          <div>
+                            <h3 className="font-semibold text-green-800">Configuration Complete</h3>
+                            <p className="text-sm text-green-700 mt-1">
+                              <strong>{project.program_type} {project.grant_type}</strong> application for <strong>{institute}</strong>
+                              {budgetCap > 0 && <span> with a <strong>${budgetCap.toLocaleString()}</strong> budget cap</span>}
+                            </p>
                           </div>
                         </div>
                       </div>
-                    )}
+                      <button
+                        onClick={startModules}
+                        className="w-full px-6 py-4 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors flex items-center justify-center gap-2 text-lg"
+                      >
+                        Continue to Module 1: Title & Concept <ArrowRight className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
-                ) : activeModule === 9 && showCommercializationModule ? (
+                ) : project && activeModule === 9 && showCommercializationModule ? (
                   <CommercializationDirector
                     project={project}
                     onUpdate={updateProject}
                   />
-                ) : (
+                ) : project ? (
                   <ModuleEditor
                     project={project}
                     moduleId={activeModule}
@@ -752,6 +836,10 @@ export default function App() {
                     isLastModule={activeModule === totalModules}
                     totalModules={totalModules}
                   />
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-neutral-500">No project loaded. Click Get Started to create a new project.</p>
+                  </div>
                 )}
               </div>
             </>

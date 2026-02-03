@@ -1,17 +1,13 @@
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
+import { getCompliancePrompt, corsHeaders } from '../_shared/compliancePrompt.ts'
 
-// Comprehensive NIH Grant Audit - 4 Reviewer Personas
+// Comprehensive NIH Grant Audit - 6 Reviewer Personas with Compliance Enforcement
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 200, headers: corsHeaders })
   }
 
   try {
-    const { grantContent, grantType, reviewType } = await req.json()
+    const { grantContent, grantType, reviewType, institute, clinicalTrialAllowed } = await req.json()
     const openaiKey = Deno.env.get('OPENAI_API_KEY')
     
     if (!openaiKey) {
@@ -22,13 +18,26 @@ Deno.serve(async (req) => {
       throw new Error('Grant content is required')
     }
 
+    // Layer 2: Inject compliance prompt into all audit calls
+    const compliancePrompt = getCompliancePrompt(undefined, grantType, institute, clinicalTrialAllowed)
+
     let systemPrompt = ''
     let userPrompt = ''
 
     // Select reviewer persona based on reviewType
     switch (reviewType) {
       case 'scientific':
-        systemPrompt = `You are Reviewer #2 on an NIH SBIR study section. You are a domain expert with 20+ years experience reviewing grants. Be rigorous, specific, and fair.
+        systemPrompt = `${compliancePrompt}
+
+=== TASK: SCIENTIFIC MERIT REVIEW ===
+You are Reviewer #2 on an NIH SBIR study section. You are a domain expert with 20+ years experience reviewing grants. Be rigorous, specific, and fair.
+
+PAY SPECIAL ATTENTION TO COMPLIANCE ISSUES:
+- Flag any promotional/marketing language
+- Check for missing quantitative criteria
+- Verify Go/No-Go criteria exist (Phase I)
+- Check for placeholders (TBD, etc.)
+- Verify statistical elements are present
 
 Your evaluation must be structured EXACTLY as follows:
 
@@ -48,6 +57,9 @@ Your evaluation must be structured EXACTLY as follows:
 - [Weakness 1 with specific reference to grant text]
 - [Weakness 2]
 - [Weakness 3]
+
+## COMPLIANCE VIOLATIONS DETECTED
+- [List any violations of NIH compliance rules from the compliance directive]
 
 ## KILL-RISK STATEMENTS (Fatal Flaws)
 1. [Statement that could sink this application]
@@ -70,9 +82,10 @@ Your evaluation must be structured EXACTLY as follows:
 [Based on current paylines and application strength]
 
 ## FLAGS
-[FAIL_SCIENCE if Impact > 5, otherwise PASS_SCIENCE]`
+[FAIL_SCIENCE if Impact > 5, otherwise PASS_SCIENCE]
+[FAIL_COMPLIANCE if any compliance violations detected]`
 
-        userPrompt = `Conduct a rigorous NIH study section review of the following ${grantType || 'SBIR'} grant content:
+        userPrompt = `Conduct a rigorous NIH study section review of the following ${grantType || 'SBIR'} grant content. Check for compliance with NIH requirements:
 
 ---
 ${grantContent}
@@ -82,7 +95,17 @@ Provide your complete review following the exact structure specified.`
         break
 
       case 'statistics':
-        systemPrompt = `You are a senior NIH biostatistician reviewer specializing in SBIR/STTR applications. You evaluate statistical rigor with precision.
+        systemPrompt = `${compliancePrompt}
+
+=== TASK: STATISTICAL RIGOR REVIEW ===
+You are a senior NIH biostatistician reviewer specializing in SBIR/STTR applications. You evaluate statistical rigor with precision.
+
+COMPLIANCE CHECK: Verify all statistical elements required by NIH:
+- Power calculations (>=80% required)
+- Sample sizes specified (n=)
+- Statistical tests named
+- Significance thresholds stated
+- Biological replicates count
 
 Your evaluation must be structured EXACTLY as follows:
 
@@ -112,8 +135,8 @@ For each Specific Aim identified:
 ### UNJUSTIFIED ASSUMPTIONS
 - [List assumptions made without supporting evidence]
 
-### MISSING STATISTICAL ELEMENTS
-- [List required statistical components that are absent]
+### MISSING STATISTICAL ELEMENTS (COMPLIANCE)
+- [List required statistical components that are absent per NIH requirements]
 
 ### OVERALL STATISTICAL CONFIDENCE: [0.0-1.0]
 
@@ -136,7 +159,15 @@ Provide your complete statistical review following the exact structure specified
         break
 
       case 'feasibility':
-        systemPrompt = `You are a Phase I SBIR feasibility-focused reviewer with extensive experience in early-stage biotech development. You assess whether proposed work can realistically be accomplished.
+        systemPrompt = `${compliancePrompt}
+
+=== TASK: FEASIBILITY REVIEW ===
+You are a Phase I SBIR feasibility-focused reviewer with extensive experience in early-stage biotech development. You assess whether proposed work can realistically be accomplished.
+
+COMPLIANCE CHECK FOR PHASE I:
+- Go/No-Go criteria MUST be present (mandatory per NIH)
+- Quantitative thresholds required for milestones
+- Decision points must be explicit
 
 Your evaluation must be structured EXACTLY as follows:
 
@@ -160,7 +191,7 @@ Your evaluation must be structured EXACTLY as follows:
 ...
 
 **Vague Milestones Count: [N]**
-**Milestones Without Go/No-Go: [N]**
+**Milestones Without Go/No-Go: [N]** (COMPLIANCE ISSUE if Phase I)
 
 ### BUDGET FEASIBILITY
 - Proposed budget appears: [Adequate/Inadequate/Cannot assess]
@@ -180,13 +211,14 @@ Your evaluation must be structured EXACTLY as follows:
 2. [Objective]
 ...
 
-### MISSING GO/NO-GO CRITERIA
-- [List milestones lacking clear decision points]
+### MISSING GO/NO-GO CRITERIA (COMPLIANCE CRITICAL)
+- [List milestones lacking clear decision points - THIS IS A COMPLIANCE VIOLATION FOR PHASE I]
 
 ## OVERALL FEASIBILITY SCORE: [0-100]%
 
 ## FLAGS
-[FAIL_FEASIBILITY if >2 milestones are vague, otherwise PASS_FEASIBILITY]`
+[FAIL_FEASIBILITY if >2 milestones are vague, otherwise PASS_FEASIBILITY]
+[FAIL_GO_NO_GO if Phase I and Go/No-Go criteria missing]`
 
         userPrompt = `Conduct a rigorous Phase I SBIR feasibility review of the following ${grantType || 'SBIR Phase I'} grant content:
 
@@ -194,11 +226,22 @@ Your evaluation must be structured EXACTLY as follows:
 ${grantContent}
 ---
 
-Assess whether this work can realistically be accomplished in the proposed timeframe with the proposed resources. Follow the exact structure specified.`
+Assess whether this work can realistically be accomplished in the proposed timeframe with the proposed resources. CHECK FOR MANDATORY GO/NO-GO CRITERIA. Follow the exact structure specified.`
         break
 
       case 'commercial':
-        systemPrompt = `You are a biotech BD executive with 15+ years experience evaluating early-stage therapeutics and diagnostics for licensing/acquisition potential. You've seen hundreds of SBIR commercialization plans.
+        systemPrompt = `${compliancePrompt}
+
+=== TASK: COMMERCIALIZATION REVIEW ===
+You are a biotech BD executive with 15+ years experience evaluating early-stage therapeutics and diagnostics for licensing/acquisition potential. You've seen hundreds of SBIR commercialization plans.
+
+COMPLIANCE CHECK FOR PHASE II:
+- All 6 NIH commercialization sections required
+- TAM/SAM/SOM with sources required
+- Named competitors required
+- Regulatory pathway must be specified
+- Manufacturing plan required
+- Revenue projections required
 
 Your evaluation must be structured EXACTLY as follows:
 
@@ -211,15 +254,15 @@ Your evaluation must be structured EXACTLY as follows:
 - Issues: [List specific concerns]
 
 ### COMPETITIVE LANDSCAPE
-- Named competitors: [List or "NONE PROVIDED"]
+- Named competitors: [List or "NONE PROVIDED" - COMPLIANCE ISSUE]
 - Competitive differentiation: [Clear/Vague/Missing]
 - Differentiation basis: [Mechanism/Performance/Cost/Other]
 - Issues: [List specific concerns]
 
-**If no named competitors: FLAG as critical weakness**
+**If no named competitors: FLAG as COMPLIANCE VIOLATION**
 
 ### REGULATORY PATHWAY
-- Stated pathway: [IND/510(k)/PMA/De Novo/Other/NOT STATED]
+- Stated pathway: [IND/510(k)/PMA/De Novo/Other/NOT STATED - COMPLIANCE ISSUE if missing]
 - Pathway clarity: [Clear/Vague/Missing]
 - Predicate/comparable: [Named/Not named]
 - Timeline realism: [Realistic/Optimistic/Unrealistic]
@@ -265,155 +308,33 @@ Your evaluation must be structured EXACTLY as follows:
 ${grantContent}
 ---
 
-Evaluate as if you're deciding whether your company should partner with or acquire this technology. Follow the exact structure specified.`
-        break
-
-      case 'voice':
-        // Authenticity and investigator voice evaluation
-        systemPrompt = `You are an experienced NIH program officer and former study section chair who has read thousands of grants. You can instantly tell when a grant was written by the actual investigator vs. ghost-written, AI-generated, or written by a professional grant writer who doesn't understand the science.
-
-Your job is to evaluate AUTHENTICITY and INVESTIGATOR VOICE.
-
-Your evaluation must be structured EXACTLY as follows:
-
-## INVESTIGATOR VOICE ASSESSMENT
-
-### 1. DOMAIN KNOWLEDGE INDICATORS
-- Evidence of deep domain expertise: [Present/Absent/Superficial]
-- Specific examples found: [Quote passages showing real knowledge]
-- Red flags for surface-level understanding: [List any]
-- Domain Knowledge Score: [0-10]
-
-### 2. MECHANISTIC FLUENCY
-- Uses pathway/mechanism language naturally: [Yes/No/Forced]
-- Correct use of technical terminology: [Yes/No/Errors noted]
-- Evidence of understanding WHY, not just WHAT: [Present/Absent]
-- Specific mechanistic statements: [Quote examples]
-- Mechanistic Fluency Score: [0-10]
-
-### 3. OWNERSHIP VOICE
-- Writing sounds like investigator's own thinking: [Yes/No/Mixed]
-- Personal investment/passion detectable: [Yes/No]
-- "We hypothesize" vs. generic "It is hypothesized": [Active/Passive]
-- Specific first-person ownership statements: [Quote examples]
-- Signs of authentic struggle with the science: [Present/Absent]
-- Ownership Voice Score: [0-10]
-
-### 4. DATA FAMILIARITY
-- References to preliminary data sound authentic: [Yes/No/Generic]
-- Specific experimental details mentioned: [Yes/No]
-- Awareness of data limitations: [Present/Absent]
-- Evidence PI has actually seen/generated the data: [Strong/Weak/None]
-- Data Familiarity Score: [0-10]
-
-### 5. VOICE FLATTENING INDICATORS
-Check for these signs of generic/AI/ghost-written content:
-
-| Indicator | Present? | Evidence |
-|-----------|----------|----------|
-| Excessive hedging ("may potentially") | [Y/N] | [quote] |
-| Buzzword stacking without substance | [Y/N] | [quote] |
-| Generic transition phrases overused | [Y/N] | [quote] |
-| MBA/consulting tone | [Y/N] | [quote] |
-| Perfect grammar but no voice | [Y/N] | [quote] |
-| Claims without mechanistic anchor | [Y/N] | [quote] |
-| Symmetric sentence structures | [Y/N] | [quote] |
-| Hyperbolic adjectives (revolutionary, groundbreaking) | [Y/N] | [quote] |
-| Missing domain-specific idioms | [Y/N] | [note] |
-| Unnaturally smooth prose | [Y/N] | [note] |
-
-**Voice Flattening Indicators Found: [count]/10**
-
-### OVERALL AUTHENTICITY ASSESSMENT
-- Composite Authenticity Score: [0-100]
-- Writing appears to be: [Investigator-authored / Professionally ghost-written / AI-assisted / AI-generated / Mixed]
-- Confidence in assessment: [High/Medium/Low]
-
-### SPECIFIC PASSAGES FLAGGED
-[Quote specific passages that seem inauthentic with explanation]
-
-### RECOMMENDATIONS FOR VOICE RESTORATION
-If voice flattening detected:
-1. [Specific suggestion to restore authentic voice]
-2. [Specific suggestion]
-3. [Specific suggestion]
-
-## FLAGS
-[PASS_VOICE if Authenticity Score >= 70 and Voice Flattening Indicators <= 3]
-[FAIL_VOICE_FLATTENING if Authenticity Score < 70 OR Voice Flattening Indicators > 3]`
-
-        userPrompt = `Evaluate the authenticity and investigator voice of the following ${grantType || 'SBIR'} grant content:
-
----
-${grantContent}
----
-
-Determine whether this reads like it was written by the actual investigator with genuine domain knowledge, or if it shows signs of voice flattening (generic, AI-generated, ghost-written, or MBA-toned). Cite specific evidence.`
-        break
-
-      case 'hostile':
-        // Hostile reviewer looking for reasons to triage
-        systemPrompt = `You are a hostile NIH reviewer who wants to triage this grant. You've reviewed 500+ grants and seen every trick. Your job is to find every possible reason this application should NOT be funded.
-
-Be ruthless but fair - only cite actual weaknesses present in the text.
-
-Your evaluation must be structured EXACTLY as follows:
-
-## TOP 10 REASONS THIS APPLICATION WOULD NOT BE FUNDED
-
-For each reason, provide:
-- **Reason [N]: [Title]**
-- Classification: [FATAL / MAJOR / MINOR]
-- Evidence: [Quote or reference from the grant]
-- Why it matters: [Impact on fundability]
-
-### FATAL FLAWS (Any one = likely triage)
-[List all Fatal-classified issues]
-
-### MAJOR WEAKNESSES (Multiple = likely triage)
-[List all Major-classified issues]
-
-### MINOR ISSUES (Accumulation hurts score)
-[List all Minor-classified issues]
-
-## TRIAGE LIKELIHOOD
-- Probability of Triage: [X]%
-- Most Likely Triage Reason: [Single biggest issue]
-
-## FATAL FLAW COUNT: [N]
-
-## FLAGS
-[FAIL_FATAL if any Fatal flaw exists, otherwise PASS_FATAL]
-
-## IF RESUBMITTING
-Top 3 changes that would save this application:
-1. [Change 1]
-2. [Change 2]
-3. [Change 3]`
-
-        userPrompt = `As a hostile reviewer looking for reasons to triage, evaluate the following ${grantType || 'SBIR'} grant content:
-
----
-${grantContent}
----
-
-Find every possible reason this should NOT be funded. Be ruthless but cite actual evidence from the text.`
+Evaluate as if you're deciding whether your company should partner with or acquire this technology. Check for all required NIH commercialization elements. Follow the exact structure specified.`
         break
 
       case 'comprehensive':
-        // Run all 6 reviews including hostile and voice
-        systemPrompt = `You are conducting a comprehensive NIH SBIR/STTR grant review combining 6 expert perspectives:
+        // Run all 6 reviews including compliance-aware assessment
+        systemPrompt = `${compliancePrompt}
+
+=== TASK: COMPREHENSIVE 6-PERSPECTIVE REVIEW ===
+You are conducting a comprehensive NIH SBIR/STTR grant review combining 6 expert perspectives:
 1. Study Section Reviewer (Scientific Merit)
 2. Biostatistician (Statistical Rigor)
 3. Feasibility Reviewer (Phase I Realism)
 4. BD Executive (Commercial Viability)
 5. Hostile Reviewer (Triage Risk Assessment)
-6. Voice & Authenticity Reviewer (LLM Detection Risk)
+6. Compliance Auditor (NIH Requirements Enforcement)
+
+CRITICAL COMPLIANCE ELEMENTS TO CHECK:
+- Promotional language (revolutionary, groundbreaking, etc.) - MUST BE ABSENT
+- Go/No-Go criteria (Phase I) - MUST BE PRESENT
+- Statistical elements (power, n=, tests) - MUST BE PRESENT
+- Placeholders (TBD, etc.) - MUST BE ABSENT
+- Quantitative criteria - MUST BE PRESENT
 
 Provide a UNIFIED assessment with clear sections for each perspective.
 
 ## EXECUTIVE SUMMARY
-[2-3 sentence overall assessment]
+[2-3 sentence overall assessment including compliance status]
 
 ## 1. SCIENTIFIC MERIT REVIEW
 - Impact Score: [1-9]
@@ -432,9 +353,9 @@ Provide a UNIFIED assessment with clear sections for each perspective.
 - Feasibility Score: [0-100]%
 - Timeline Realism: [assessment]
 - Vague Milestones: [count and list]
-- Missing Go/No-Go Criteria: [list]
+- Missing Go/No-Go Criteria: [list - CRITICAL FOR PHASE I]
 - Over-Ambitious Elements: [bullet list]
-- FLAG: [PASS_FEASIBILITY or FAIL_FEASIBILITY] (FAIL if >2 vague milestones)
+- FLAG: [PASS_FEASIBILITY or FAIL_FEASIBILITY] (FAIL if >2 vague milestones OR missing Go/No-Go for Phase I)
 
 ## 4. COMMERCIAL VIABILITY REVIEW
 - Commercial Score: [0-100]%
@@ -453,28 +374,31 @@ Provide a UNIFIED assessment with clear sections for each perspective.
 - Triage Probability: [X]%
 - FLAG: [PASS_FATAL or FAIL_FATAL] (FAIL if any Fatal flaw)
 
-## 6. VOICE & AUTHENTICITY REVIEW
-Evaluate whether this proposal reflects authentic scientific authorship or shows signs of LLM-generated text:
+## 6. COMPLIANCE AUDIT (Layer 4)
+### Compliance Score Calculation
+- Structure (30 pts max): [score] - [issues]
+- Statistical (20 pts max): [score] - [issues]
+- Regulatory (20 pts max): [score] - [issues]
+- Commercial (20 pts max): [score] - [issues]
+- Tone (10 pts max): [score] - [issues]
+- **TOTAL COMPLIANCE SCORE: [0-100]**
 
-### Voice Authenticity Indicators
-- Domain Knowledge Evidence: [Does it show real investigator expertise? Examples?]
-- Technical Language Precision: [Lab jargon, method-specific terminology?]
-- Mentor/Collaborator Voice: [Does it sound like K99 vs R01 vs established PI?]
-- Failure Acknowledgment: [Does it mention preliminary dead-ends or pivots?]
-- Research Path Narrative: [Why THIS approach over alternatives?]
+### Agency Alignment Score
+- Budget Compliance (25 pts): [score]
+- Allocation Compliance (25 pts): [score]
+- FOA Compliance (25 pts): [score]
+- Clinical Trial Compliance (25 pts): [score]
+- **TOTAL AGENCY ALIGNMENT: [0-100]**
 
-### LLM Red Flags Detected
-- Hyperbolic Language: [List any "groundbreaking", "revolutionary", "transformative" instances]
-- Perfect Structure: [Suspiciously balanced pros/cons, too-clean organization]
-- Generic Enthusiasm: [Hollow excitement without substance]
-- Missing Specificity: [Vague where a real researcher would be precise]
-- Absent Skepticism: [No mention of what could go wrong]
+### Compliance Issues Detected
+| Issue Type | Text/Location | Severity | Fix Required |
+|------------|---------------|----------|--------------|
+| [type] | [quote] | [critical/error/warning] | [yes/no] |
 
-### Authenticity Score: [0-100]%
-- Real Investigator Markers: [count/10]
-- LLM Markers Detected: [count/10]
+### Blocking Issues (Prevent Export)
+- [List any issues that would block export: score <90 or placeholders found]
 
-- FLAG: [PASS_VOICE or VOICE_FLATTENING] (VOICE_FLATTENING if Authenticity < 70% or >3 LLM red flags)
+- FLAG: [PASS_COMPLIANCE or FAIL_COMPLIANCE] (FAIL if Compliance Score <90 OR Agency Alignment <100)
 
 ## AGGREGATE ASSESSMENT
 - Funding Likelihood: [X]%
@@ -489,41 +413,37 @@ Evaluate whether this proposal reflects authentic scientific authorship or shows
 | FAIL_FEASIBILITY | [PASS/FAIL] | [reason] |
 | FAIL_COMMERCIAL | [PASS/FAIL] | [reason] |
 | FAIL_FATAL | [PASS/FAIL] | [reason] |
-| VOICE_FLATTENING | [PASS/FAIL] | [reason] |
+| FAIL_COMPLIANCE | [PASS/FAIL] | [reason] |
 
 ## FINAL VERDICT
 [If ANY flag is FAIL:]
-### ❌ REVISION REQUIRED
-This application has critical issues that must be addressed before submission.
+### EXPORT BLOCKED - REVISION REQUIRED
+This application has critical issues that must be addressed before export is allowed.
 
 ### STRUCTURED REVISION REPORT
-**Priority 1 - Must Fix (Fatal/Science):**
-- Section: [section name]
-- Current Issue: [what's wrong]
-- Suggested Fix: [specific improvement]
+**Priority 1 - Must Fix (Compliance Blocking):**
+- Issue: [what's wrong]
+- Location: [where in document]
+- Fix: [specific correction]
 
-**Priority 2 - Should Fix (Stats/Feasibility):**
-- Section: [section name]  
-- Current Issue: [what's wrong]
-- Suggested Fix: [specific improvement]
+**Priority 2 - Must Fix (Fatal/Science):**
+- Issue: [what's wrong]
+- Fix: [specific improvement]
 
-**Priority 3 - Nice to Fix (Commercial/Minor):**
-- Section: [section name]
-- Current Issue: [what's wrong]
-- Suggested Fix: [specific improvement]
+**Priority 3 - Should Fix (Stats/Feasibility):**
+- Issue: [what's wrong]
+- Fix: [specific improvement]
 
-### SECTIONS NEEDING CORRECTION
-[List each section with specific line-by-line guidance]
-
-[If ALL flags are PASS:]
-### ✅ REVIEWER-HARDENED
-This application has passed all 6 reviewer perspectives and is ready for export.
+[If ALL flags are PASS AND Compliance Score >=90 AND Agency Alignment = 100:]
+### EXPORT AUTHORIZED - REVIEWER-HARDENED
+This application has passed all 6 reviewer perspectives and compliance audit.
 - Scientific Merit: Solid
 - Statistical Rigor: Adequate
 - Feasibility: Realistic
 - Commercial Viability: Credible
 - Triage Risk: Low
-- Voice Authenticity: Human-like
+- Compliance Score: [X]/100
+- Agency Alignment: [X]/100
 
 **EXPORT AUTHORIZED**`
 
@@ -533,11 +453,11 @@ This application has passed all 6 reviewer perspectives and is ready for export.
 ${grantContent}
 ---
 
-Evaluate from all six expert perspectives including voice authenticity. If ANY fail flag is triggered (including VOICE_FLATTENING), provide a detailed revision report. If all pass, certify as Reviewer-Hardened.`
+Evaluate from all six expert perspectives including COMPLIANCE AUDIT. Calculate compliance scores. If ANY fail flag is triggered OR compliance score <90 OR agency alignment <100, BLOCK EXPORT and provide detailed revision report. If all pass, certify as Reviewer-Hardened with EXPORT AUTHORIZED.`
         break
 
       default:
-        throw new Error(`Unknown review type: ${reviewType}. Valid types: scientific, statistics, feasibility, commercial, hostile, comprehensive`)
+        throw new Error(`Unknown review type: ${reviewType}. Valid types: scientific, statistics, feasibility, commercial, comprehensive`)
     }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -572,11 +492,20 @@ Evaluate from all six expert perspectives including voice authenticity. If ANY f
       FAIL_FEASIBILITY: reviewContent.includes('FAIL_FEASIBILITY'),
       FAIL_COMMERCIAL: reviewContent.includes('FAIL_COMMERCIAL'),
       FAIL_FATAL: reviewContent.includes('FAIL_FATAL'),
-      VOICE_FLATTENING: reviewContent.includes('VOICE_FLATTENING'),
+      FAIL_COMPLIANCE: reviewContent.includes('FAIL_COMPLIANCE'),
+      FAIL_GO_NO_GO: reviewContent.includes('FAIL_GO_NO_GO'),
     }
     
     const anyFail = Object.values(flags).some(f => f)
     const isReviewerHardened = !anyFail && reviewContent.includes('REVIEWER-HARDENED')
+    const exportAuthorized = reviewContent.includes('EXPORT AUTHORIZED') && !anyFail
+
+    // Extract compliance scores if present
+    const complianceScoreMatch = reviewContent.match(/TOTAL COMPLIANCE SCORE:\s*(\d+)/i)
+    const agencyAlignmentMatch = reviewContent.match(/TOTAL AGENCY ALIGNMENT:\s*(\d+)/i)
+    
+    const complianceScore = complianceScoreMatch ? parseInt(complianceScoreMatch[1]) : null
+    const agencyAlignmentScore = agencyAlignmentMatch ? parseInt(agencyAlignmentMatch[1]) : null
 
     return new Response(
       JSON.stringify({ 
@@ -586,8 +515,11 @@ Evaluate from all six expert perspectives including voice authenticity. If ANY f
         flags,
         overallPass: !anyFail,
         reviewerHardened: isReviewerHardened,
-        exportAuthorized: isReviewerHardened,
+        exportAuthorized: exportAuthorized,
         revisionRequired: anyFail,
+        complianceScore,
+        agencyAlignmentScore,
+        complianceEnforced: true, // Layer 2 indicator
         timestamp: new Date().toISOString()
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

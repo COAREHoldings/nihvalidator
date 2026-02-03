@@ -1,8 +1,4 @@
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-}
+import { getCompliancePrompt, corsHeaders } from '../_shared/compliancePrompt.ts'
 
 // Human-like scientific authorship directive - applied to all document types
 const AUTHORSHIP_DIRECTIVE = `
@@ -69,12 +65,20 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { documentType, grantType, modules } = await req.json()
+    const { documentType, grantType, modules, institute, clinicalTrialAllowed } = await req.json()
     const openaiKey = Deno.env.get('OPENAI_API_KEY')
     
     if (!openaiKey) {
       throw new Error('OpenAI API key not configured')
     }
+
+    // Layer 2: Inject compliance system prompt based on document type
+    const compliancePrompt = getCompliancePrompt(
+      documentType === 'commercialization' ? 'commercialization' : 'research_strategy',
+      grantType || 'Phase I',
+      institute,
+      clinicalTrialAllowed
+    )
 
     // Build context from modules
     const moduleContext = `
@@ -120,7 +124,10 @@ ${modules.m9 ? JSON.stringify(modules.m9, null, 2) : 'Not provided'}
 
     switch (documentType) {
       case 'titles':
-        systemPrompt = `You are an experienced NIH-funded principal investigator helping a colleague craft project titles. Write titles that experienced NIH reviewers would find credible and compelling.
+        systemPrompt = `${compliancePrompt}
+
+=== TASK: GENERATE PROJECT TITLES ===
+You are an experienced NIH-funded principal investigator helping a colleague craft project titles. Write titles that experienced NIH reviewers would find credible and compelling.
 
 ${AUTHORSHIP_DIRECTIVE}
 
@@ -154,14 +161,18 @@ ${moduleContext}`
         break
 
       case 'research':
-        systemPrompt = `You are an experienced NIH-funded principal investigator writing a Research Strategy section. Write as a domain expert presenting to a study section of peers.
+        systemPrompt = `${compliancePrompt}
+
+=== TASK: GENERATE RESEARCH STRATEGY ===
+You are an experienced NIH-funded principal investigator writing a Research Strategy section. Write as a domain expert presenting to a study section of peers.
 
 ${AUTHORSHIP_DIRECTIVE}
 
 For Research Strategy specifically:
 - SIGNIFICANCE: Ground in epidemiological data and mechanistic gaps. Cite specific limitations of current approaches.
 - INNOVATION: Be specific about what is new. Avoid claiming everything is "novel." Compare directly to existing methods.
-- APPROACH: Include experimental details, sample sizes, controls, statistical analysis plans. Address rigor and reproducibility. Include potential pitfalls and alternatives for EACH aim.`
+- APPROACH: Include experimental details, sample sizes, controls, statistical analysis plans. Address rigor and reproducibility. Include potential pitfalls and alternatives for EACH aim.
+- MANDATORY FOR PHASE I: Include explicit Go/No-Go criteria with quantitative thresholds`
 
         userPrompt = `Generate a complete NIH Research Strategy section based on the following content.
 
@@ -186,6 +197,7 @@ For EACH Specific Aim:
 - Experimental design with specifics (n=, timepoints, controls)
 - Methods with enough detail for reproducibility
 - Expected outcomes with quantitative success criteria
+- **Go/No-Go criteria (REQUIRED FOR PHASE I): Define quantitative threshold for proceeding**
 - Potential problems and alternative approaches
 - How aim results feed into subsequent aims
 
@@ -201,7 +213,10 @@ ${moduleContext}`
         break
 
       case 'references':
-        systemPrompt = `You are a scientific literature expert helping structure a reference section. Generate PLACEHOLDER references that indicate what types of citations are needed - do NOT fabricate specific papers with fake PMIDs.
+        systemPrompt = `${compliancePrompt}
+
+=== TASK: GENERATE REFERENCE FRAMEWORK ===
+You are a scientific literature expert helping structure a reference section. Generate PLACEHOLDER references that indicate what types of citations are needed - do NOT fabricate specific papers with fake PMIDs.
 
 ${AUTHORSHIP_DIRECTIVE}
 
@@ -249,7 +264,10 @@ ${moduleContext}`
         break
 
       case 'commercialization':
-        systemPrompt = `You are an experienced SBIR/STTR commercialization consultant and former NIH program officer. Write commercialization plans that demonstrate genuine market understanding, not just TAM slides.
+        systemPrompt = `${compliancePrompt}
+
+=== TASK: GENERATE COMMERCIALIZATION PLAN ===
+You are an experienced SBIR/STTR commercialization consultant and former NIH program officer. Write commercialization plans that demonstrate genuine market understanding, not just TAM slides.
 
 ${AUTHORSHIP_DIRECTIVE}
 
@@ -260,11 +278,12 @@ For Commercialization Plans specifically:
 - Address reimbursement (CPT codes, coverage considerations)
 - Differentiate on mechanism, not vague "better" claims
 - Acknowledge market risks and mitigation strategies
-- Include specific partnership types needed, not just "seek partners"`
+- Include specific partnership types needed, not just "seek partners"
+- THIS IS REQUIRED FOR PHASE II: Must include all 6 NIH commercialization sections`
 
         userPrompt = `Generate a comprehensive NIH Commercialization Plan based on the following content.
 
-REQUIRED SECTIONS:
+REQUIRED SECTIONS (All 6 NIH sections required for Phase II):
 
 1. COMPANY AND VALUE PROPOSITION (1.5-2 pages)
 - Company background (or placeholder for new company)
@@ -344,7 +363,12 @@ ${moduleContext}`
     const content = data.choices?.[0]?.message?.content || ''
 
     return new Response(
-      JSON.stringify({ success: true, content, documentType }),
+      JSON.stringify({ 
+        success: true, 
+        content, 
+        documentType,
+        complianceEnforced: true // Layer 2 indicator
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {

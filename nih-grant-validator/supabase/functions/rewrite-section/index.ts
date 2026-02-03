@@ -1,16 +1,12 @@
-Deno.serve(async (req) => {
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
+import { getCompliancePrompt, corsHeaders } from '../_shared/compliancePrompt.ts'
 
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
 
   try {
-    const { originalText, documentType, mechanism, auditFeedback } = await req.json();
+    const { originalText, documentType, mechanism, auditFeedback, grantType, institute, clinicalTrialAllowed } = await req.json();
 
     if (!originalText || !documentType) {
       throw new Error('Original text and document type are required');
@@ -21,6 +17,9 @@ Deno.serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
+    // Layer 2: Inject compliance system prompt
+    const compliancePrompt = getCompliancePrompt(documentType, grantType || 'Phase I', institute, clinicalTrialAllowed);
+
     const documentTypeLabels: Record<string, string> = {
       'specific_aims': 'Specific Aims',
       'research_strategy': 'Research Strategy',
@@ -29,15 +28,28 @@ Deno.serve(async (req) => {
       'biosketches': 'Biosketch',
       'letters_of_support': 'Letter of Support',
       'milestones': 'Milestones',
+      'rigor': 'Rigor and Reproducibility',
+      'vertebrate_animals': 'Vertebrate Animals',
+      'human_subjects': 'Human Subjects',
     };
 
     const docLabel = documentTypeLabels[documentType] || documentType;
 
-    const systemPrompt = `You are a senior NIH reviewer and grant writer with extensive experience in ${mechanism || 'SBIR/STTR'} applications.
+    const systemPrompt = `${compliancePrompt}
 
-Your task is to rewrite the provided ${docLabel} section to improve its competitiveness for NIH funding.
+=== TASK: SECTION REWRITE ===
+You are a senior NIH reviewer and grant writer with extensive experience in ${mechanism || 'SBIR/STTR'} applications.
 
-CRITICAL RULES:
+Your task is to rewrite the provided ${docLabel} section to improve its competitiveness for NIH funding while ensuring STRICT COMPLIANCE with all NIH requirements.
+
+CRITICAL COMPLIANCE RULES (MUST FOLLOW):
+1. REMOVE ALL promotional/marketing language (revolutionary, groundbreaking, etc.)
+2. ADD quantitative criteria where missing (statistical tests, n=, power calculations)
+3. ADD Go/No-Go criteria if this is Phase I and they are missing
+4. ENSURE all claims are evidence-based, not speculative
+5. REMOVE any placeholders (TBD, [insert], etc.) - flag them as needing input
+
+CRITICAL PRESERVATION RULES:
 1. Preserve ALL scientific meaning and technical accuracy
 2. Do NOT exaggerate claims or results
 3. Do NOT fabricate citations or references
@@ -68,8 +80,12 @@ Return a JSON object with:
       "changes": ["list of specific changes made"]
     }
   ],
+  "complianceFixes": [
+    {"original": "problematic text", "fix": "compliant replacement", "rule": "which compliance rule"}
+  ],
   "summary": {
     "majorChanges": ["list of major improvements"],
+    "complianceIssuesFixed": ["list of compliance issues addressed"],
     "wordCountOriginal": number,
     "wordCountRewritten": number
   }
@@ -87,7 +103,7 @@ Preserve paragraph structure where possible. Each paragraph should be a logical 
         model: 'gpt-4o',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Rewrite the following ${docLabel} section:\n\n${originalText}` }
+          { role: 'user', content: `Rewrite the following ${docLabel} section ensuring NIH compliance:\n\n${originalText}` }
         ],
         temperature: 0.4,
         response_format: { type: 'json_object' }
@@ -106,6 +122,7 @@ Preserve paragraph structure where possible. Each paragraph should be a logical 
       success: true,
       documentType,
       rewrite: rewriteResult,
+      complianceEnforced: true, // Layer 2 indicator
       timestamp: new Date().toISOString()
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

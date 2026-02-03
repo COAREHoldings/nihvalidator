@@ -6,26 +6,88 @@ export type ProgramType = 'SBIR' | 'STTR'
 export type ModuleStatus = 'incomplete' | 'partial' | 'complete'
 export type NIHInstitute = 'NCI' | 'NHLBI' | 'NIAID' | 'NIMH' | 'NINDS' | 'NIDDK' | 'NEI' | 'NICHD' | 'NIA' | 'NIGMS' | 'Standard NIH'
 
-// Institute Budget Caps
+// Layer 8: Import dynamic configuration from compliance module
+// Budget caps are now managed centrally in complianceConfig.ts
+import { 
+  INSTITUTE_CONFIGS, 
+  getInstituteConfig, 
+  getBudgetCapForPhase,
+  POLICY_VERSION,
+  POLICY_LAST_UPDATED,
+  isPolicyExpired,
+  getPolicyWarning
+} from './compliance/complianceConfig'
+
+// Re-export for backward compatibility
+export { 
+  INSTITUTE_CONFIGS, 
+  getInstituteConfig, 
+  getBudgetCapForPhase,
+  POLICY_VERSION,
+  POLICY_LAST_UPDATED,
+  isPolicyExpired,
+  getPolicyWarning
+}
+
+// Layer 7: Audit Trail Types
+export interface ComplianceAuditEntry {
+  timestamp: string
+  moduleId: number | null
+  sectionType: string | null
+  action: 'check' | 'revision' | 'export_attempt' | 'export_success' | 'export_blocked'
+  complianceScore: number
+  agencyAlignmentScore: number
+  issues: string[]
+  passed: boolean
+}
+
+export interface AuditTrail {
+  entries: ComplianceAuditEntry[]
+  lastComplianceCheck: string | null
+  lastSuccessfulExport: string | null
+  totalRevisions: number
+}
+
+// Layer 5: FOA Parsed Data
+export interface FOAParsedData {
+  foaNumber: string
+  title: string
+  extractedAt: string
+  pageLimits: Record<string, number>
+  requiredAttachments: string[]
+  clinicalTrialDesignation: boolean | null
+  budgetCapOverride: number | null
+  smallBusinessMinOverride: number | null
+  researchInstitutionMinOverride: number | null
+  reviewCriteria: string[]
+  specialRequirements: string[]
+  rawText: string
+}
+
+// Legacy budget caps interface (for backward compatibility)
 export interface InstituteBudgetCaps {
   phase1: number
   phase2: number
   phase2b: number | null
 }
 
-export const INSTITUTE_BUDGET_CAPS: Record<NIHInstitute, InstituteBudgetCaps> = {
-  'NCI': { phase1: 400000, phase2: 2000000, phase2b: 4500000 },
-  'NHLBI': { phase1: 275000, phase2: 1750000, phase2b: null },
-  'NIAID': { phase1: 275000, phase2: 1750000, phase2b: null },
-  'NIMH': { phase1: 275000, phase2: 1750000, phase2b: null },
-  'NINDS': { phase1: 275000, phase2: 1750000, phase2b: null },
-  'NIDDK': { phase1: 275000, phase2: 1750000, phase2b: null },
-  'NEI': { phase1: 275000, phase2: 1750000, phase2b: null },
-  'NICHD': { phase1: 275000, phase2: 1750000, phase2b: null },
-  'NIA': { phase1: 275000, phase2: 1750000, phase2b: null },
-  'NIGMS': { phase1: 275000, phase2: 1750000, phase2b: null },
-  'Standard NIH': { phase1: 275000, phase2: 1750000, phase2b: null }
+// Helper to convert new config to legacy format
+export function getInstituteBudgetCaps(institute: NIHInstitute): InstituteBudgetCaps {
+  const config = getInstituteConfig(institute)
+  return {
+    phase1: config.phase1Cap,
+    phase2: config.phase2Cap,
+    phase2b: config.phase2bCap
+  }
 }
+
+// Backward-compatible INSTITUTE_BUDGET_CAPS derived from dynamic config
+export const INSTITUTE_BUDGET_CAPS: Record<NIHInstitute, InstituteBudgetCaps> = (
+  Object.keys(INSTITUTE_CONFIGS) as NIHInstitute[]
+).reduce((acc, key) => {
+  acc[key] = getInstituteBudgetCaps(key)
+  return acc
+}, {} as Record<NIHInstitute, InstituteBudgetCaps>)
 
 export const NIH_INSTITUTES: { code: NIHInstitute; name: string }[] = [
   { code: 'NCI', name: 'National Cancer Institute' },
@@ -41,12 +103,14 @@ export const NIH_INSTITUTES: { code: NIHInstitute; name: string }[] = [
   { code: 'Standard NIH', name: 'Standard NIH (Default Caps)' }
 ]
 
-// FOA Configuration
+// FOA Configuration (Layer 1 & 5)
 export interface FOAConfig {
   direct_phase2_allowed: boolean
   fast_track_allowed: boolean
   phase2b_allowed: boolean
   commercialization_required: boolean
+  // Layer 5: Parsed FOA overrides
+  parsed_foa?: FOAParsedData
 }
 
 // Module State Object
@@ -305,7 +369,7 @@ export interface BudgetData {
   researchInstitutionPercent: number
 }
 
-// Complete Project Schema v2
+// Complete Project Schema v2 (Extended for 8-Layer Compliance)
 export interface ProjectSchemaV2 {
   schema_version: 2
   project_id: string
@@ -315,6 +379,20 @@ export interface ProjectSchemaV2 {
   program_type: ProgramType
   institute: NIHInstitute
   foa_config: FOAConfig
+  
+  // Layer 1: Clinical Trial Flag (required at project creation)
+  clinical_trial_included: boolean
+  
+  // Layer 5: FOA Number and Parsed Data
+  foa_number: string
+  
+  // Layer 7: Audit Trail
+  audit_trail: AuditTrail
+  
+  // Layer 4 & 8: Last Compliance Audit Results
+  last_compliance_score: number | null
+  last_agency_alignment_score: number | null
+  compliance_export_allowed: boolean
   
   // Module States
   module_states: ModuleState[]
@@ -346,6 +424,14 @@ export interface ProjectSchemaV2 {
   // Legacy compatibility
   legacy_budget: BudgetData
   legacy_checklist: Record<string, boolean>
+  
+  // Layer 6: Claim Control - tracked flagged terms
+  flagged_claims: {
+    term: string
+    location: string
+    suggested_replacement: string | null
+    resolved: boolean
+  }[]
 }
 
 // Legacy Schema v1 (for migration)

@@ -1,16 +1,12 @@
-Deno.serve(async (req) => {
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  };
+import { getCompliancePrompt, corsHeaders } from '../_shared/compliancePrompt.ts'
 
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
 
   try {
-    const { moduleContent, grantType, phase, programType } = await req.json();
+    const { moduleContent, grantType, phase, programType, institute, clinicalTrialAllowed } = await req.json();
 
     if (!moduleContent) {
       throw new Error('Module content is required');
@@ -21,11 +17,17 @@ Deno.serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
+    // Layer 2: Inject compliance system prompt
+    const compliancePrompt = getCompliancePrompt('specific_aims', grantType || 'Phase I', institute, clinicalTrialAllowed);
+
     // Build the phase context for Fast Track grants
     const phaseContext = phase ? `This is for ${phase} of a Fast Track application.` : '';
     const grantContext = grantType || 'SBIR/STTR';
 
-    const systemPrompt = `You are an experienced NIH-funded principal investigator writing a Specific Aims page. Write as a domain expert, not a marketing copywriter. ${phaseContext}
+    const systemPrompt = `${compliancePrompt}
+
+=== TASK: GENERATE SPECIFIC AIMS PAGE ===
+You are an experienced NIH-funded principal investigator writing a Specific Aims page. Write as a domain expert, not a marketing copywriter. ${phaseContext}
 
 === HUMAN-LIKE SCIENTIFIC AUTHORSHIP RULES (MANDATORY) ===
 
@@ -88,6 +90,7 @@ For each aim include:
 - Technical approach in 1-2 sentences
 - Expected outcome with quantifiable success criterion
 - Potential challenge and mitigation/alternative approach
+- **Go/No-Go criterion (REQUIRED FOR PHASE I): "Go criterion: [metric] achieves [threshold]. No-Go: [action if failed]"**
 
 **FINAL PARAGRAPH: EXPECTED OUTCOMES & IMPACT** (3-4 sentences)
 - Concrete deliverables upon completion
@@ -104,7 +107,7 @@ For each aim include:
 
 **For ${grantContext}:**
 ${grantType === 'Phase I' || phase === 'Phase I' 
-  ? '- Emphasize feasibility and proof-of-concept\n- Reference preliminary data supporting approach\n- Include go/no-go criteria for Phase II transition\n- Address technical risk with specific mitigation strategies'
+  ? '- Emphasize feasibility and proof-of-concept\n- Reference preliminary data supporting approach\n- MANDATORY: Include explicit Go/No-Go criteria for Phase II transition\n- Address technical risk with specific mitigation strategies'
   : '- Emphasize optimization and scale-up\n- Reference Phase I results (or placeholder)\n- Include regulatory pathway milestones\n- Address manufacturing/commercialization feasibility'}
 
 Write as an experienced investigator, not an AI. Introduce natural variation in phrasing and structure.`;
@@ -153,7 +156,7 @@ ${moduleContent.m3?.aim3_statement ? `- Aim 3: ${moduleContent.m3.aim3_statement
 **Grant Type:** ${grantType || 'Phase I'}
 ${phase ? `**Phase:** ${phase}` : ''}
 
-Generate the complete Specific Aims page now:`;
+Generate the complete Specific Aims page now. Ensure all content complies with NIH requirements and includes Go/No-Go criteria if this is Phase I.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -191,6 +194,7 @@ Generate the complete Specific Aims page now:`;
         phase: phase || null,
         grantType: grantType || 'Phase I',
         generatedAt: new Date().toISOString(),
+        complianceEnforced: true // Layer 2 indicator
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -1,9 +1,18 @@
 import type {
   ProjectSchemaV2, ProjectSchemaV1, ModuleState, ModuleStatus,
   ModuleValidationResult, AIGatingResult, LifecycleValidationResult,
-  ValidationError, ValidationResult, GrantType, FOAConfig, NIHInstitute
+  ValidationError, ValidationResult, GrantType, FOAConfig, NIHInstitute,
+  AuditTrail, ComplianceAuditEntry
 } from './types'
-import { MODULE_DEFINITIONS, DIRECT_PHASE2_REQUIRED_FIELDS, INSTITUTE_BUDGET_CAPS } from './types'
+import { 
+  MODULE_DEFINITIONS, 
+  DIRECT_PHASE2_REQUIRED_FIELDS, 
+  getInstituteConfig,
+  getBudgetCapForPhase,
+  isPolicyExpired,
+  getPolicyWarning
+} from './types'
+import { runComplianceAudit, type ComplianceAuditResult } from './compliance/complianceAudit'
 
 // Generate unique project ID
 function generateProjectId(): string {
@@ -24,23 +33,74 @@ export function createInitialModuleStates(): ModuleState[] {
   }))
 }
 
-// Create new v2 project
+// Create new v2 project with Layer 1 mechanism configuration
+export interface ProjectCreationConfig {
+  programType: 'SBIR' | 'STTR'
+  grantType: GrantType
+  institute: NIHInstitute
+  clinicalTrialIncluded: boolean
+  foaNumber?: string
+}
+
+// Create initial audit trail
+function createInitialAuditTrail(): AuditTrail {
+  return {
+    entries: [],
+    lastComplianceCheck: null,
+    lastSuccessfulExport: null,
+    totalRevisions: 0
+  }
+}
+
+// Create new v2 project (default - for backward compatibility)
 export function createNewProject(): ProjectSchemaV2 {
+  return createNewProjectWithConfig({
+    programType: 'SBIR',
+    grantType: 'Phase I',
+    institute: 'Standard NIH',
+    clinicalTrialIncluded: false
+  })
+}
+
+// Layer 1: Create new project with mandatory mechanism configuration
+export function createNewProjectWithConfig(config: ProjectCreationConfig): ProjectSchemaV2 {
   const now = new Date().toISOString()
+  const instituteConfig = getInstituteConfig(config.institute)
+  
+  // Layer 1: Validate clinical trial compatibility with institute
+  if (config.clinicalTrialIncluded && !instituteConfig.clinicalTrialAllowed) {
+    console.warn(`Warning: Clinical trials not typically allowed for ${config.institute}. Proceeding but review may be impacted.`)
+  }
+  
   return {
     schema_version: 2,
     project_id: generateProjectId(),
     created_at: now,
     updated_at: now,
-    grant_type: null,
-    program_type: 'SBIR',
-    institute: 'Standard NIH',
+    grant_type: config.grantType,
+    program_type: config.programType,
+    institute: config.institute,
     foa_config: {
       direct_phase2_allowed: true,
       fast_track_allowed: true,
-      phase2b_allowed: true,
-      commercialization_required: true
+      phase2b_allowed: instituteConfig.phase2bCap !== null,
+      commercialization_required: config.grantType !== 'Phase I'
     },
+    
+    // Layer 1: Clinical trial flag
+    clinical_trial_included: config.clinicalTrialIncluded,
+    
+    // Layer 5: FOA tracking
+    foa_number: config.foaNumber || '',
+    
+    // Layer 7: Audit trail
+    audit_trail: createInitialAuditTrail(),
+    
+    // Layer 4 & 8: Compliance scores
+    last_compliance_score: null,
+    last_agency_alignment_score: null,
+    compliance_export_allowed: false,
+    
     module_states: createInitialModuleStates(),
     m1_title_concept: {},
     m2_hypothesis: {},
@@ -81,10 +141,13 @@ export function createNewProject(): ProjectSchemaV2 {
       directCosts: 0,
       personnelCosts: 0,
       subawardCosts: 0,
-      smallBusinessPercent: 67,
-      researchInstitutionPercent: 0
+      smallBusinessPercent: config.programType === 'SBIR' ? 67 : 40,
+      researchInstitutionPercent: config.programType === 'STTR' ? 30 : 0
     },
-    legacy_checklist: {}
+    legacy_checklist: {},
+    
+    // Layer 6: Claim control
+    flagged_claims: []
   }
 }
 
@@ -367,58 +430,124 @@ export function validateLifecycle(project: ProjectSchemaV2): LifecycleValidation
   }
 }
 
-// Get budget cap for institute and grant type
+// Layer 8: Get budget cap for institute and grant type using dynamic configuration
 export function getBudgetCap(institute: NIHInstitute, grantType: GrantType | null, phase?: 'phase1' | 'phase2'): number {
-  const caps = INSTITUTE_BUDGET_CAPS[institute] || INSTITUTE_BUDGET_CAPS['Standard NIH']
+  // Use centralized configuration
+  const config = getInstituteConfig(institute)
   
-  if (grantType === 'Phase I') return caps.phase1
-  if (grantType === 'Phase II' || grantType === 'Direct to Phase II') return caps.phase2
-  if (grantType === 'Phase IIB') return caps.phase2b || caps.phase2
+  if (grantType === 'Phase I') return config.phase1Cap
+  if (grantType === 'Phase II' || grantType === 'Direct to Phase II') return config.phase2Cap
+  if (grantType === 'Phase IIB') return config.phase2bCap || config.phase2Cap
   if (grantType === 'Fast Track') {
-    if (phase === 'phase1') return caps.phase1
-    if (phase === 'phase2') return caps.phase2
-    return caps.phase1 + caps.phase2
+    if (phase === 'phase1') return config.phase1Cap
+    if (phase === 'phase2') return config.phase2Cap
+    return config.phase1Cap + config.phase2Cap
   }
-  return caps.phase1
+  return config.phase1Cap
 }
 
-// Budget Validation (DO NOT MODIFY calculation engine)
+// Layer 8: Get allocation requirements using dynamic configuration
+export function getAllocationRequirements(
+  institute: NIHInstitute, 
+  programType: 'SBIR' | 'STTR', 
+  grantType: GrantType | null
+): { smallBusinessMin: number; researchInstitutionMin: number } {
+  const config = getInstituteConfig(institute)
+  
+  if (programType === 'SBIR') {
+    const min = grantType === 'Phase I' || grantType === 'Fast Track' 
+      ? config.sbir.phase1SmallBusinessMin 
+      : config.sbir.phase2SmallBusinessMin
+    return { smallBusinessMin: min, researchInstitutionMin: 0 }
+  } else {
+    return {
+      smallBusinessMin: config.sttr.smallBusinessMin,
+      researchInstitutionMin: config.sttr.researchInstitutionMin
+    }
+  }
+}
+
+// Budget Validation using Layer 8 dynamic configuration (DO NOT MODIFY calculation engine)
 export function validateBudget(project: ProjectSchemaV2): ValidationError[] {
   const errors: ValidationError[] = []
   const budget = project.legacy_budget
   const grantType = project.grant_type
   const institute = project.institute || 'Standard NIH'
+  const programType = project.program_type
   
+  // Layer 8: Use dynamic configuration for budget cap
   const budgetCap = getBudgetCap(institute, grantType)
+  const allocReqs = getAllocationRequirements(institute, programType, grantType)
+  
+  // Layer 8: Check for policy expiration warning
+  const policyWarning = getPolicyWarning()
+  if (policyWarning) {
+    errors.push({ 
+      code: 'POLICY_WARN', 
+      message: policyWarning, 
+      field: 'policy',
+      severity: 'warning'
+    })
+  }
   
   if (budget.directCosts > budgetCap) {
-    errors.push({ code: 'BUDGET_001', message: `Direct costs exceed ${institute} ${grantType} cap of $${budgetCap.toLocaleString()}`, field: 'budget.directCosts' })
+    errors.push({ 
+      code: 'BUDGET_001', 
+      message: `Direct costs exceed ${institute} ${grantType} cap of $${budgetCap.toLocaleString()}`, 
+      field: 'budget.directCosts',
+      severity: 'critical'
+    })
   }
   
   const fastTrackCap = getBudgetCap(institute, 'Fast Track')
   if (grantType === 'Fast Track' && budget.directCosts > fastTrackCap) {
-    errors.push({ code: 'BUDGET_001', message: `Fast Track combined budget exceeds ${institute} limit of $${fastTrackCap.toLocaleString()}`, field: 'budget.directCosts' })
+    errors.push({ 
+      code: 'BUDGET_001', 
+      message: `Fast Track combined budget exceeds ${institute} limit of $${fastTrackCap.toLocaleString()}`, 
+      field: 'budget.directCosts',
+      severity: 'critical'
+    })
   }
   
-  if (project.program_type === 'SBIR') {
-    const minPercent = (grantType === 'Phase I' || grantType === 'Fast Track') ? 67 : 50
-    if (budget.smallBusinessPercent < minPercent) {
-      errors.push({ code: 'BUDGET_002', message: `SBIR ${grantType} requires minimum ${minPercent}% small business effort`, field: 'budget.smallBusinessPercent' })
+  // Layer 8: Use dynamic allocation requirements
+  if (programType === 'SBIR') {
+    if (budget.smallBusinessPercent < allocReqs.smallBusinessMin) {
+      errors.push({ 
+        code: 'BUDGET_002', 
+        message: `SBIR ${grantType} requires minimum ${allocReqs.smallBusinessMin}% small business effort`, 
+        field: 'budget.smallBusinessPercent',
+        severity: 'critical'
+      })
     }
   }
   
-  if (project.program_type === 'STTR') {
-    if (budget.smallBusinessPercent < 40) {
-      errors.push({ code: 'BUDGET_002', message: 'STTR requires minimum 40% small business effort', field: 'budget.smallBusinessPercent' })
+  if (programType === 'STTR') {
+    if (budget.smallBusinessPercent < allocReqs.smallBusinessMin) {
+      errors.push({ 
+        code: 'BUDGET_002', 
+        message: `STTR requires minimum ${allocReqs.smallBusinessMin}% small business effort`, 
+        field: 'budget.smallBusinessPercent',
+        severity: 'critical'
+      })
     }
-    if (budget.researchInstitutionPercent < 30) {
-      errors.push({ code: 'BUDGET_002', message: 'STTR requires minimum 30% research institution effort', field: 'budget.researchInstitutionPercent' })
+    if (budget.researchInstitutionPercent < allocReqs.researchInstitutionMin) {
+      errors.push({ 
+        code: 'BUDGET_002', 
+        message: `STTR requires minimum ${allocReqs.researchInstitutionMin}% research institution effort`, 
+        field: 'budget.researchInstitutionPercent',
+        severity: 'critical'
+      })
     }
   }
   
   const calculatedTotal = budget.personnelCosts + budget.subawardCosts
   if (calculatedTotal > budget.directCosts) {
-    errors.push({ code: 'BUDGET_003', message: 'Personnel + Subaward costs exceed total direct costs', field: 'budget' })
+    errors.push({ 
+      code: 'BUDGET_003', 
+      message: 'Personnel + Subaward costs exceed total direct costs', 
+      field: 'budget',
+      severity: 'error'
+    })
   }
   
   return errors
@@ -470,4 +599,139 @@ export function isGrantTypeAllowed(grantType: GrantType, foa: FOAConfig): boolea
     case 'Phase IIB': return foa.phase2b_allowed
     default: return true
   }
+}
+
+// Layer 7: Add audit trail entry
+export function addAuditEntry(
+  project: ProjectSchemaV2,
+  entry: Omit<ComplianceAuditEntry, 'timestamp'>
+): ProjectSchemaV2 {
+  const newEntry: ComplianceAuditEntry = {
+    ...entry,
+    timestamp: new Date().toISOString()
+  }
+  
+  return {
+    ...project,
+    audit_trail: {
+      ...project.audit_trail,
+      entries: [...project.audit_trail.entries, newEntry],
+      lastComplianceCheck: entry.action === 'check' ? newEntry.timestamp : project.audit_trail.lastComplianceCheck,
+      lastSuccessfulExport: entry.action === 'export_success' ? newEntry.timestamp : project.audit_trail.lastSuccessfulExport,
+      totalRevisions: entry.action === 'revision' ? project.audit_trail.totalRevisions + 1 : project.audit_trail.totalRevisions
+    },
+    last_compliance_score: entry.complianceScore,
+    last_agency_alignment_score: entry.agencyAlignmentScore,
+    compliance_export_allowed: entry.passed
+  }
+}
+
+// Layer 4: Run full compliance audit on project content
+export function runProjectComplianceAudit(
+  project: ProjectSchemaV2,
+  fullContent: string,
+  sectionTypes: string[] = []
+): { result: ComplianceAuditResult; updatedProject: ProjectSchemaV2 } {
+  const result = runComplianceAudit(
+    fullContent,
+    {
+      institute: project.institute,
+      grantType: project.grant_type || 'Phase I',
+      programType: project.program_type,
+      directCosts: project.legacy_budget.directCosts,
+      smallBusinessPercent: project.legacy_budget.smallBusinessPercent,
+      researchInstitutionPercent: project.legacy_budget.researchInstitutionPercent,
+      clinicalTrialIncluded: project.clinical_trial_included,
+      foaNumber: project.foa_number || undefined,
+      foaOverrides: project.foa_config.parsed_foa ? {
+        budgetCap: project.foa_config.parsed_foa.budgetCapOverride || undefined,
+        smallBusinessMin: project.foa_config.parsed_foa.smallBusinessMinOverride || undefined,
+        researchInstitutionMin: project.foa_config.parsed_foa.researchInstitutionMinOverride || undefined,
+        clinicalTrialAllowed: project.foa_config.parsed_foa.clinicalTrialDesignation || undefined
+      } : undefined
+    },
+    sectionTypes
+  )
+  
+  const updatedProject = addAuditEntry(project, {
+    moduleId: null,
+    sectionType: sectionTypes.length > 0 ? sectionTypes.join(', ') : 'full_audit',
+    action: 'check',
+    complianceScore: result.complianceScore.total,
+    agencyAlignmentScore: result.agencyAlignmentScore.total,
+    issues: result.issues.map(i => i.message),
+    passed: result.passed
+  })
+  
+  return { result, updatedProject }
+}
+
+// Layer 4: Check if export is allowed
+export function canExportProject(project: ProjectSchemaV2): { 
+  allowed: boolean
+  reason: string | null
+  complianceScore: number | null
+  agencyAlignmentScore: number | null
+} {
+  if (project.last_compliance_score === null || project.last_agency_alignment_score === null) {
+    return {
+      allowed: false,
+      reason: 'Compliance audit has not been run. Please run a compliance audit before exporting.',
+      complianceScore: null,
+      agencyAlignmentScore: null
+    }
+  }
+  
+  if (project.last_compliance_score < 90) {
+    return {
+      allowed: false,
+      reason: `Compliance score (${project.last_compliance_score}) is below the required threshold of 90.`,
+      complianceScore: project.last_compliance_score,
+      agencyAlignmentScore: project.last_agency_alignment_score
+    }
+  }
+  
+  if (project.last_agency_alignment_score < 100) {
+    return {
+      allowed: false,
+      reason: `Agency alignment score (${project.last_agency_alignment_score}) must be 100 for export.`,
+      complianceScore: project.last_compliance_score,
+      agencyAlignmentScore: project.last_agency_alignment_score
+    }
+  }
+  
+  return {
+    allowed: true,
+    reason: null,
+    complianceScore: project.last_compliance_score,
+    agencyAlignmentScore: project.last_agency_alignment_score
+  }
+}
+
+// Layer 1: Validate mechanism configuration at project creation
+export function validateMechanismConfiguration(config: ProjectCreationConfig): ValidationError[] {
+  const errors: ValidationError[] = []
+  const instituteConfig = getInstituteConfig(config.institute)
+  
+  // Check if Phase IIB is supported by institute
+  if (config.grantType === 'Phase IIB' && instituteConfig.phase2bCap === null) {
+    errors.push({
+      code: 'MECHANISM_001',
+      message: `${config.institute} does not support Phase IIB grants`,
+      field: 'grantType',
+      severity: 'critical'
+    })
+  }
+  
+  // Check clinical trial compatibility
+  if (config.clinicalTrialIncluded && !instituteConfig.clinicalTrialAllowed) {
+    errors.push({
+      code: 'MECHANISM_002',
+      message: `${config.institute} typically does not support clinical trials`,
+      field: 'clinicalTrialIncluded',
+      severity: 'warning'
+    })
+  }
+  
+  return errors
 }
