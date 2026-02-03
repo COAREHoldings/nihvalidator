@@ -1,13 +1,13 @@
 # NIH Grant Validator - Project Continuation Details
 
-**Last Updated:** 2026-02-03 14:23 UTC  
-**Version:** FinalEddie
+**Last Updated:** 2026-02-03 14:30 UTC  
+**Version:** FINALFINAL
 
 ---
 
 ## Live Deployment
 
-**URL:** https://m2gp5oqskdiv.space.minimax.io
+**URL:** https://89n79j8c8if1.space.minimax.io
 
 ---
 
@@ -15,9 +15,9 @@
 
 | Setting | Value |
 |---------|-------|
-| **Project ID** | `raqkwtjsxohnhtcacakb` |
-| **Project URL** | `https://raqkwtjsxohnhtcacakb.supabase.co` |
-| **Anon Key** | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhcWt3dGpzeG9obmh0Y2FjYWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDIyNTQsImV4cCI6MjA4NTI3ODI1NH0.pDpNp4UlpCinhi6gl2qtKhT3t20uUGHU_FUxTxYjttI` |
+| **Project ID** | `dvuhtfzsvcacyrlfettz` |
+| **Project URL** | `https://dvuhtfzsvcacyrlfettz.supabase.co` |
+| **Anon Key** | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2dWh0ZnpzdmNhY3lybGZldHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDk3OTYsImV4cCI6MjA4NTIyNTc5Nn0.vUtnPXeQrzU0kO0E7qK2qJtZ_RCqnXCEFSa60adHld0` |
 
 ### Secrets Configured
 - `OPENAI_API_KEY` - Set in Supabase Edge Function secrets
@@ -46,13 +46,13 @@
 - Real-time validation with field-level feedback
 - Progress tracking and completion status
 
-### 2. Inline Navigation Warning (NEW)
+### 2. Inline Navigation Warning
 - Warns users when navigating away from incomplete modules
 - Shows list of missing required fields
 - "Stay & Complete" or "Continue Anyway" options
 
-### 3. AI Compilation & Review (FIXED)
-- **AI Gating removed** - Always accessible now
+### 3. AI Compilation & Review
+- **AI Gating removed** - Always accessible
 - Actions available:
   - `refine` - Writing quality improvement suggestions
   - `compliance` - NIH compliance checking
@@ -113,27 +113,10 @@ nih-grant-validator/
 
 ---
 
-## Recent Changes (This Session)
-
-1. **Supabase Project Changed**
-   - Migrated from `dvuhtfzsvcacyrlfettz` to `raqkwtjsxohnhtcacakb`
-   - All frontend files updated with new URL and anon key
-
-2. **AI Features Fixed**
-   - Created missing `ai-refine` edge function
-   - Removed AI gating lock in `validation.ts`
-   - Configured OpenAI API key as project secret
-
-3. **Inline Validation Added** (previous session)
-   - Navigation warning modal for incomplete modules
-   - `pendingNavigation` state management
-
----
-
 ## To Continue Development
 
 ### Option 1: Use the ZIP file
-1. Extract `nih-grant-validator-2026-02-03-1423-FinalEddie.zip`
+1. Extract `nih-grant-validator-2026-02-03-1430-FINALFINAL.zip`
 2. Run `pnpm install`
 3. Run `pnpm dev` for local development
 4. Run `pnpm build` to build for production
