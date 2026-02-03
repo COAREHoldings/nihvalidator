@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { ProjectSchemaV2, ModuleState, M3SpecificAims, M5ExperimentalApproach, M6Budget, M7Regulatory, M7Phase2Additional } from '../types'
 import { MODULE_DEFINITIONS } from '../types'
 import { getBudgetCap } from '../validation'
-import { Plus, Trash2, AlertTriangle, Lock, CheckCircle, Sparkles, Loader2, X, Lightbulb, FileText, ShieldCheck } from 'lucide-react'
+import { Plus, Trash2, AlertTriangle, Lock, CheckCircle, Sparkles, Loader2, X, Lightbulb, FileText, ShieldCheck, ArrowRight, ChevronRight, FileCheck } from 'lucide-react'
 
 const SUPABASE_URL = 'https://dvuhtfzsvcacyrlfettz.supabase.co'
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2dWh0ZnpzdmNhY3lybGZldHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDk3OTYsImV4cCI6MjA4NTIyNTc5Nn0.vUtnPXeQrzU0kO0E7qK2qJtZ_RCqnXCEFSa60adHld0'
@@ -12,6 +12,10 @@ interface Props {
   moduleId: number
   moduleState: ModuleState
   onUpdate: (updates: Partial<ProjectSchemaV2>) => void
+  onNext?: () => void
+  onValidate?: () => void
+  isLastModule?: boolean
+  totalModules?: number
 }
 
 interface AIState {
@@ -313,7 +317,7 @@ function PhaseIndicator({ phase }: { phase: 'I' | 'II' | 'Shared' }) {
   )
 }
 
-export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props) {
+export function ModuleEditor({ project, moduleId, moduleState, onUpdate, onNext, onValidate, isLastModule, totalModules }: Props) {
   const def = MODULE_DEFINITIONS.find(m => m.id === moduleId)
   const isFastTrack = project.grant_type === 'Fast Track'
   const hasPhases = isFastTrack && [3, 5, 6, 7].includes(moduleId)
@@ -1021,6 +1025,65 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate }: Props
       {moduleId === 8 && renderM8()}
       
       {moduleId === 2 && renderDirectPhase2()}
+
+      {/* Module Footer - Progress & Next Steps */}
+      <div className="mt-8 pt-6 border-t border-neutral-200">
+        {moduleState.status === 'complete' ? (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-green-800">Module Complete!</p>
+                <p className="text-sm text-green-600">All required fields have been filled out.</p>
+              </div>
+            </div>
+          </div>
+        ) : moduleState.status === 'partial' ? (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-amber-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-amber-800">In Progress</p>
+                <p className="text-sm text-amber-600">
+                  {moduleState.required_fields.length - moduleState.completed_fields.length} required field(s) remaining
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {/* Next Action Button */}
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-neutral-500">
+            Module {moduleId} of {totalModules || 8}
+          </div>
+          {isLastModule ? (
+            <button
+              onClick={onValidate}
+              className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-sm"
+            >
+              <FileCheck className="w-5 h-5" />
+              Run Validation
+            </button>
+          ) : (
+            <button
+              onClick={onNext}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors shadow-sm ${
+                moduleState.status === 'complete'
+                  ? 'bg-primary-600 text-white hover:bg-primary-700'
+                  : 'bg-neutral-200 text-neutral-700 hover:bg-neutral-300'
+              }`}
+            >
+              Continue to Module {moduleId + 1}
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

@@ -699,6 +699,10 @@ export default function App() {
                     moduleId={activeModule}
                     moduleState={project.module_states.find(m => m.module_id === activeModule)!}
                     onUpdate={updateProject}
+                    onNext={() => setActiveModule(prev => Math.min(totalModules, prev + 1))}
+                    onValidate={runValidation}
+                    isLastModule={activeModule === totalModules}
+                    totalModules={totalModules}
                   />
                 )}
               </div>
