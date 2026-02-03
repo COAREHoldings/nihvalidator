@@ -268,73 +268,167 @@ ${grantContent}
 Evaluate as if you're deciding whether your company should partner with or acquire this technology. Follow the exact structure specified.`
         break
 
+      case 'hostile':
+        // Hostile reviewer looking for reasons to triage
+        systemPrompt = `You are a hostile NIH reviewer who wants to triage this grant. You've reviewed 500+ grants and seen every trick. Your job is to find every possible reason this application should NOT be funded.
+
+Be ruthless but fair - only cite actual weaknesses present in the text.
+
+Your evaluation must be structured EXACTLY as follows:
+
+## TOP 10 REASONS THIS APPLICATION WOULD NOT BE FUNDED
+
+For each reason, provide:
+- **Reason [N]: [Title]**
+- Classification: [FATAL / MAJOR / MINOR]
+- Evidence: [Quote or reference from the grant]
+- Why it matters: [Impact on fundability]
+
+### FATAL FLAWS (Any one = likely triage)
+[List all Fatal-classified issues]
+
+### MAJOR WEAKNESSES (Multiple = likely triage)
+[List all Major-classified issues]
+
+### MINOR ISSUES (Accumulation hurts score)
+[List all Minor-classified issues]
+
+## TRIAGE LIKELIHOOD
+- Probability of Triage: [X]%
+- Most Likely Triage Reason: [Single biggest issue]
+
+## FATAL FLAW COUNT: [N]
+
+## FLAGS
+[FAIL_FATAL if any Fatal flaw exists, otherwise PASS_FATAL]
+
+## IF RESUBMITTING
+Top 3 changes that would save this application:
+1. [Change 1]
+2. [Change 2]
+3. [Change 3]`
+
+        userPrompt = `As a hostile reviewer looking for reasons to triage, evaluate the following ${grantType || 'SBIR'} grant content:
+
+---
+${grantContent}
+---
+
+Find every possible reason this should NOT be funded. Be ruthless but cite actual evidence from the text.`
+        break
+
       case 'comprehensive':
-        // Run all 4 reviews
-        systemPrompt = `You are conducting a comprehensive NIH SBIR/STTR grant review combining 4 expert perspectives:
+        // Run all 5 reviews including hostile
+        systemPrompt = `You are conducting a comprehensive NIH SBIR/STTR grant review combining 5 expert perspectives:
 1. Study Section Reviewer (Scientific Merit)
 2. Biostatistician (Statistical Rigor)
 3. Feasibility Reviewer (Phase I Realism)
 4. BD Executive (Commercial Viability)
+5. Hostile Reviewer (Triage Risk Assessment)
 
 Provide a UNIFIED assessment with clear sections for each perspective.
 
 ## EXECUTIVE SUMMARY
 [2-3 sentence overall assessment]
 
-## SCIENTIFIC MERIT REVIEW
+## 1. SCIENTIFIC MERIT REVIEW
 - Impact Score: [1-9]
 - Key Strengths: [bullet list]
 - Key Weaknesses: [bullet list]
 - Kill-Risk Statements: [3 items]
-- FLAG: [PASS_SCIENCE or FAIL_SCIENCE]
+- FLAG: [PASS_SCIENCE or FAIL_SCIENCE] (FAIL if Impact > 5)
 
-## STATISTICAL RIGOR REVIEW
+## 2. STATISTICAL RIGOR REVIEW
 - Overall Confidence: [0.0-1.0]
-- Aim Confidence Scores: [list each aim]
+- Aim Confidence Scores: [list each aim with score]
 - Critical Statistical Gaps: [bullet list]
-- FLAG: [PASS_STATS or FAIL_STATS]
+- FLAG: [PASS_STATS or FAIL_STATS] (FAIL if any Aim < 0.75)
 
-## FEASIBILITY REVIEW
+## 3. FEASIBILITY REVIEW
 - Feasibility Score: [0-100]%
 - Timeline Realism: [assessment]
 - Vague Milestones: [count and list]
+- Missing Go/No-Go Criteria: [list]
 - Over-Ambitious Elements: [bullet list]
-- FLAG: [PASS_FEASIBILITY or FAIL_FEASIBILITY]
+- FLAG: [PASS_FEASIBILITY or FAIL_FEASIBILITY] (FAIL if >2 vague milestones)
 
-## COMMERCIAL VIABILITY REVIEW
+## 4. COMMERCIAL VIABILITY REVIEW
 - Commercial Score: [0-100]%
 - Named Competitors: [list or "NONE"]
 - Regulatory Pathway: [clear/vague/missing]
 - Cost Estimate: [provided/missing]
+- Reimbursement Strategy: [clear/vague/missing]
 - Fantasy Projections: [bullet list]
-- FLAG: [PASS_COMMERCIAL or FAIL_COMMERCIAL]
+- FLAG: [PASS_COMMERCIAL or FAIL_COMMERCIAL] (FAIL if TAM-only logic)
+
+## 5. HOSTILE TRIAGE REVIEW
+- Fatal Flaws Found: [count]
+- Fatal Flaws: [list each with evidence]
+- Major Weaknesses: [count and list]
+- Minor Issues: [count]
+- Triage Probability: [X]%
+- FLAG: [PASS_FATAL or FAIL_FATAL] (FAIL if any Fatal flaw)
 
 ## AGGREGATE ASSESSMENT
 - Funding Likelihood: [X]%
 - Primary Barrier to Funding: [single biggest issue]
 - If Funded, Likely Success: [X]%
 
-## FAIL FLAGS SUMMARY
-[List all FAIL flags or "ALL PASS"]
+## ALL FLAGS SUMMARY
+| Flag | Status | Reason |
+|------|--------|--------|
+| FAIL_SCIENCE | [PASS/FAIL] | [reason] |
+| FAIL_STATS | [PASS/FAIL] | [reason] |
+| FAIL_FEASIBILITY | [PASS/FAIL] | [reason] |
+| FAIL_COMMERCIAL | [PASS/FAIL] | [reason] |
+| FAIL_FATAL | [PASS/FAIL] | [reason] |
 
-## TOP 5 RECOMMENDATIONS FOR RESUBMISSION
-1. [Most critical fix]
-2. [Second priority]
-3. [Third priority]
-4. [Fourth priority]
-5. [Fifth priority]`
+## FINAL VERDICT
+[If ANY flag is FAIL:]
+### ❌ REVISION REQUIRED
+This application has critical issues that must be addressed before submission.
 
-        userPrompt = `Conduct a comprehensive 4-perspective review of the following ${grantType || 'SBIR'} grant content:
+### STRUCTURED REVISION REPORT
+**Priority 1 - Must Fix (Fatal/Science):**
+- Section: [section name]
+- Current Issue: [what's wrong]
+- Suggested Fix: [specific improvement]
+
+**Priority 2 - Should Fix (Stats/Feasibility):**
+- Section: [section name]  
+- Current Issue: [what's wrong]
+- Suggested Fix: [specific improvement]
+
+**Priority 3 - Nice to Fix (Commercial/Minor):**
+- Section: [section name]
+- Current Issue: [what's wrong]
+- Suggested Fix: [specific improvement]
+
+### SECTIONS NEEDING CORRECTION
+[List each section with specific line-by-line guidance]
+
+[If ALL flags are PASS:]
+### ✅ REVIEWER-HARDENED
+This application has passed all 5 reviewer perspectives and is ready for export.
+- Scientific Merit: Solid
+- Statistical Rigor: Adequate
+- Feasibility: Realistic
+- Commercial Viability: Credible
+- Triage Risk: Low
+
+**EXPORT AUTHORIZED**`
+
+        userPrompt = `Conduct a comprehensive 5-perspective review of the following ${grantType || 'SBIR'} grant content:
 
 ---
 ${grantContent}
 ---
 
-Evaluate from all four expert perspectives and provide the unified assessment structure specified.`
+Evaluate from all five expert perspectives. If ANY fail flag is triggered, provide a detailed revision report. If all pass, certify as Reviewer-Hardened.`
         break
 
       default:
-        throw new Error(`Unknown review type: ${reviewType}. Valid types: scientific, statistics, feasibility, commercial, comprehensive`)
+        throw new Error(`Unknown review type: ${reviewType}. Valid types: scientific, statistics, feasibility, commercial, hostile, comprehensive`)
     }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -368,9 +462,11 @@ Evaluate from all four expert perspectives and provide the unified assessment st
       FAIL_STATS: reviewContent.includes('FAIL_STATS'),
       FAIL_FEASIBILITY: reviewContent.includes('FAIL_FEASIBILITY'),
       FAIL_COMMERCIAL: reviewContent.includes('FAIL_COMMERCIAL'),
+      FAIL_FATAL: reviewContent.includes('FAIL_FATAL'),
     }
     
     const anyFail = Object.values(flags).some(f => f)
+    const isReviewerHardened = !anyFail && reviewContent.includes('REVIEWER-HARDENED')
 
     return new Response(
       JSON.stringify({ 
@@ -379,6 +475,9 @@ Evaluate from all four expert perspectives and provide the unified assessment st
         reviewType,
         flags,
         overallPass: !anyFail,
+        reviewerHardened: isReviewerHardened,
+        exportAuthorized: isReviewerHardened,
+        revisionRequired: anyFail,
         timestamp: new Date().toISOString()
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
