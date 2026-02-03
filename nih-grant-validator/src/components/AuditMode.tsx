@@ -4,8 +4,8 @@ import {
   Upload, FileText, CheckCircle, XCircle, AlertTriangle, 
   Download, Sparkles, ChevronDown, ChevronUp, ArrowLeft,
   FileCheck, AlertCircle, Info, Users, DollarSign, Briefcase, 
-  ClipboardList, Loader2, Plus, Trash2, File, Type, X, Clock,
-  Eye, FileUp, Layers
+  ClipboardList, Loader2, Plus, Trash2, File as FileIcon, Type, X, Clock,
+  Eye, FileUp, Layers, Home
 } from 'lucide-react'
 import * as pdfjsLib from 'pdfjs-dist'
 import mammoth from 'mammoth'
@@ -496,11 +496,31 @@ export function AuditMode({ onBack }: AuditModeProps) {
   return (
     <div className="min-h-screen bg-neutral-50">
       <header className="sticky top-0 z-50 bg-white border-b border-neutral-200 h-16 flex items-center px-4 md:px-6">
-        <button onClick={onBack} className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900 mr-4">
-          <ArrowLeft className="w-5 h-5" />
-          <span className="hidden sm:inline">Back</span>
+        {/* Home Button */}
+        <button 
+          onClick={onBack} 
+          className="flex items-center gap-2 text-neutral-900 hover:text-primary-600 transition-colors mr-4"
+        >
+          <Home className="w-5 h-5" />
+          <span className="font-semibold hidden sm:inline">NIH Validator</span>
         </button>
-        <h1 className="text-lg font-semibold text-neutral-900">Grant Audit Engine</h1>
+
+        {/* Navigation Tabs */}
+        <nav className="flex items-center gap-1 md:gap-2">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100 rounded-lg"
+          >
+            <ClipboardList className="w-4 h-4" />
+            <span className="hidden sm:inline">Build Mode</span>
+          </button>
+          <span className="text-neutral-300">|</span>
+          <span className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium bg-indigo-100 text-indigo-700 rounded-lg">
+            <FileCheck className="w-4 h-4" />
+            <span className="hidden sm:inline">Audit Mode</span>
+          </span>
+        </nav>
+
         <div className="ml-auto">
           <span className="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-medium rounded-full">
             Advisory Pre-Submission Audit
@@ -829,7 +849,7 @@ export function AuditMode({ onBack }: AuditModeProps) {
                           <div className="mb-3 space-y-2">
                             {cat.files.map(f => (
                               <div key={f.id} className="flex items-center gap-3 p-2 bg-white rounded border border-neutral-200">
-                                <File className="w-4 h-4 text-neutral-400" />
+                                <FileIcon className="w-4 h-4 text-neutral-400" />
                                 <span className="flex-1 text-sm text-neutral-700 truncate">{f.fileName}</span>
                                 <span className="text-xs text-neutral-400">{Math.round(f.content.length / 1000)}K</span>
                                 {f.audit && (
