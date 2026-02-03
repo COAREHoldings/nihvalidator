@@ -5,7 +5,7 @@
         "id": "1",
         "content": "Implement Research Intelligence Dashboard",
         "details": "4 panels: Grants.gov, NIH RePORTER, PubMed, ClinicalTrials.gov\n4 edge functions with caching\nContext-aware queries\nRead-only, isolated from compliance engine",
-        "status": "in_progress",
+        "status": "completed",
         "priority": "high"
       }
     }
