@@ -10,7 +10,7 @@ import { AuditMode } from './components/AuditMode'
 import type { ProjectSchemaV2, ValidationResult } from './types'
 import { INSTITUTE_BUDGET_CAPS } from './types'
 import { createNewProject, updateModuleStates, runFullValidation, checkAIGating, getBudgetCap } from './validation'
-import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, ChevronLeft, Briefcase, Upload, FileText, Home, Menu, X } from 'lucide-react'
+import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, ChevronLeft, Briefcase, Upload, FileText, Home, Menu, X, BookOpen, FileOutput, ListOrdered } from 'lucide-react'
 import { DocumentImport } from './components/DocumentImport'
 import { SpecificAimsGenerator } from './components/SpecificAimsGenerator'
 
@@ -30,6 +30,9 @@ export default function App() {
   const [showImport, setShowImport] = useState(false)
   const [showAimsGenerator, setShowAimsGenerator] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [showDocGenerator, setShowDocGenerator] = useState<'titles' | 'research' | 'references' | 'commercialization' | null>(null)
+  const [generatedContent, setGeneratedContent] = useState<{ type: string; content: string } | null>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   // Update module states when project changes
   useEffect(() => {
@@ -411,21 +414,65 @@ export default function App() {
               )}
             </div>
 
-            {/* Generate Specific Aims Button */}
-            <button
-              onClick={() => setShowAimsGenerator(true)}
-              disabled={!canGenerateAims}
-              className="mt-6 w-full px-4 py-3 bg-indigo-500 text-white font-semibold rounded-lg hover:bg-indigo-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              title={!canGenerateAims ? 'Complete Modules 1-4 to generate Specific Aims' : 'Generate NIH Specific Aims page'}
-            >
-              <FileText className="w-5 h-5" />
-              Generate Specific Aims
-            </button>
+            {/* Generate Documents Section */}
+            <div className="mt-6 pt-4 border-t border-neutral-200">
+              <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">Generate Documents</h4>
+              
+              <button
+                onClick={() => setShowDocGenerator('titles')}
+                disabled={!canGenerateAims}
+                className="w-full mb-2 px-3 py-2 text-left text-sm bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <ListOrdered className="w-4 h-4" />
+                Generate 3 Titles
+              </button>
+
+              <button
+                onClick={() => setShowAimsGenerator(true)}
+                disabled={!canGenerateAims}
+                className="w-full mb-2 px-3 py-2 text-left text-sm bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg hover:bg-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <FileText className="w-4 h-4" />
+                Generate Specific Aims
+              </button>
+
+              <button
+                onClick={() => setShowDocGenerator('research')}
+                disabled={overallProgress < 5}
+                className="w-full mb-2 px-3 py-2 text-left text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                title={overallProgress < 5 ? 'Complete at least 5 modules' : 'Generate Research Strategy'}
+              >
+                <BookOpen className="w-4 h-4" />
+                Generate Research Strategy
+              </button>
+
+              <button
+                onClick={() => setShowDocGenerator('references')}
+                disabled={overallProgress < 5}
+                className="w-full mb-2 px-3 py-2 text-left text-sm bg-purple-50 text-purple-700 border border-purple-200 rounded-lg hover:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                title={overallProgress < 5 ? 'Complete at least 5 modules' : 'Generate References'}
+              >
+                <FileOutput className="w-4 h-4" />
+                Generate References
+              </button>
+
+              {showCommercializationModule && (
+                <button
+                  onClick={() => setShowDocGenerator('commercialization')}
+                  disabled={overallProgress < 6}
+                  className="w-full mb-2 px-3 py-2 text-left text-sm bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  title={overallProgress < 6 ? 'Complete at least 6 modules' : 'Generate Commercialization Plan'}
+                >
+                  <Briefcase className="w-4 h-4" />
+                  Generate Commercialization
+                </button>
+              )}
+            </div>
 
             <button
               onClick={runValidation}
               disabled={!canValidate}
-              className="mt-3 w-full px-4 py-3 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="mt-4 w-full px-4 py-3 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <FileCheck className="w-5 h-5" />
               Run Validation
@@ -646,6 +693,137 @@ export default function App() {
           project={project}
           onClose={() => setShowAimsGenerator(false)}
         />
+      )}
+
+      {/* Document Generator Modal */}
+      {showDocGenerator && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-neutral-200">
+              <h3 className="text-lg font-semibold text-neutral-900">
+                {showDocGenerator === 'titles' && '🎯 Generate Project Titles'}
+                {showDocGenerator === 'research' && '📚 Generate Research Strategy'}
+                {showDocGenerator === 'references' && '📖 Generate References'}
+                {showDocGenerator === 'commercialization' && '💼 Generate Commercialization Plan'}
+              </h3>
+              <button
+                onClick={() => { setShowDocGenerator(null); setGeneratedContent(null); }}
+                className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-auto p-6">
+              {!generatedContent ? (
+                <div className="text-center py-8">
+                  <p className="text-neutral-600 mb-6">
+                    {showDocGenerator === 'titles' && 'Generate 3 compelling project titles based on your module content.'}
+                    {showDocGenerator === 'research' && 'Generate a complete NIH Research Strategy (Significance, Innovation, Approach) based on your modules.'}
+                    {showDocGenerator === 'references' && 'Generate relevant scientific references to support your Research Strategy.'}
+                    {showDocGenerator === 'commercialization' && 'Generate a 12-page NIH Commercialization Plan with all 6 required sections.'}
+                  </p>
+                  <button
+                    onClick={async () => {
+                      setIsGenerating(true)
+                      try {
+                        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://dvuhtfzsvcacyrlfettz.supabase.co'
+                        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2dWh0ZnpzdmNhY3lybGZldHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDk3OTYsImV4cCI6MjA4NTIyNTc5Nn0.vUtnPXeQrzU0kO0E7qK2qJtZ_RCqnXCEFSa60adHld0'
+                        
+                        const response = await fetch(`${supabaseUrl}/functions/v1/generate-document`, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${supabaseAnonKey}`
+                          },
+                          body: JSON.stringify({
+                            documentType: showDocGenerator,
+                            grantType: project.grant_type,
+                            modules: {
+                              m1: project.m1_title_concept,
+                              m2: project.m2_hypothesis,
+                              m3: project.m3_specific_aims,
+                              m3_fast_track: project.m3_fast_track,
+                              m4: project.m4_team_mapping,
+                              m5: project.m5_experimental_approach,
+                              m6: project.m6_budget,
+                              m7: project.m7_regulatory,
+                              m9: project.m9_commercialization
+                            }
+                          })
+                        })
+                        
+                        const data = await response.json()
+                        if (data.content) {
+                          setGeneratedContent({ type: showDocGenerator, content: data.content })
+                        } else if (data.error) {
+                          throw new Error(data.error.message || 'Generation failed')
+                        }
+                      } catch (err) {
+                        console.error('Generation error:', err)
+                        alert('Failed to generate content. Please try again.')
+                      } finally {
+                        setIsGenerating(false)
+                      }
+                    }}
+                    disabled={isGenerating}
+                    className="px-8 py-3 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 disabled:opacity-50 flex items-center gap-2 mx-auto"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-5 h-5" />
+                        Generate Now
+                      </>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <div className="prose prose-sm max-w-none">
+                  <pre className="whitespace-pre-wrap font-sans text-sm text-neutral-700 leading-relaxed bg-neutral-50 p-4 rounded-lg">
+                    {generatedContent.content}
+                  </pre>
+                </div>
+              )}
+            </div>
+
+            {generatedContent && (
+              <div className="flex items-center justify-end gap-3 p-4 border-t border-neutral-200 bg-neutral-50">
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(generatedContent.content)
+                    alert('Copied to clipboard!')
+                  }}
+                  className="px-4 py-2 bg-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-300 flex items-center gap-2"
+                >
+                  Copy to Clipboard
+                </button>
+                <button
+                  onClick={() => {
+                    const blob = new Blob([generatedContent.content], { type: 'text/plain' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `${generatedContent.type}_${Date.now()}.txt`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                  }}
+                  className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   )
