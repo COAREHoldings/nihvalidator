@@ -268,6 +268,89 @@ ${grantContent}
 Evaluate as if you're deciding whether your company should partner with or acquire this technology. Follow the exact structure specified.`
         break
 
+      case 'voice':
+        // Authenticity and investigator voice evaluation
+        systemPrompt = `You are an experienced NIH program officer and former study section chair who has read thousands of grants. You can instantly tell when a grant was written by the actual investigator vs. ghost-written, AI-generated, or written by a professional grant writer who doesn't understand the science.
+
+Your job is to evaluate AUTHENTICITY and INVESTIGATOR VOICE.
+
+Your evaluation must be structured EXACTLY as follows:
+
+## INVESTIGATOR VOICE ASSESSMENT
+
+### 1. DOMAIN KNOWLEDGE INDICATORS
+- Evidence of deep domain expertise: [Present/Absent/Superficial]
+- Specific examples found: [Quote passages showing real knowledge]
+- Red flags for surface-level understanding: [List any]
+- Domain Knowledge Score: [0-10]
+
+### 2. MECHANISTIC FLUENCY
+- Uses pathway/mechanism language naturally: [Yes/No/Forced]
+- Correct use of technical terminology: [Yes/No/Errors noted]
+- Evidence of understanding WHY, not just WHAT: [Present/Absent]
+- Specific mechanistic statements: [Quote examples]
+- Mechanistic Fluency Score: [0-10]
+
+### 3. OWNERSHIP VOICE
+- Writing sounds like investigator's own thinking: [Yes/No/Mixed]
+- Personal investment/passion detectable: [Yes/No]
+- "We hypothesize" vs. generic "It is hypothesized": [Active/Passive]
+- Specific first-person ownership statements: [Quote examples]
+- Signs of authentic struggle with the science: [Present/Absent]
+- Ownership Voice Score: [0-10]
+
+### 4. DATA FAMILIARITY
+- References to preliminary data sound authentic: [Yes/No/Generic]
+- Specific experimental details mentioned: [Yes/No]
+- Awareness of data limitations: [Present/Absent]
+- Evidence PI has actually seen/generated the data: [Strong/Weak/None]
+- Data Familiarity Score: [0-10]
+
+### 5. VOICE FLATTENING INDICATORS
+Check for these signs of generic/AI/ghost-written content:
+
+| Indicator | Present? | Evidence |
+|-----------|----------|----------|
+| Excessive hedging ("may potentially") | [Y/N] | [quote] |
+| Buzzword stacking without substance | [Y/N] | [quote] |
+| Generic transition phrases overused | [Y/N] | [quote] |
+| MBA/consulting tone | [Y/N] | [quote] |
+| Perfect grammar but no voice | [Y/N] | [quote] |
+| Claims without mechanistic anchor | [Y/N] | [quote] |
+| Symmetric sentence structures | [Y/N] | [quote] |
+| Hyperbolic adjectives (revolutionary, groundbreaking) | [Y/N] | [quote] |
+| Missing domain-specific idioms | [Y/N] | [note] |
+| Unnaturally smooth prose | [Y/N] | [note] |
+
+**Voice Flattening Indicators Found: [count]/10**
+
+### OVERALL AUTHENTICITY ASSESSMENT
+- Composite Authenticity Score: [0-100]
+- Writing appears to be: [Investigator-authored / Professionally ghost-written / AI-assisted / AI-generated / Mixed]
+- Confidence in assessment: [High/Medium/Low]
+
+### SPECIFIC PASSAGES FLAGGED
+[Quote specific passages that seem inauthentic with explanation]
+
+### RECOMMENDATIONS FOR VOICE RESTORATION
+If voice flattening detected:
+1. [Specific suggestion to restore authentic voice]
+2. [Specific suggestion]
+3. [Specific suggestion]
+
+## FLAGS
+[PASS_VOICE if Authenticity Score >= 70 and Voice Flattening Indicators <= 3]
+[FAIL_VOICE_FLATTENING if Authenticity Score < 70 OR Voice Flattening Indicators > 3]`
+
+        userPrompt = `Evaluate the authenticity and investigator voice of the following ${grantType || 'SBIR'} grant content:
+
+---
+${grantContent}
+---
+
+Determine whether this reads like it was written by the actual investigator with genuine domain knowledge, or if it shows signs of voice flattening (generic, AI-generated, ghost-written, or MBA-toned). Cite specific evidence.`
+        break
+
       case 'hostile':
         // Hostile reviewer looking for reasons to triage
         systemPrompt = `You are a hostile NIH reviewer who wants to triage this grant. You've reviewed 500+ grants and seen every trick. Your job is to find every possible reason this application should NOT be funded.
@@ -318,13 +401,14 @@ Find every possible reason this should NOT be funded. Be ruthless but cite actua
         break
 
       case 'comprehensive':
-        // Run all 5 reviews including hostile
-        systemPrompt = `You are conducting a comprehensive NIH SBIR/STTR grant review combining 5 expert perspectives:
+        // Run all 6 reviews including hostile and voice
+        systemPrompt = `You are conducting a comprehensive NIH SBIR/STTR grant review combining 6 expert perspectives:
 1. Study Section Reviewer (Scientific Merit)
 2. Biostatistician (Statistical Rigor)
 3. Feasibility Reviewer (Phase I Realism)
 4. BD Executive (Commercial Viability)
 5. Hostile Reviewer (Triage Risk Assessment)
+6. Voice & Authenticity Reviewer (LLM Detection Risk)
 
 Provide a UNIFIED assessment with clear sections for each perspective.
 
@@ -369,6 +453,29 @@ Provide a UNIFIED assessment with clear sections for each perspective.
 - Triage Probability: [X]%
 - FLAG: [PASS_FATAL or FAIL_FATAL] (FAIL if any Fatal flaw)
 
+## 6. VOICE & AUTHENTICITY REVIEW
+Evaluate whether this proposal reflects authentic scientific authorship or shows signs of LLM-generated text:
+
+### Voice Authenticity Indicators
+- Domain Knowledge Evidence: [Does it show real investigator expertise? Examples?]
+- Technical Language Precision: [Lab jargon, method-specific terminology?]
+- Mentor/Collaborator Voice: [Does it sound like K99 vs R01 vs established PI?]
+- Failure Acknowledgment: [Does it mention preliminary dead-ends or pivots?]
+- Research Path Narrative: [Why THIS approach over alternatives?]
+
+### LLM Red Flags Detected
+- Hyperbolic Language: [List any "groundbreaking", "revolutionary", "transformative" instances]
+- Perfect Structure: [Suspiciously balanced pros/cons, too-clean organization]
+- Generic Enthusiasm: [Hollow excitement without substance]
+- Missing Specificity: [Vague where a real researcher would be precise]
+- Absent Skepticism: [No mention of what could go wrong]
+
+### Authenticity Score: [0-100]%
+- Real Investigator Markers: [count/10]
+- LLM Markers Detected: [count/10]
+
+- FLAG: [PASS_VOICE or VOICE_FLATTENING] (VOICE_FLATTENING if Authenticity < 70% or >3 LLM red flags)
+
 ## AGGREGATE ASSESSMENT
 - Funding Likelihood: [X]%
 - Primary Barrier to Funding: [single biggest issue]
@@ -382,6 +489,7 @@ Provide a UNIFIED assessment with clear sections for each perspective.
 | FAIL_FEASIBILITY | [PASS/FAIL] | [reason] |
 | FAIL_COMMERCIAL | [PASS/FAIL] | [reason] |
 | FAIL_FATAL | [PASS/FAIL] | [reason] |
+| VOICE_FLATTENING | [PASS/FAIL] | [reason] |
 
 ## FINAL VERDICT
 [If ANY flag is FAIL:]
@@ -409,22 +517,23 @@ This application has critical issues that must be addressed before submission.
 
 [If ALL flags are PASS:]
 ### ✅ REVIEWER-HARDENED
-This application has passed all 5 reviewer perspectives and is ready for export.
+This application has passed all 6 reviewer perspectives and is ready for export.
 - Scientific Merit: Solid
 - Statistical Rigor: Adequate
 - Feasibility: Realistic
 - Commercial Viability: Credible
 - Triage Risk: Low
+- Voice Authenticity: Human-like
 
 **EXPORT AUTHORIZED**`
 
-        userPrompt = `Conduct a comprehensive 5-perspective review of the following ${grantType || 'SBIR'} grant content:
+        userPrompt = `Conduct a comprehensive 6-perspective review of the following ${grantType || 'SBIR'} grant content:
 
 ---
 ${grantContent}
 ---
 
-Evaluate from all five expert perspectives. If ANY fail flag is triggered, provide a detailed revision report. If all pass, certify as Reviewer-Hardened.`
+Evaluate from all six expert perspectives including voice authenticity. If ANY fail flag is triggered (including VOICE_FLATTENING), provide a detailed revision report. If all pass, certify as Reviewer-Hardened.`
         break
 
       default:
@@ -463,6 +572,7 @@ Evaluate from all five expert perspectives. If ANY fail flag is triggered, provi
       FAIL_FEASIBILITY: reviewContent.includes('FAIL_FEASIBILITY'),
       FAIL_COMMERCIAL: reviewContent.includes('FAIL_COMMERCIAL'),
       FAIL_FATAL: reviewContent.includes('FAIL_FATAL'),
+      VOICE_FLATTENING: reviewContent.includes('VOICE_FLATTENING'),
     }
     
     const anyFail = Object.values(flags).some(f => f)
