@@ -7,12 +7,14 @@ import { PriorPhaseEditor } from './components/PriorPhaseEditor'
 import { AIRefinement } from './components/AIRefinement'
 import { CommercializationDirector } from './components/CommercializationDirector'
 import { AuditMode } from './components/AuditMode'
+import { ComplianceAuditPanel } from './components/ComplianceAuditPanel'
 import type { ProjectSchemaV2, ValidationResult } from './types'
 import { getBudgetCapForPhase, getInstituteConfig } from './compliance'
 import { updateModuleStates, runFullValidation, checkAIGating } from './validation'
-import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, ChevronLeft, Briefcase, Upload, FileText, Home, Menu, X, BookOpen, FileOutput, ListOrdered, AlertCircle } from 'lucide-react'
+import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, ChevronLeft, Briefcase, Upload, FileText, Home, Menu, X, BookOpen, FileOutput, ListOrdered, AlertCircle, ShieldCheck } from 'lucide-react'
 import { DocumentImport } from './components/DocumentImport'
 import { SpecificAimsGenerator } from './components/SpecificAimsGenerator'
+import { FOAUpload } from './components/FOAUpload'
 
 type AppMode = 'modules' | 'ai-refinement' | 'results'
 type ConfigTab = 'lifecycle' | 'overview'
@@ -35,6 +37,8 @@ export default function App() {
   const [generatedContent, setGeneratedContent] = useState<{ type: string; content: string } | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [pendingNavigation, setPendingNavigation] = useState<{ target: number | 'config' | 'validate' } | null>(null)
+  const [showComplianceAudit, setShowComplianceAudit] = useState(false)
+  const [showFOAUpload, setShowFOAUpload] = useState(false)
 
   // Update module states when project changes
   useEffect(() => {
@@ -273,6 +277,22 @@ export default function App() {
           {/* Desktop Actions */}
           <div className="ml-auto hidden md:flex items-center gap-2">
             <button
+              onClick={() => setShowFOAUpload(true)}
+              disabled={!project}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-purple-600 hover:bg-purple-50 border border-purple-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FileText className="w-4 h-4" />
+              Upload FOA
+            </button>
+            <button
+              onClick={() => setShowComplianceAudit(true)}
+              disabled={!project}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-green-600 hover:bg-green-50 border border-green-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              Compliance Audit
+            </button>
+            <button
               onClick={() => setMainView('audit')}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-indigo-600 hover:bg-indigo-50 border border-indigo-200"
             >
@@ -327,12 +347,28 @@ export default function App() {
               <span>Home</span>
             </button>
             <button
-              onClick={() => { setMainView('audit'); setMobileMenuOpen(false); }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg hover:bg-indigo-50 text-indigo-600"
-            >
-              <Upload className="w-5 h-5" />
-              <span>Audit Mode</span>
-            </button>
+                              onClick={() => { setShowFOAUpload(true); setMobileMenuOpen(false); }}
+                              disabled={!project}
+                              className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg hover:bg-purple-50 text-purple-600 disabled:opacity-50"
+                            >
+                              <FileText className="w-5 h-5" />
+                              <span>Upload FOA</span>
+                            </button>
+                            <button
+                              onClick={() => { setShowComplianceAudit(true); setMobileMenuOpen(false); }}
+                              disabled={!project}
+                              className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg hover:bg-green-50 text-green-600 disabled:opacity-50"
+                            >
+                              <ShieldCheck className="w-5 h-5" />
+                              <span>Compliance Audit</span>
+                            </button>
+                            <button
+                              onClick={() => { setMainView('audit'); setMobileMenuOpen(false); }}
+                              className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg hover:bg-indigo-50 text-indigo-600"
+                            >
+                              <Upload className="w-5 h-5" />
+                              <span>Audit Mode</span>
+                            </button>
             <button
               onClick={() => { setShowImport(true); setMobileMenuOpen(false); }}
               className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg hover:bg-neutral-100"
@@ -585,6 +621,15 @@ export default function App() {
               <FileCheck className="w-5 h-5" />
               Run Validation
             </button>
+            
+            <button
+              onClick={() => setShowComplianceAudit(true)}
+              disabled={!project}
+              className="mt-2 w-full px-4 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <ShieldCheck className="w-5 h-5" />
+              Compliance Audit
+            </button>
           </aside>
         )}
 
@@ -796,7 +841,7 @@ export default function App() {
                         </p>
                       </div>
                     )}
-                    {configTab === 'lifecycle' && <PriorPhaseEditor project={project} onUpdate={updateProject} />}}
+                    {configTab === 'lifecycle' && <PriorPhaseEditor project={project} onUpdate={updateProject} />}
 
                     {/* Continue Button */}
                     <div className="mt-8 pt-6 border-t border-neutral-200">
@@ -858,6 +903,14 @@ export default function App() {
         <SpecificAimsGenerator
           project={project}
           onClose={() => setShowAimsGenerator(false)}
+        />
+      )}
+
+      {showFOAUpload && project && (
+        <FOAUpload
+          project={project}
+          onUpdate={updateProject}
+          onClose={() => setShowFOAUpload(false)}
         />
       )}
 
@@ -988,6 +1041,36 @@ export default function App() {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Compliance Audit Modal */}
+      {showComplianceAudit && project && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-neutral-200">
+              <h3 className="text-lg font-semibold text-neutral-900">
+                Pre-Export Compliance Audit
+              </h3>
+              <button
+                onClick={() => setShowComplianceAudit(false)}
+                className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-auto p-6">
+              <ComplianceAuditPanel
+                project={project}
+                onUpdate={updateProject}
+                onExport={() => {
+                  setShowComplianceAudit(false)
+                  exportJSON()
+                }}
+              />
+            </div>
           </div>
         </div>
       )}
