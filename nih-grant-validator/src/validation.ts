@@ -135,6 +135,7 @@ function getModuleData(project: ProjectSchemaV2, moduleId: number): Record<strin
     case 6: return project.m6_budget as Record<string, unknown>
     case 7: return project.m7_regulatory as Record<string, unknown>
     case 8: return project.m8_compilation as Record<string, unknown>
+    case 9: return project.m9_commercialization as Record<string, unknown>
     default: return {}
   }
 }
@@ -194,7 +195,21 @@ export function updateModuleStates(project: ProjectSchemaV2): ModuleState[] {
 
 // Validate all modules
 export function validateModules(project: ProjectSchemaV2): ModuleValidationResult[] {
+  // Module 9 (Commercialization) only required for Phase II, Direct Phase II, Phase IIB, Fast Track
+  const commercializationRequired = project.grant_type !== 'Phase I' && project.grant_type !== null
+  
   return MODULE_DEFINITIONS.map(def => {
+    // Skip Module 9 validation for Phase I grants
+    if (def.id === 9 && !commercializationRequired) {
+      return {
+        module_id: def.id,
+        status: 'complete' as ModuleStatus,
+        missing_fields: [],
+        populated_fields: [],
+        errors: []
+      }
+    }
+    
     const { status, completed, missing } = calculateModuleStatus(project, def.id)
     const errors: ValidationError[] = missing.map(field => ({
       code: `MODULE_${def.id}_MISSING`,
