@@ -200,17 +200,29 @@ export interface M5FastTrack {
   phase2_complete: boolean
 }
 
-// M6: Budget & Justification (7 fields) - DO NOT MODIFY calculation engine
+// M6: Budget & Justification - Full NIH SBIR/STTR budget calculation fields
 export interface M6Budget {
+  // Line Items (Direct Costs)
   direct_costs_total: number
   personnel_costs: number
   equipment_costs: number
   supplies_costs: number
   travel_costs: number
+  consultant_costs: number
   subaward_costs: number
+  patient_care_costs: number
+  tuition_costs: number
   other_costs: number
+  // F&A (Indirect) Costs
+  f_and_a_rate: number
+  indirect_costs: number
+  // Calculated Totals
+  mtdc: number
+  total_project_costs: number
+  // Allocation Percentages
   small_business_percent: number
   research_institution_percent: number
+  // Justification
   budget_justification: string
 }
 

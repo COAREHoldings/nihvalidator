@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { ProjectSchemaV2, ModuleState, M3SpecificAims, M5ExperimentalApproach, M6Budget, M7Regulatory, M7Phase2Additional } from '../types'
 import { MODULE_DEFINITIONS } from '../types'
 import { getBudgetCap } from '../validation'
+import { BudgetCalculator } from './BudgetCalculator'
 import { Plus, Trash2, AlertTriangle, Lock, CheckCircle, Sparkles, Loader2, X, Lightbulb, FileText, ShieldCheck, ArrowRight, ChevronRight, FileCheck } from 'lucide-react'
 
 const SUPABASE_URL = 'https://dvuhtfzsvcacyrlfettz.supabase.co'
@@ -616,27 +617,13 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate, onNext,
     )
   }
 
-  // Module 6: Budget - with Fast Track phases
+  // Module 6: Budget - with Fast Track phases - uses BudgetCalculator component
   const renderM6 = () => {
     const institute = project.institute || 'Standard NIH'
     
     if (isFastTrack) {
       const ftData = project.m6_fast_track
-      const currentPhaseData = phaseTab === 'phase1' ? ftData.phase1 : ftData.phase2
       const phase1Complete = checkPhase1Fields(ftData.phase1)
-      const budgetCap = getBudgetCap(institute, 'Fast Track', phaseTab as 'phase1' | 'phase2')
-
-      const updateField = (field: string, value: number | string) => {
-        const updatedPhase = { ...currentPhaseData, [field]: value }
-        const isComplete = checkPhase1Fields(updatedPhase as Partial<M6Budget>)
-        onUpdate({
-          m6_fast_track: {
-            ...ftData,
-            [phaseTab]: updatedPhase,
-            [`${phaseTab}_complete`]: isComplete
-          }
-        })
-      }
 
       return (
         <div>
@@ -650,71 +637,27 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate, onNext,
           <div className="flex items-center gap-2 mb-4">
             <PhaseIndicator phase={phaseTab === 'phase1' ? 'I' : 'II'} />
             <span className="text-sm text-neutral-600">
-              {institute} Budget cap: <strong>${budgetCap.toLocaleString()}</strong>
+              NIH SBIR/STTR Budget Calculator
             </span>
           </div>
-          {(currentPhaseData.direct_costs_total || 0) > budgetCap && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-800">
-              <AlertTriangle className="w-4 h-4" />
-              Budget exceeds {institute} {phaseTab === 'phase1' ? 'Phase I' : 'Phase II'} cap of ${budgetCap.toLocaleString()}
-            </div>
-          )}
-          <NumberField label="Total Direct Costs" value={currentPhaseData.direct_costs_total || 0} onChange={v => updateField('direct_costs_total', v)} required prefix="$" max={budgetCap} />
-          <NumberField label="Personnel Costs" value={currentPhaseData.personnel_costs || 0} onChange={v => updateField('personnel_costs', v)} required prefix="$" />
-          <NumberField label="Equipment Costs" value={currentPhaseData.equipment_costs || 0} onChange={v => updateField('equipment_costs', v)} prefix="$" />
-          <NumberField label="Supplies Costs" value={currentPhaseData.supplies_costs || 0} onChange={v => updateField('supplies_costs', v)} prefix="$" />
-          <NumberField label="Travel Costs" value={currentPhaseData.travel_costs || 0} onChange={v => updateField('travel_costs', v)} prefix="$" />
-          <NumberField label="Subaward Costs" value={currentPhaseData.subaward_costs || 0} onChange={v => updateField('subaward_costs', v)} prefix="$" />
-          <NumberField label="Small Business %" value={currentPhaseData.small_business_percent || 67} onChange={v => updateField('small_business_percent', v)} required suffix="%" />
-          {project.program_type === 'STTR' && (
-            <NumberField label="Research Institution %" value={currentPhaseData.research_institution_percent || 0} onChange={v => updateField('research_institution_percent', v)} required suffix="%" />
-          )}
-          <TextField label="Budget Justification" value={currentPhaseData.budget_justification || ''} onChange={v => updateField('budget_justification', v)} required multiline placeholder={`Justify ${phaseTab === 'phase1' ? 'Phase I' : 'Phase II'} budget allocations`} />
+          <BudgetCalculator
+            project={project}
+            onUpdate={onUpdate}
+            isFastTrack={true}
+            currentPhase={phaseTab as 'phase1' | 'phase2'}
+          />
         </div>
       )
     }
 
-    // Non-Fast Track
-    const data = project.m6_budget
-    const legacy = project.legacy_budget
-    const budgetCap = getBudgetCap(institute, project.grant_type)
-    const updateField = (field: string, value: number | string) => {
-      onUpdate({ 
-        m6_budget: { ...data, [field]: value },
-        legacy_budget: {
-          ...legacy,
-          directCosts: field === 'direct_costs_total' ? value as number : legacy.directCosts,
-          personnelCosts: field === 'personnel_costs' ? value as number : legacy.personnelCosts,
-          subawardCosts: field === 'subaward_costs' ? value as number : legacy.subawardCosts,
-          smallBusinessPercent: field === 'small_business_percent' ? value as number : legacy.smallBusinessPercent,
-          researchInstitutionPercent: field === 'research_institution_percent' ? value as number : legacy.researchInstitutionPercent
-        }
-      })
-    }
+    // Non-Fast Track - use BudgetCalculator component
     return (
       <div>
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <span className="text-sm text-blue-800">
-            {institute} {project.grant_type} budget cap: <strong>${budgetCap.toLocaleString()}</strong>
-          </span>
-        </div>
-        {(data.direct_costs_total || legacy.directCosts || 0) > budgetCap && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-800">
-            <AlertTriangle className="w-4 h-4" />
-            Budget exceeds {institute} {project.grant_type} cap of ${budgetCap.toLocaleString()}
-          </div>
-        )}
-        <NumberField label="Total Direct Costs" value={data.direct_costs_total || legacy.directCosts || 0} onChange={v => updateField('direct_costs_total', v)} required prefix="$" max={budgetCap} />
-        <NumberField label="Personnel Costs" value={data.personnel_costs || legacy.personnelCosts || 0} onChange={v => updateField('personnel_costs', v)} required prefix="$" />
-        <NumberField label="Equipment Costs" value={data.equipment_costs || 0} onChange={v => updateField('equipment_costs', v)} prefix="$" />
-        <NumberField label="Supplies Costs" value={data.supplies_costs || 0} onChange={v => updateField('supplies_costs', v)} prefix="$" />
-        <NumberField label="Travel Costs" value={data.travel_costs || 0} onChange={v => updateField('travel_costs', v)} prefix="$" />
-        <NumberField label="Subaward Costs" value={data.subaward_costs || legacy.subawardCosts || 0} onChange={v => updateField('subaward_costs', v)} prefix="$" />
-        <NumberField label="Small Business %" value={data.small_business_percent || legacy.smallBusinessPercent || 67} onChange={v => updateField('small_business_percent', v)} required suffix="%" />
-        {project.program_type === 'STTR' && (
-          <NumberField label="Research Institution %" value={data.research_institution_percent || legacy.researchInstitutionPercent || 0} onChange={v => updateField('research_institution_percent', v)} required suffix="%" />
-        )}
-        <TextField label="Budget Justification" value={data.budget_justification || ''} onChange={v => onUpdate({ m6_budget: { ...data, budget_justification: v } })} required multiline placeholder="Justify your budget allocations" />
+        <BudgetCalculator
+          project={project}
+          onUpdate={onUpdate}
+          isFastTrack={false}
+        />
       </div>
     )
   }
