@@ -228,24 +228,10 @@ export function validateModules(project: ProjectSchemaV2): ModuleValidationResul
   })
 }
 
-// AI Gating Logic
+// AI Gating Logic - Removed restrictions, always allowed
 export function checkAIGating(project: ProjectSchemaV2): AIGatingResult {
-  const moduleResults = validateModules(project)
-  const incompleteModules = moduleResults.filter(m => m.module_id <= 7 && m.status !== 'complete')
-  
-  if (incompleteModules.length === 0) {
-    return { allowed: true, missing_modules: [], missing_fields: [] }
-  }
-  
-  return {
-    allowed: false,
-    blocking_reason: `AI refinement requires Modules 1-7 to be complete. ${incompleteModules.length} module(s) incomplete.`,
-    missing_modules: incompleteModules.map(m => m.module_id),
-    missing_fields: incompleteModules.map(m => ({
-      module_id: m.module_id,
-      fields: m.missing_fields
-    }))
-  }
+  // Gate removed - AI features always available
+  return { allowed: true, missing_modules: [], missing_fields: [] }
 }
 
 // Lifecycle Validation
