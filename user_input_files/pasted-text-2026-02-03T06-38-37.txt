@@ -1,0 +1,914 @@
+{
+  "status": "structurally_ready",
+  "phase": "Fast Track",
+  "errors": [
+    {
+      "code": "MODULE_3_MISSING",
+      "message": "Missing required field: aim1 statement",
+      "field": "m3.aim1_statement",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_3_MISSING",
+      "message": "Missing required field: aim1 milestones",
+      "field": "m3.aim1_milestones",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_3_MISSING",
+      "message": "Missing required field: aim2 statement",
+      "field": "m3.aim2_statement",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_3_MISSING",
+      "message": "Missing required field: aim2 milestones",
+      "field": "m3.aim2_milestones",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_3_MISSING",
+      "message": "Missing required field: timeline summary",
+      "field": "m3.timeline_summary",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_3_MISSING",
+      "message": "Missing required field: interdependencies",
+      "field": "m3.interdependencies",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_5_MISSING",
+      "message": "Missing required field: methodology overview",
+      "field": "m5.methodology_overview",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_5_MISSING",
+      "message": "Missing required field: experimental design",
+      "field": "m5.experimental_design",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_5_MISSING",
+      "message": "Missing required field: data collection methods",
+      "field": "m5.data_collection_methods",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_5_MISSING",
+      "message": "Missing required field: analysis plan",
+      "field": "m5.analysis_plan",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_5_MISSING",
+      "message": "Missing required field: statistical approach",
+      "field": "m5.statistical_approach",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_5_MISSING",
+      "message": "Missing required field: expected results",
+      "field": "m5.expected_results",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_5_MISSING",
+      "message": "Missing required field: potential pitfalls",
+      "field": "m5.potential_pitfalls",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_5_MISSING",
+      "message": "Missing required field: alternative approaches",
+      "field": "m5.alternative_approaches",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_6_MISSING",
+      "message": "Missing required field: direct costs total",
+      "field": "m6.direct_costs_total",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_6_MISSING",
+      "message": "Missing required field: personnel costs",
+      "field": "m6.personnel_costs",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_6_MISSING",
+      "message": "Missing required field: small business percent",
+      "field": "m6.small_business_percent",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_6_MISSING",
+      "message": "Missing required field: budget justification",
+      "field": "m6.budget_justification",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_7_MISSING",
+      "message": "Missing required field: facilities description",
+      "field": "m7.facilities_description",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_8_MISSING",
+      "message": "Missing required field: final review checklist",
+      "field": "m8.final_review_checklist",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_8_MISSING",
+      "message": "Missing required field: page limit compliance",
+      "field": "m8.page_limit_compliance",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_8_MISSING",
+      "message": "Missing required field: format compliance",
+      "field": "m8.format_compliance",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_8_MISSING",
+      "message": "Missing required field: submission readiness",
+      "field": "m8.submission_readiness",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_9_MISSING",
+      "message": "Missing required field: section1 value",
+      "field": "m9.section1_value",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_9_MISSING",
+      "message": "Missing required field: section2 company",
+      "field": "m9.section2_company",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_9_MISSING",
+      "message": "Missing required field: section3 market",
+      "field": "m9.section3_market",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_9_MISSING",
+      "message": "Missing required field: section4 ip",
+      "field": "m9.section4_ip",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_9_MISSING",
+      "message": "Missing required field: section5 finance",
+      "field": "m9.section5_finance",
+      "severity": "error"
+    },
+    {
+      "code": "MODULE_9_MISSING",
+      "message": "Missing required field: section6 revenue",
+      "field": "m9.section6_revenue",
+      "severity": "error"
+    }
+  ],
+  "warnings": [],
+  "module_results": [
+    {
+      "module_id": 1,
+      "status": "complete",
+      "missing_fields": [],
+      "populated_fields": [
+        "project_title",
+        "lay_summary",
+        "scientific_abstract",
+        "problem_statement",
+        "proposed_solution",
+        "target_population",
+        "therapeutic_area",
+        "technology_type"
+      ],
+      "errors": []
+    },
+    {
+      "module_id": 2,
+      "status": "complete",
+      "missing_fields": [],
+      "populated_fields": [
+        "central_hypothesis",
+        "supporting_rationale",
+        "preliminary_data_summary",
+        "expected_outcomes",
+        "success_criteria"
+      ],
+      "errors": []
+    },
+    {
+      "module_id": 3,
+      "status": "incomplete",
+      "missing_fields": [
+        "aim1_statement",
+        "aim1_milestones",
+        "aim2_statement",
+        "aim2_milestones",
+        "timeline_summary",
+        "interdependencies"
+      ],
+      "populated_fields": [],
+      "errors": [
+        {
+          "code": "MODULE_3_MISSING",
+          "message": "Missing required field: aim1 statement",
+          "field": "m3.aim1_statement",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_3_MISSING",
+          "message": "Missing required field: aim1 milestones",
+          "field": "m3.aim1_milestones",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_3_MISSING",
+          "message": "Missing required field: aim2 statement",
+          "field": "m3.aim2_statement",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_3_MISSING",
+          "message": "Missing required field: aim2 milestones",
+          "field": "m3.aim2_milestones",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_3_MISSING",
+          "message": "Missing required field: timeline summary",
+          "field": "m3.timeline_summary",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_3_MISSING",
+          "message": "Missing required field: interdependencies",
+          "field": "m3.interdependencies",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "module_id": 4,
+      "status": "complete",
+      "missing_fields": [],
+      "populated_fields": [
+        "pi_name",
+        "pi_qualifications",
+        "key_personnel"
+      ],
+      "errors": []
+    },
+    {
+      "module_id": 5,
+      "status": "incomplete",
+      "missing_fields": [
+        "methodology_overview",
+        "experimental_design",
+        "data_collection_methods",
+        "analysis_plan",
+        "statistical_approach",
+        "expected_results",
+        "potential_pitfalls",
+        "alternative_approaches"
+      ],
+      "populated_fields": [],
+      "errors": [
+        {
+          "code": "MODULE_5_MISSING",
+          "message": "Missing required field: methodology overview",
+          "field": "m5.methodology_overview",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_5_MISSING",
+          "message": "Missing required field: experimental design",
+          "field": "m5.experimental_design",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_5_MISSING",
+          "message": "Missing required field: data collection methods",
+          "field": "m5.data_collection_methods",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_5_MISSING",
+          "message": "Missing required field: analysis plan",
+          "field": "m5.analysis_plan",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_5_MISSING",
+          "message": "Missing required field: statistical approach",
+          "field": "m5.statistical_approach",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_5_MISSING",
+          "message": "Missing required field: expected results",
+          "field": "m5.expected_results",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_5_MISSING",
+          "message": "Missing required field: potential pitfalls",
+          "field": "m5.potential_pitfalls",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_5_MISSING",
+          "message": "Missing required field: alternative approaches",
+          "field": "m5.alternative_approaches",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "module_id": 6,
+      "status": "incomplete",
+      "missing_fields": [
+        "direct_costs_total",
+        "personnel_costs",
+        "small_business_percent",
+        "budget_justification"
+      ],
+      "populated_fields": [],
+      "errors": [
+        {
+          "code": "MODULE_6_MISSING",
+          "message": "Missing required field: direct costs total",
+          "field": "m6.direct_costs_total",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_6_MISSING",
+          "message": "Missing required field: personnel costs",
+          "field": "m6.personnel_costs",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_6_MISSING",
+          "message": "Missing required field: small business percent",
+          "field": "m6.small_business_percent",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_6_MISSING",
+          "message": "Missing required field: budget justification",
+          "field": "m6.budget_justification",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "module_id": 7,
+      "status": "incomplete",
+      "missing_fields": [
+        "facilities_description"
+      ],
+      "populated_fields": [],
+      "errors": [
+        {
+          "code": "MODULE_7_MISSING",
+          "message": "Missing required field: facilities description",
+          "field": "m7.facilities_description",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "module_id": 8,
+      "status": "incomplete",
+      "missing_fields": [
+        "final_review_checklist",
+        "page_limit_compliance",
+        "format_compliance",
+        "submission_readiness"
+      ],
+      "populated_fields": [],
+      "errors": [
+        {
+          "code": "MODULE_8_MISSING",
+          "message": "Missing required field: final review checklist",
+          "field": "m8.final_review_checklist",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_8_MISSING",
+          "message": "Missing required field: page limit compliance",
+          "field": "m8.page_limit_compliance",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_8_MISSING",
+          "message": "Missing required field: format compliance",
+          "field": "m8.format_compliance",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_8_MISSING",
+          "message": "Missing required field: submission readiness",
+          "field": "m8.submission_readiness",
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "module_id": 9,
+      "status": "incomplete",
+      "missing_fields": [
+        "section1_value",
+        "section2_company",
+        "section3_market",
+        "section4_ip",
+        "section5_finance",
+        "section6_revenue"
+      ],
+      "populated_fields": [],
+      "errors": [
+        {
+          "code": "MODULE_9_MISSING",
+          "message": "Missing required field: section1 value",
+          "field": "m9.section1_value",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_9_MISSING",
+          "message": "Missing required field: section2 company",
+          "field": "m9.section2_company",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_9_MISSING",
+          "message": "Missing required field: section3 market",
+          "field": "m9.section3_market",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_9_MISSING",
+          "message": "Missing required field: section4 ip",
+          "field": "m9.section4_ip",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_9_MISSING",
+          "message": "Missing required field: section5 finance",
+          "field": "m9.section5_finance",
+          "severity": "error"
+        },
+        {
+          "code": "MODULE_9_MISSING",
+          "message": "Missing required field: section6 revenue",
+          "field": "m9.section6_revenue",
+          "severity": "error"
+        }
+      ]
+    }
+  ],
+  "ai_gating": {
+    "allowed": false,
+    "blocking_reason": "AI refinement requires Modules 1-7 to be complete. 4 module(s) incomplete.",
+    "missing_modules": [
+      3,
+      5,
+      6,
+      7
+    ],
+    "missing_fields": [
+      {
+        "module_id": 3,
+        "fields": [
+          "aim1_statement",
+          "aim1_milestones",
+          "aim2_statement",
+          "aim2_milestones",
+          "timeline_summary",
+          "interdependencies"
+        ]
+      },
+      {
+        "module_id": 5,
+        "fields": [
+          "methodology_overview",
+          "experimental_design",
+          "data_collection_methods",
+          "analysis_plan",
+          "statistical_approach",
+          "expected_results",
+          "potential_pitfalls",
+          "alternative_approaches"
+        ]
+      },
+      {
+        "module_id": 6,
+        "fields": [
+          "direct_costs_total",
+          "personnel_costs",
+          "small_business_percent",
+          "budget_justification"
+        ]
+      },
+      {
+        "module_id": 7,
+        "fields": [
+          "facilities_description"
+        ]
+      }
+    ]
+  },
+  "lifecycle_validation": {
+    "valid": true,
+    "current_state": "Zero",
+    "target_state": "Fast Track",
+    "errors": [],
+    "required_documentation": []
+  },
+  "data": {
+    "schema_version": 2,
+    "project_id": "proj_1770094175259_xxzu8puvz",
+    "created_at": "2026-02-03T04:49:35.259Z",
+    "updated_at": "2026-02-03T05:57:48.926Z",
+    "grant_type": "Fast Track",
+    "program_type": "SBIR",
+    "institute": "Standard NIH",
+    "foa_config": {
+      "direct_phase2_allowed": true,
+      "fast_track_allowed": true,
+      "phase2b_allowed": true,
+      "commercialization_required": true
+    },
+    "module_states": [
+      {
+        "module_id": 1,
+        "name": "Title & Concept Clarity",
+        "required_fields": [
+          "project_title",
+          "lay_summary",
+          "scientific_abstract",
+          "problem_statement",
+          "proposed_solution",
+          "target_population",
+          "therapeutic_area",
+          "technology_type"
+        ],
+        "completed_fields": [
+          "project_title",
+          "lay_summary",
+          "scientific_abstract",
+          "problem_statement",
+          "proposed_solution",
+          "target_population",
+          "therapeutic_area",
+          "technology_type"
+        ],
+        "status": "complete",
+        "locked": false,
+        "last_updated": "2026-02-03T05:26:15.664Z"
+      },
+      {
+        "module_id": 2,
+        "name": "Hypothesis Development",
+        "required_fields": [
+          "central_hypothesis",
+          "supporting_rationale",
+          "preliminary_data_summary",
+          "expected_outcomes",
+          "success_criteria"
+        ],
+        "completed_fields": [
+          "central_hypothesis",
+          "supporting_rationale",
+          "preliminary_data_summary",
+          "expected_outcomes",
+          "success_criteria"
+        ],
+        "status": "complete",
+        "locked": false,
+        "last_updated": "2026-02-03T05:26:15.664Z"
+      },
+      {
+        "module_id": 3,
+        "name": "Specific Aims",
+        "required_fields": [
+          "aim1_statement",
+          "aim1_milestones",
+          "aim2_statement",
+          "aim2_milestones",
+          "timeline_summary",
+          "interdependencies"
+        ],
+        "completed_fields": [],
+        "status": "incomplete",
+        "locked": false,
+        "last_updated": "2026-02-03T05:26:15.664Z"
+      },
+      {
+        "module_id": 4,
+        "name": "Team Mapping",
+        "required_fields": [
+          "pi_name",
+          "pi_qualifications",
+          "key_personnel"
+        ],
+        "completed_fields": [
+          "pi_name",
+          "pi_qualifications",
+          "key_personnel"
+        ],
+        "status": "complete",
+        "locked": false,
+        "last_updated": "2026-02-03T05:26:15.664Z"
+      },
+      {
+        "module_id": 5,
+        "name": "Experimental Approach",
+        "required_fields": [
+          "methodology_overview",
+          "experimental_design",
+          "data_collection_methods",
+          "analysis_plan",
+          "statistical_approach",
+          "expected_results",
+          "potential_pitfalls",
+          "alternative_approaches"
+        ],
+        "completed_fields": [],
+        "status": "incomplete",
+        "locked": false,
+        "last_updated": "2026-02-03T05:26:15.664Z"
+      },
+      {
+        "module_id": 6,
+        "name": "Budget & Justification",
+        "required_fields": [
+          "direct_costs_total",
+          "personnel_costs",
+          "small_business_percent",
+          "budget_justification"
+        ],
+        "completed_fields": [],
+        "status": "incomplete",
+        "locked": false,
+        "last_updated": "2026-02-03T05:26:15.664Z"
+      },
+      {
+        "module_id": 7,
+        "name": "Regulatory & Supporting",
+        "required_fields": [
+          "facilities_description"
+        ],
+        "completed_fields": [],
+        "status": "incomplete",
+        "locked": false,
+        "last_updated": "2026-02-03T05:26:15.664Z"
+      },
+      {
+        "module_id": 8,
+        "name": "Compilation & Review",
+        "required_fields": [
+          "final_review_checklist",
+          "page_limit_compliance",
+          "format_compliance",
+          "submission_readiness"
+        ],
+        "completed_fields": [],
+        "status": "incomplete",
+        "locked": true,
+        "last_updated": "2026-02-03T05:26:15.664Z"
+      },
+      {
+        "module_id": 9,
+        "name": "Commercialization Director",
+        "required_fields": [
+          "section1_value",
+          "section2_company",
+          "section3_market",
+          "section4_ip",
+          "section5_finance",
+          "section6_revenue"
+        ],
+        "completed_fields": [],
+        "status": "incomplete",
+        "locked": false,
+        "last_updated": "2026-02-03T05:26:15.664Z"
+      }
+    ],
+    "m1_title_concept": {
+      "project_title": "Development of a DCLK1-Targeted CAR-T Therapy in Combination with Carboplatin for Platinum-Resistant High-Grade Serous Ovarian Cancer",
+      "lay_summary": "High-grade serous ovarian cancer is the most common and deadly form of ovarian cancer. Although many patients initially respond to chemotherapy with platinum-based drugs, most tumors return within a few years. Once the cancer becomes resistant to platinum therapy, treatment options are limited and survival is often measured in months. There is an urgent need for new therapies that can overcome resistance and prevent relapse.\n\nResearch suggests that a small population of â€œcancer stem-like cellsâ€ helps ovarian tumors survive chemotherapy and regrow. These cells often express a protein called DCLK1 on their surface. DCLK1 is found at higher levels in chemotherapy-resistant ovarian cancers and is associated with poor outcomes.\n\nThis project is developing a new type of immunotherapy called CAR-T cell therapy that is designed to recognize and attack cells expressing DCLK1. The therapy, called CBT-611H, reprograms a patientâ€™s own immune cells to specifically target DCLK1-positive cancer cells. By eliminating these resistant stem-like cells, we aim to reduce tumor regrowth and improve long-term outcomes.\n\nWe will test CBT-611H both alone and in combination with carboplatin, a standard chemotherapy drug. Carboplatin may help reduce tumor size and improve the effectiveness of the CAR-T cells. The research will first evaluate how well the therapy kills resistant ovarian cancer cells in laboratory models derived from patients. We will also carefully assess safety using advanced human tissue models and animal studies to ensure that normal tissues are not harmed.\n\nThe ultimate goal of this project is to prepare this new therapy for human clinical trials. If successful, this approach could lead to a new treatment option for patients with platinum-resistant ovarian cancer and may establish a broader strategy for targeting treatment-resistant cancer stem cells in other solid tumors.",
+      "scientific_abstract": "High-grade serous ovarian cancer (HGSOC) accounts for the majority of ovarian cancerâ€“related deaths. Although initial response rates to platinum-based chemotherapy exceed 70%, approximately 80% of patients relapse within three years and ultimately develop platinum-resistant disease, for which therapeutic options remain limited and survival outcomes are poor. Emerging evidence implicates a subpopulation of cancer stem-like cells (CSCs) in mediating platinum resistance, metastatic dissemination, and tumor recurrence. Doublecortin-like kinase 1 (DCLK1), a CSC-associated protein minimally expressed in most normal adult tissues, is enriched in platinum-resistant HGSOC and correlates with adverse clinical outcomes.\n\nThis Fast-Track STTR project seeks to develop CBT-611H, a novel CAR-T cell therapy targeting extracellular domains of DCLK1 isoforms 2 and 4, in combination with carboplatin for platinum-resistant HGSOC. The central hypothesis is that CBT-611H will selectively eradicate DCLK1âº CSC populations and that carboplatin will enhance antitumor efficacy and durability without inducing unacceptable off-tumor toxicity.\n\nPhase I studies will quantify real-time cytotoxicity, cytokine release, and T-cell activation induced by CBT-611H Â± carboplatin in platinum-resistant HGSOC spheroids and patient-derived organoids. DCLK1 surface expression will be measured to confirm antigen specificity and distinguish on-target tumor killing from potential off-tumor effects. Multiplex safety profiling will be conducted using human microphysiologic organ-on-a-chip systems representing major organ compartments to evaluate tissue-specific toxicity and cytokine responses.\n\nPhase II will establish a scalable, closed pre-GMP manufacturing process and qualified analytical release panel for CBT-611H. IND-enabling pharmacology, biodistribution, and pre-GLP safety studies will be performed in humanized NSG models bearing DCLK1âº HGSOC xenografts. These studies will define therapeutic index, persistence, cytokine profiles, and no-observed-adverse-effect levels (NOAEL) to support IND submission and first-in-human clinical testing.\n\nSuccessful completion of this project will deliver a first-in-class DCLK1-targeted CAR-T therapy with a de-risked manufacturing and safety package and establish a mechanistically grounded strategy for targeting CSC-associated antigens in solid tumors.",
+      "problem_statement": "High-grade serous ovarian cancer (HGSOC) remains the deadliest gynecologic malignancy. Although most patients initially respond to platinum-based chemotherapy, approximately 80% relapse within three years and ultimately develop platinum-resistant disease. Once resistance emerges, median progression-free survival is only a few months, and existing treatment options offer limited durability and cumulative toxicity. No curative therapy exists for platinum-resistant HGSOC.\n\nA central biological driver of relapse is the persistence of cancer stem-like cells (CSCs), which survive chemotherapy, promote metastasis, and regenerate tumor mass. Current therapies primarily target rapidly dividing bulk tumor cells but fail to eradicate the stem-like populations that sustain recurrence. Doublecortin-like kinase 1 (DCLK1) is enriched in platinum-resistant HGSOC and marks CSC-associated populations linked to epithelialâ€“mesenchymal transition, immune evasion, and poor survival. However, no approved therapy specifically targets DCLK1 or CSC-associated antigens in ovarian cancer.\n\nCAR-T cell therapy has revolutionized hematologic malignancies but has not yet achieved regulatory success in solid tumors due to antigen heterogeneity, on-target/off-tumor toxicity risks, and the immunosuppressive tumor microenvironment. In platinum-resistant HGSOC, there is no validated, tumor-selective CAR-T target that addresses the CSC reservoir driving relapse.\n\nTherefore, the critical problem is the absence of a mechanistically targeted, clinically translatable immunotherapy capable of safely eliminating DCLK1âº cancer stem-like cells and overcoming platinum resistance in HGSOC. Without such an approach, relapse and mortality rates will remain unacceptably high.",
+      "proposed_solution": "We propose to develop and clinically enable CBT-611H, a novel CAR-T cell therapy directed against extracellular domains of DCLK1 isoforms 2 and 4, in combination with carboplatin, to overcome platinum resistance in high-grade serous ovarian cancer (HGSOC).\n\nThe therapeutic strategy is based on the premise that platinum-resistant relapse is driven by DCLK1âº cancer stem-like cells (CSCs) that survive conventional chemotherapy and regenerate tumor burden. CBT-611H is engineered to selectively recognize and eliminate DCLK1-expressing tumor cells, thereby targeting the stem-like cellular reservoir responsible for recurrence. Carboplatin will be incorporated as a rational combination partner to debulk tumor mass, modulate the tumor microenvironment, and potentially enhance CAR-T infiltration and activity, while CBT-611H eradicates residual DCLK1âº CSC populations.\n\nThe proposed program integrates mechanistic validation, safety assessment, and translational development in a phased manner:\n\nMechanistic Efficacy â€“ Quantitative evaluation of real-time cytotoxicity, immune activation, CSC depletion, and antigen specificity in platinum-resistant HGSOC spheroids and patient-derived organoids.\n\nHuman-Relevant Safety â€“ Multiplex toxicity assessment across human microphysiologic organ-on-a-chip systems to distinguish on-target tumor killing from potential off-tumor effects.\n\nScalable Manufacturing â€“ Development and qualification of a closed, pre-GMP CAR-T manufacturing process and analytical release panel to ensure reproducibility, potency, and regulatory readiness.\n\nIND-Enabling Pharmacology and Toxicology â€“ Evaluation of efficacy, biodistribution, persistence, cytokine profiles, and no-observed-adverse-effect levels (NOAEL) in humanized NSG models of platinum-resistant HGSOC.\n\nThis integrated approach will deliver a first-in-class DCLK1-targeted CAR-T therapy with a defined therapeutic index, scalable manufacturing platform, and regulatory pathway to first-in-human clinical testing. Beyond HGSOC, this strategy establishes a broader framework for safely targeting CSC-associated antigens in solid tumors.",
+      "target_population": "The primary target population for this therapy consists of adult patients with platinum-resistant high-grade serous ovarian cancer (HGSOC) who have experienced disease progression within six months of completing platinum-based chemotherapy.  Clinical Characteristics  Histologically confirmed high-grade serous ovarian, fallopian tube, or primary peritoneal carcinoma  Recurrent disease following standard-of-care platinum-based chemotherapy  Platinum-resistant status (progression â‰¤ 6 months after last platinum dose)  Limited therapeutic options after failure of cytotoxic agents, PARP inhibitors, and/or anti-angiogenic therapy  Typically advanced-stage (Stage IIIâ€“IV) disease with peritoneal dissemination  Biological Subpopulation  Within this broader clinical group, the intended biological target is tumors enriched for DCLK1-expressing cancer stem-like cells, which are associated with:  Platinum resistance  Epithelialâ€“mesenchymal transition (EMT)  Tumor recurrence and metastasis  Poor overall survival  Importantly, in this development program, DCLK1 quantification is used to confirm antigen specificity and mechanistic targeting rather than to define a companion diagnostic population.  Unmet Need  Patients with platinum-resistant HGSOC represent a population with:  Median progression-free survival of approximately 3â€“4 months  Median overall survival near 12 months  No curative options  High symptom burden and cumulative toxicity from prior therapies  This population faces urgent clinical need for mechanism-based therapies capable of overcoming chemoresistance and preventing recurrent tumor regrowth.  Long-Term Expansion Potential  Following initial clinical validation in platinum-resistant HGSOC, the therapeutic platform may be expanded to:  Earlier-line platinum-sensitive relapse  Other DCLK1-enriched solid tumors  Intraperitoneal CAR-T strategies for peritoneal metastases",
+      "therapeutic_area": "Primary therapeutic area: Oncology (Gynecologic Oncology â€“ Platinum-Resistant HGSOC), within Cellular Immunotherapy (CAR-T therapy for solid tumors).",
+      "technology_type": "CBT-611H is a gene-modified autologous CAR-T cell therapy using lentiviral vector transduction to target a cancer stem cellâ€“associated surface antigen (DCLK1)."
+    },
+    "m2_hypothesis": {
+      "central_hypothesis": "The central hypothesis of this project is that CBT-611H, a CAR-T therapy targeting extracellular domains of DCLK1 isoforms 2 and 4, will selectively eliminate DCLK1âº cancer stem-like cells in platinum-resistant high-grade serous ovarian cancer, and that combination with carboplatin will enhance antitumor efficacy and durability without causing unacceptable off-tumor toxicity.\n\nThis hypothesis is based on:\n\nThe enrichment of DCLK1âº cancer stem-like cells in platinum-resistant HGSOC\n\nThe role of DCLK1 in chemoresistance, epithelialâ€“mesenchymal transition, and tumor recurrence\n\nPreliminary evidence demonstrating DCLK1-dependent CAR-T cytotoxicity\n\nThe potential of carboplatin to debulk tumor mass and modulate the tumor microenvironment in a manner that enhances CAR-T activity\n\nSuccessful testing of this hypothesis will establish a mechanistically grounded, clinically translatable strategy for overcoming platinum resistance by eradicating the stem-like tumor reservoir.",
+      "supporting_rationale": "Platinum-resistant high-grade serous ovarian cancer (HGSOC) remains a lethal clinical problem due to the persistence of tumor subpopulations that survive chemotherapy and regenerate disease. Increasing evidence indicates that cancer stem-like cells (CSCs) play a central role in platinum resistance, metastatic dissemination, and tumor recurrence. These cells exhibit enhanced DNA damage repair capacity, quiescence, epithelialâ€“mesenchymal transition (EMT) phenotypes, and immune-evasive properties that allow them to survive cytotoxic therapy and repopulate tumors.\n\nDoublecortin-like kinase 1 (DCLK1) has emerged as a biologically relevant CSC-associated marker in multiple epithelial malignancies, including HGSOC. DCLK1 expression is enriched in platinum-resistant tumors and correlates with poor survival. Mechanistically, DCLK1 is associated with stemness signaling, EMT activation, tumor cell plasticity, and modulation of the tumor microenvironment. Importantly, DCLK1 isoforms 2 and 4 possess extracellular domains accessible to antibody or CAR-based targeting, while expression in most normal adult tissues is limited, supporting a potentially favorable therapeutic index.\n\nPreliminary data demonstrate that DCLK1-dependent CAR-T constructs selectively kill DCLK1-expressing tumor cells in vitro and inhibit xenograft growth in vivo, while DCLK1-knockout controls show minimal cytotoxicity. These findings support the antigen specificity and mechanistic validity of targeting DCLK1 in platinum-resistant disease.\n\nHowever, CAR-T therapy in solid tumors faces known barriers, including antigen heterogeneity, immunosuppressive tumor microenvironments, and inadequate T-cell persistence. Carboplatin, the backbone of standard ovarian cancer therapy, may provide a rational combination partner by debulking tumor mass, increasing antigen exposure, altering stromal architecture, and potentially enhancing CAR-T trafficking and activation. By combining carboplatin-mediated tumor debulking with CBT-611Hâ€“mediated eradication of residual DCLK1âº CSCs, this strategy directly addresses both bulk tumor and stem-like disease compartments.\n\nFurthermore, integrating human-relevant organ-on-a-chip safety platforms and IND-enabling pharmacology in humanized NSG models strengthens translational rigor and de-risks first-in-human testing. Together, the biological relevance of DCLK1 in platinum resistance, the demonstrated feasibility of DCLK1-targeted CAR-T cytotoxicity, and the mechanistic synergy with carboplatin provide strong rationale for the proposed therapeutic strategy.",
+      "preliminary_data_summary": "Our preliminary studies provide biological, mechanistic, and translational support for targeting DCLK1 in platinum-resistant high-grade serous ovarian cancer (HGSOC) using a CAR-Tâ€“based strategy.\n\n1. DCLK1 Is Enriched in Platinum-Resistant HGSOC and Associated with Poor Outcomes\n\nAnalysis of HGSOC tumor samples and published datasets demonstrates that DCLK1 expression is elevated in platinum-resistant disease and correlates with reduced progression-free and overall survival. Functional studies indicate that DCLK1 contributes to epithelialâ€“mesenchymal transition (EMT), metastatic behavior, and chemoresistance phenotypes. Genetic or pharmacologic suppression of DCLK1 in resistant spheroids reduces stem-like properties and partially restores platinum sensitivity.\n\n2. DCLK1 Drives Stem-Like and Metastatic Phenotypes\n\nIn vitro studies show that DCLK1 expression is associated with increased spheroid formation, invasion, and expression of stemness markers. Loss-of-function experiments demonstrate reduced tumor-initiating capacity and decreased resistance to platinum chemotherapy, supporting a functional role for DCLK1 in maintaining the chemoresistant cancer stem-like compartment.\n\n3. First-Generation DCLK1 CAR-T Demonstrates Antigen-Specific Cytotoxicity\n\nProof-of-concept DCLK1-targeted CAR-T constructs directed against the same extracellular domain epitope demonstrate robust in vitro cytotoxicity against DCLK1-expressing tumor cells. In xenograft models, DCLK1 CAR-T treatment significantly inhibits tumor growth compared to mock controls.\n\n4. Second-Generation CBT-611H Shows Potent and Specific Activity in HGSOC Models\n\nThe optimized second-generation construct, CBT-611H, demonstrates:\n\nDose-dependent, real-time cytotoxicity against platinum-resistant HGSOC spheroids\n\nStatistically significant tumor cell killing compared to mock CAR-T (p < 0.0001)\n\nMinimal cytotoxicity in DCLK1-knockout tumor cells, confirming antigen specificity\n\nThese findings establish that cytotoxic activity is DCLK1-dependent and not attributable to non-specific T-cell activation.\n\n5. Preliminary In Vivo Evidence Supports Antitumor Activity and CAR-T Persistence\n\nEarly in vivo data demonstrate that CBT-611H reduces tumor burden in DCLK1-overexpressing HGSOC xenograft models. Treated tumors show immune infiltration and evidence of CAR-T persistence within the tumor microenvironment.",
+      "expected_outcomes": "Successful completion of this Fast-Track STTR is expected to generate mechanistic, safety, manufacturing, and regulatory-enabling data supporting the clinical translation of CBT-611H in combination with carboplatin for platinum-resistant high-grade serous ovarian cancer (HGSOC).\n\nPhase I Expected Outcomes (Mechanistic and Human-Relevant Validation)\n\nDemonstration of Antigen-Specific Cytotoxicity\n\nRobust, DCLK1-dependent tumor cell killing in platinum-resistant HGSOC spheroids and patient-derived organoids.\n\nMinimal cytotoxicity in DCLK1-negative or knockout controls, confirming target specificity.\n\nCSC Depletion and Functional Impact\n\nSignificant reduction of DCLK1âº and other CSC-associated populations (e.g., ALDH1A1âº, CD133âº).\n\nCorrelation between DCLK1 surface density and CAR-Tâ€“mediated cytotoxicity (mechanistic confirmation, not biomarker development).\n\nSynergistic or Additive Benefit with Carboplatin\n\nEnhanced cytotoxicity, cytokine production, and/or durability of response in combination arms compared to monotherapy arms.\n\nHuman-Relevant Safety Signal Characterization\n\nLimited on-target/off-tumor toxicity in organ-on-a-chip models across key organ systems.\n\nCytokine profiles within ranges consistent with manageable clinical exposure.\n\nClear differentiation between tumor-specific engagement and normal-tissue effects.\n\nPhase II Expected Outcomes (Translational and IND-Enabling)\n\nLocked, Scalable Manufacturing Process\n\nReproducible pre-GMP CAR-T production meeting predefined critical quality attributes (identity, potency, purity, vector copy number, viability).\n\nDemonstrated comparability across independent production runs.\n\nDefined Therapeutic Index in Humanized NSG Models\n\nStatistically significant tumor reduction and/or survival benefit in DCLK1âº HGSOC models.\n\nPreferential biodistribution to tumor and peritoneal compartments.\n\nQuantified persistence kinetics and pharmacodynamic activation.\n\nSafety and NOAEL Determination\n\nComprehensive toxicology dataset supporting a defensible no-observed-adverse-effect level (NOAEL).\n\nManageable cytokine profiles and absence of prohibitive organ toxicity.\n\nData sufficient to inform projected first-in-human starting dose and dose-escalation schema.",
+      "success_criteria": "Success for this Fast-Track STTR will be defined by achievement of pre-specified, quantitative milestones across mechanistic validation, safety profiling, manufacturing readiness, and IND-enabling studies.\n\nPhase I Success Criteria (Mechanistic & Human-Relevant Validation)\n1. Antigen-Specific Cytotoxicity\n\nCBT-611H must demonstrate:\n\nâ‰¥ 50% specific lysis of DCLK1âº platinum-resistant HGSOC spheroids/organoids at optimized E:T ratios\n\nâ‰¤ 15% lysis in DCLK1-knockout or DCLK1-low controls\n\nStatistically significant tumor cell killing vs. mock CAR-T (p < 0.05)\n\nGo Criterion: Clear DCLK1-dependent cytotoxicity confirmed across â‰¥ 3 independent experiments.\n\n2. CSC Depletion\n\nâ‰¥ 40% reduction in DCLK1âº CSC-associated populations\n\nSignificant reduction in ALDH1A1âº and/or CD133âº compartments\n\nPositive correlation between DCLK1 surface density and CAR-T response (mechanistic validation only)\n\nGo Criterion: Demonstrated depletion of CSC-enriched populations in high-DCLK1 PDOs.\n\n3. Combination Benefit (CBT-611H + Carboplatin)\n\nStatistically significant improvement in cytotoxicity or durability over monotherapy arms\n\nNo significant impairment of CAR-T activation or proliferation\n\nGo Criterion: Combination therapy shows additive or synergistic benefit without compromising CAR-T viability.\n\n4. Human-Relevant Safety (Organ-on-a-Chip)\n\nNo clinically significant impairment of barrier integrity, hepatic function, cardiac contractility, or renal markers\n\nCytokine levels within predefined thresholds consistent with manageable CRS risk\n\nNo evidence of prohibitive neuronal injury\n\nGo Criterion: Acceptable safety window in â‰¥ 5 of 6 tested organ systems.\n\nPhase II Success Criteria (Translational & IND-Enabling)\n5. Manufacturing Readiness\n\nâ‰¥ 3 consecutive pre-GMP lots meeting release specifications:\n\nâ‰¥ 80% viability\n\nâ‰¥ 40% CAR expression\n\nVector copy number â‰¤ 5 copies/genome\n\nâ‰¥ 50% in vitro specific lysis potency\n\nGo Criterion: Locked, reproducible manufacturing process with qualified analytical panel.\n\n6. In Vivo Efficacy\n\nStatistically significant reduction in tumor burden vs. controls\n\nImproved survival (p < 0.05, log-rank test)\n\nReduced peritoneal carcinomatosis index and ascites formation\n\nGo Criterion: Demonstrated therapeutic effect in humanized NSG HGSOC model.\n\n7. Biodistribution & Persistence\n\nDetectable CAR-T expansion and persistence over predefined minimum time window\n\nPreferential localization to tumor/peritoneal compartments\n\nNo disproportionate accumulation in critical off-target organs (e.g., brain)\n\nGo Criterion: Tumor-directed biodistribution with manageable systemic exposure.\n\n8. Toxicology & NOAEL\n\nIdentification of dose level with no-observed-adverse-effect level (NOAEL)\n\nManageable cytokine release profile\n\nAbsence of prohibitive organ pathology\n\nGo Criterion: Integrated dataset sufficient to justify projected first-in-human starting dose and IND submission.\n\nOverall Program Success\n\nThe program will be considered successful if:\n\nMechanistic specificity is confirmed\n\nAcceptable safety margin is demonstrated\n\nManufacturing process is locked and reproducible\n\nIn vivo efficacy and NOAEL are defined\n\nData package supports a defensible IND filing\n\nClear Answer\n\nSuccess will be defined by quantitative demonstration of DCLK1-specific cytotoxicity, CSC depletion, combination benefit, acceptable safety, scalable manufacturing readiness, in vivo efficacy, defined NOAEL, and an IND-enabling dataset."
+    },
+    "m3_specific_aims": {},
+    "m4_team_mapping": {
+      "pi_qualifications": "Courtney W. Houchen, MD, is a physician-scientist with extensive expertise in gastrointestinal oncology, cancer stem cell biology, and translational immunotherapy development. Dr. Houchen has a long-standing research focus on DCLK1 biology, epithelial malignancies, and tumor-initiating cell populations. His laboratory has contributed foundational work defining DCLK1 as a cancer stem cellâ€“associated marker and therapeutic target across multiple solid tumors.\n\nDr. Houchen has substantial experience in:\n\nCancer stem cell biology and epithelial tumor progression\n\nTranslational oncology and preclinical therapeutic development\n\nCAR-based targeting strategies and tumor antigen validation\n\nPatient-derived organoid models and in vivo xenograft systems\n\nNIH-funded research program leadership\n\nHe has authored numerous peer-reviewed publications in oncology and tumor biology and has directed multidisciplinary translational research programs bridging mechanistic discovery with therapeutic development. His expertise in DCLK1 biology and tumor stemness directly underpins the scientific rationale of CBT-611H and ensures rigorous execution of mechanistic and preclinical studies in this proposal.",
+      "pi_name": "Courtney W. Houchen, MD,",
+      "key_personnel": [
+        {
+          "name": "Bethany Hannafon, PhD",
+          "role": "Co-Investigator â€“ Gynecologic Oncology & Organoid Models",
+          "expertise": "Dr. Hannafon contributes expertise in ovarian cancer biology, patient-derived organoid models, and translational tumor immunology. She leads PDO development and correlative analyses linking DCLK1 expression with therapeutic response."
+        }
+      ]
+    },
+    "m5_experimental_approach": {},
+    "m6_budget": {},
+    "m7_regulatory": {},
+    "m8_compilation": {},
+    "m9_commercialization": {
+      "section1_value": {},
+      "section2_company": {},
+      "section3_market": {},
+      "section4_ip": {},
+      "section5_finance": {},
+      "section6_revenue": {},
+      "total_word_count": 0,
+      "page_count": 0,
+      "validation_score": 0,
+      "risk_flags": [],
+      "section_weaknesses": []
+    },
+    "phase1_commercialization": {},
+    "prior_phase": {
+      "awardNumber": "",
+      "completionDate": "",
+      "fundingSource": "",
+      "findings": "",
+      "phase1_success_documented": false,
+      "phase2_success_documented": false
+    },
+    "direct_phase2_feasibility": {},
+    "m3_fast_track": {
+      "phase1": {
+        "aim1_statement": "Aim 1: Quantify real-time cytotoxicity, immune activation, and antigen specificity of CBT-611H Â± carboplatin in platinum-resistant HGSOC spheroids and organoids.\n\nWe will determine the magnitude, kinetics, and DCLK1-dependence of tumor cell killing induced by CBT-611H alone and in combination with carboplatin using cisplatin-resistant HGSOC 3D spheroids and organoid models. Immune activation, cytokine release, and T-cell exhaustion markers will be characterized to define optimal effector-to-target ratios and dosing parameters for downstream studies.\n\n",
+        "aim1_milestones": [
+          "Aim 1 Milestones *",
+          "â‰¥ 50% specific lysis of DCLK1âº platinum-resistant spheroids at optimized E:T ratios",
+          "â‰¤ 15% cytotoxicity in DCLK1-knockout controls",
+          "Statistically significant improvement vs. mock CAR-T (p < 0.05)",
+          "Defined minimal antigen density threshold for activity",
+          "Optimized E:T ratio and carboplatin timing for downstream PDO studies",
+          "Go/No-Go: Demonstrated DCLK1-dependent cytotoxicity reproducible across â‰¥ 3 independent experiments."
+        ],
+        "aim2_statement": "Aim 2: Define therapeutic efficacy, CSC depletion, and antigen specificity of CBT-611H Â± carboplatin in patient-derived organoids (PDOs) from platinum-resistant HGSOC.\n\nWe will evaluate CBT-611H alone and in combination with carboplatin across a panel of â‰¥ 20 independent PDO lines derived from platinum-resistant ascites. We will quantify tumor viability, depletion of CSC-associated populations (DCLK1âº, ALDH1A1âº, CD133âº), cytokine production, CAR-T persistence, and correlation with DCLK1 surface expression to confirm mechanistic targeting.\n\n",
+        "aim2_milestones": [
+          "Aim 2 Milestones *",
+          "Establish â‰¥ 20 PDO lines with characterized DCLK1 expression",
+          "â‰¥ 40% reduction in DCLK1âº CSC-enriched populations in high-expression PDOs",
+          "Statistically significant tumor viability reduction vs. controls (p < 0.05)",
+          "Demonstrated correlation between DCLK1 surface density and CAR-T activity",
+          "Evidence of additive or synergistic effect with carboplatin",
+          "Go/No-Go: Selective cytotoxicity in DCLK1-high PDOs with preserved specificity in DCLK1-low controls."
+        ],
+        "aim3_statement": "Aim 3: Evaluate multiplex safety and potential off-tumor engagement of CBT-611H Â± carboplatin using human microphysiologic organ-on-a-chip systems.\n\nWe will assess tissue-specific toxicity across brain, liver, kidney, heart, lung, and gastrointestinal models. DCLK1 surface expression in normal compartments will be quantified to distinguish on-target tumor killing from potential off-tumor engagement. Functional endpoints and cytokine profiles will define safety margins prior to in vivo translation.\n\nT\nBegin PDO expansion and characterization (Aim 2)\n\nMonths 6â€“9:\n\nConduct PDO therapeutic efficacy and CSC depletion studies (Aim 2)\n\nInitiate organ-on-chip safety assays (Aim 3)\n\nMonths 9â€“12:\n\nComplete safety profiling (Aim 3)\n\nIntegrate data and finalize dosing parameters for Phase II in vivo studies",
+        "timeline_summary": "imeline Summary *\n\nMonths 0â€“3:\n\nGenerate and validate spheroid/organoid models\n\nConfirm DCLK1 surface expression\n\nOptimize E:T ratios and carboplatin timing (Aim 1)\n\nMonths 3â€“6:\n\nComplete mechanistic cytotoxicity and immune activation profiling (Aim 1)\n",
+        "interdependencies": "Aim 1 informs Aim 2:\nOptimized E:T ratios, antigen density thresholds, and carboplatin timing parameters from spheroid studies will guide PDO experiments.\n\nAim 2 validates clinical relevance:\nPDO heterogeneity testing confirms translatability and defines responder profiles for in vivo modeling.\n\nAim 3 de-risks Phase II:\nOrgan-on-chip safety findings will determine safe dosing ranges and organ systems requiring enhanced monitoring in humanized NSG models.\n\nPhase II dosing and toxicology design depend directly on:\n\nCytotoxicity magnitude (Aim 1)\n\nCSC depletion and specificity (Aim 2)\n\nSafety window definition (Aim 3)\n\nTogether, Phase I establishes mechanistic validity, human relevance, and safety feasibility required for IND-enabling studies."
+      },
+      "phase2": {
+        "aim1_statement": "Aim 1: Develop, lock, and qualify a scalable pre-GMP manufacturing process and analytical release panel for CBT-611H suitable for IND-enabling studies and future cGMP translation.\n\nWe will establish a reproducible, closed-system lentiviral vector (LVV) and CAR-T manufacturing workflow, optimize critical process parameters, and qualify an analytical release panel defining identity, purity, potency, safety, and stability. The locked process will generate pre-GMP material for in vivo pharmacology and toxicology studies and support technology transfer to a CDMO for future GMP manufacturing.\n\n",
+        "aim1_milestones": [
+          "Aim 1 Milestones *",
+          "â‰¥ 3 consecutive LVV engineering runs meeting:",
+          "Functional titer â‰¥ 1 Ã— 10^8 TU/mL (pre-purification)",
+          "RCL-negative",
+          "Endotoxin < 5 EU/mL",
+          "Residual host DNA < predefined threshold",
+          "â‰¥ 5 CAR-T engineering runs meeting:",
+          "Viability â‰¥ 80% at harvest",
+          "CAR expression â‰¥ 40%",
+          "Vector copy number â‰¤ 5 copies/genome",
+          "â‰¥ 50% specific lysis of DCLK1âº targets at 10:1 E:T",
+          "â‰¤ 15% lysis of DCLK1-negative targets",
+          "Stability confirmation at 0, 3, and 6 months post-cryopreservation with â‰¥ 70% post-thaw viability",
+          "Go/No-Go: Delivery of â‰¥ 3 fully specification-compliant pre-GMP lots with qualified analytical panel."
+        ],
+        "aim2_statement": "Aim 2: Conduct IND-enabling pharmacology, efficacy, biodistribution, and safety studies of CBT-611H Â± carboplatin in humanized NSG models of DCLK1âº platinum-resistant HGSOC.\n\nWe will evaluate therapeutic efficacy, survival benefit, biodistribution, CAR-T persistence, cytokine profiles, and systemic safety in humanized NSG mice bearing luciferase-labeled DCLK1âº HGSOC xenografts. Combination therapy with carboplatin will be assessed for additive or synergistic benefit. Comprehensive clinical pathology and histologic analyses will define the therapeutic index and no-observed-adverse-effect level (NOAEL) to support IND submission.\n\n",
+        "aim2_milestones": [
+          "Aim 2 Milestones *",
+          "Statistically significant tumor burden reduction vs. controls (p < 0.05)",
+          "Improved survival in CBT-611H arms (log-rank p < 0.05)",
+          "Reduced peritoneal carcinomatosis index and ascites formation",
+          "Detectable CAR-T expansion and persistence over predefined time window",
+          "Preferential tumor/peritoneal localization vs. critical off-target organs",
+          "Defined NOAEL for monotherapy and combination therapy",
+          "Manageable cytokine profile within predefined CRS thresholds",
+          "Go/No-Go: Integrated dataset supports defensible first-in-human starting dose and IND submission readiness."
+        ],
+        "interdependencies": "Aim 1 â†’ Aim 2:\nManufacturing lock and analytical qualification are prerequisites for in vivo IND-enabling studies.\n\nAim 2 â†’ Aim 3:\nEfficacy, biodistribution, and toxicology data define starting dose and regulatory package content.\n\nCombination Data Integration:\nCarboplatin combination findings will influence clinical dosing strategy and risk mitigation planning.\n\nComparability Requirement:\nAnalytical consistency between pre-GMP lots and future GMP production underpins regulatory credibility.\n\nCollectively, Phase II establishes manufacturing reproducibility, defines therapeutic index, and generates the full nonclinical dataset required for IND submission."
+      },
+      "phase1_complete": true,
+      "phase2_complete": false
+    },
+    "m5_fast_track": {
+      "phase1": {
+        "methodology_overview": "Phase I will establish mechanistic efficacy, antigen specificity, and human-relevant safety of CBT-611H Â± carboplatin in platinum-resistant high-grade serous ovarian cancer (HGSOC). We will employ a tiered experimental framework:\n\n3D spheroid and organoid models of cisplatin-resistant HGSOC to quantify real-time cytotoxicity and immune activation.\n\nPatient-derived organoids (PDOs) from platinum-resistant ascites to assess therapeutic activity across heterogeneous clinical samples.\n\nHuman microphysiologic organ-on-a-chip platforms to evaluate potential off-tumor toxicity and cytokine responses in normal tissue analogs.\n\nThis integrated design ensures mechanistic validation, human relevance, and translational safety assessment prior to Phase II IND-enabling in vivo studies.",
+        "experimental_design": "Aim 1: Mechanistic Cytotoxicity in Spheroids/Organoids\n\nPlatinum-resistant HGSOC cell lines (e.g., OVCAR3, OVCAR8 CPR) will be cultured as 3D spheroids.\n\nDCLK1 surface expression will be quantified via flow cytometry.\n\nDCLK1-knockout controls will confirm antigen specificity.\n\nTreatment arms:\n\nVehicle control\n\nCarboplatin alone\n\nCBT-611H alone (multiple E:T ratios)\n\nCBT-611H + carboplatin (pre-treatment model)\n\nMock CAR-T\n\nReal-time cytotoxicity will be measured over 24â€“96 hours.\n\nAim 2: PDO Therapeutic Evaluation\n\nâ‰¥ 20 PDO lines will be generated from platinum-resistant ascites.\n\nBaseline DCLK1 expression stratified into high and low groups.\n\nTreatment arms identical to Aim 1.\n\nEndpoints:\n\nViability (3D CellTiter-Glo)\n\nCSC marker depletion (DCLK1âº, ALDH1A1âº, CD133âº)\n\nCytokine production\n\nCAR-T persistence and phenotype\n\nAim 3: Organ-on-a-Chip Safety\n\nBrain, liver, kidney, heart, lung, and GI microphysiologic systems.\n\nSame treatment arms.\n\nFunctional readouts:\n\nBarrier integrity\n\nContractility\n\nAlbumin production\n\nRenal markers\n\nNeuronal viability",
+        "data_collection_methods": "Flow cytometry (CAR expression, DCLK1 surface density, activation/exhaustion markers)\n\nIncuCyte live-cell imaging for real-time cytotoxicity\n\n3D CellTiter-Glo viability assays\n\nMultiplex cytokine bead assays (IFN-Î³, IL-2, IL-6, TNF-Î±)\n\nImmunoblot and IHC for DCLK1 confirmation\n\nHigh-content imaging for CSC marker quantification\n\nOrgan chip functional metrics (TEER, contractility, metabolic markers)\n\nAll assays performed in technical triplicate and biological replicates",
+        "analysis_plan": "Data will be analyzed to:\n\nConfirm DCLK1-dependent cytotoxicity.\n\nDetermine optimal E:T ratio and carboplatin sequencing.\n\nCorrelate DCLK1 surface expression with response magnitude.\n\nIdentify safety signals across organ systems.\n\nDefine parameters for in vivo dosing in Phase II.\n\nAll analyses will be pre-specified to avoid post hoc bias.",
+        "statistical_approach": "One-way or two-way ANOVA (treatment Ã— time) with Tukey correction.\n\nMixed-effects models for repeated measures (IncuCyte time-course).\n\nNon-parametric Kruskalâ€“Wallis tests when distributional assumptions fail.\n\nLinear or Spearman regression to correlate DCLK1 density with response.\n\nSignificance threshold: Î± = 0.05.\n\nPower calculations based on preliminary effect sizes (â‰¥ 80% power to detect 30â€“40% differences in cytotoxicity).\n\nAll statistical assumptions will be validated prior to parametric testing.",
+        "expected_results": "Robust DCLK1-dependent cytotoxicity in platinum-resistant spheroids.\n\nSelective depletion of CSC-associated populations in high-DCLK1 PDOs.\n\nAdditive or synergistic enhancement with carboplatin.\n\nMinimal cytotoxicity in DCLK1-negative controls.\n\nAcceptable safety profile across organ-on-chip systems.\n\nDefined activity thresholds guiding Phase II dose selection.",
+        "potential_pitfalls": "Heterogeneity in PDO DCLK1 expression.\n\nReduced CAR-T activity in 3D tumor architecture.\n\nCarboplatin impairing T-cell viability.\n\nUnexpected DCLK1 expression in normal tissue models.\n\nCytokine levels exceeding anticipated ranges.",
+        "alternative_approaches": "Expand PDO cohort or supplement with archival samples if variability limits conclusions.\n\nModify E:T ratios or culture duration to enhance 3D penetration.\n\nAdjust carboplatin timing to minimize T-cell exposure.\n\nIncorporate additional specificity controls (isotype CAR, epitope mapping).\n\nTitrate CAR-T dose or implement staged exposure in safety assays.\n\nIf organ-on-chip findings reveal concerning signals, dosing windows and exposure parameters will be refined before Phase II transition."
+      },
+      "phase2": {
+        "methodology_overview": "Phase II will generate the manufacturing, pharmacology, biodistribution, and toxicology data required to support IND submission of CBT-611H Â± carboplatin for platinum-resistant high-grade serous ovarian cancer (HGSOC).\n\nThe Phase II program integrates:\n\nPre-GMP manufacturing process lock and analytical qualification\n\nIn vivo efficacy and survival studies in humanized NSG HGSOC models\n\nBiodistribution, persistence, and pharmacodynamic profiling\n\nPre-IND-enabling toxicology and NOAEL determination\n\nThis structured translational workflow ensures that material used in nonclinical studies reflects the final clinical manufacturing configuration and supports regulatory credibility.",
+        "experimental_design": "Manufacturing and Analytical Qualification\n\nLentiviral vector production using suspension-adapted HEK293T cells.\n\nClosed-system CAR-T manufacturing with CD3/CD28 activation and IL-7/IL-15 expansion.\n\nEngineering runs (â‰¥ 3 LVV; â‰¥ 5 CAR-T).\n\nQualification of identity, potency, purity, sterility, VCN, and stability assays.\n\nCryopreservation stability tested at 0, 3, and 6 months.Aim 2: In Vivo Efficacy and Pharmacology\n\nHumanized NSG Model:\n\nNSG mice engrafted with human PBMCs.\n\nIntraperitoneal injection of luciferase-labeled DCLK1âº HGSOC cells.\n\nRandomization upon established tumor signal.\n\nTreatment Groups:\n\nVehicle\n\nCarboplatin\n\nCBT-611H\n\nCBT-611H + carboplatin\n\nMock CAR-T\n\nEndpoints:\n\nBioluminescent tumor burden\n\nSurvival\n\nAscites volume\n\nPeritoneal carcinomatosis index\n\nMetastatic spread",
+        "data_collection_methods": "Biodistribution and Persistence\n\nSerial blood collection for CAR-T quantification (flow cytometry, qPCR).\n\nTissue harvest at necropsy (tumor, liver, lung, brain, spleen, marrow).\n\nSpatial immunostaining for CAR-T localization.\n\nCytokine profiling (IL-6, IFN-Î³, TNF-Î±, IL-2). oxicology and Safety\n\nDaily monitoring (weight, behavior, activity).\n\nCBC and serum chemistry panels.\n\nHistopathologic evaluation of major organs.\n\nDetermination of NOAEL for monotherapy and combination therapy.",
+        "analysis_plan": "Data will be integrated to:\n\nConfirm reproducible manufacturing quality.\n\nQuantify tumor reduction and survival benefit.\n\nDefine CAR-T expansion kinetics and persistence window.\n\nDetermine organ-specific biodistribution.\n\nEstablish therapeutic index and NOAEL.\n\nInform first-in-human starting dose and escalation schema.\n\nInterim analyses will confirm continuation thresholds prior to toxicology expansion.",
+        "statistical_approach": "Sample size powered for â‰¥ 80% power to detect â‰¥ 30% difference in tumor burden.\n\nRepeated-measures mixed-effects modeling for longitudinal BLI.\n\nKaplanâ€“Meier survival curves with log-rank testing.\n\nCox proportional hazards modeling for hazard ratios.\n\nANOVA or Kruskalâ€“Wallis tests for continuous endpoints.\n\nCorrection for multiple comparisons (Tukey or Bonferroni).\n\nEquivalence testing for manufacturing comparability.\n\nSignificance level set at Î± = 0.05.",
+        "expected_results": "Reproducible pre-GMP CAR-T production meeting defined specifications.\n\nStatistically significant tumor burden reduction with CBT-611H.\n\nImproved survival compared to controls.\n\nPreferential CAR-T localization to tumor/peritoneal compartments.\n\nManageable cytokine profile.\n\nDefined NOAEL supporting clinical starting dose.\n\nData package suitable for IND submission.",
+        "potential_pitfalls": "Variability in PBMC humanization or early GVHD.\n\nInconsistent tumor engraftment.\n\nSuboptimal CAR-T persistence.\n\nUnexpected neurotoxicity signal.\n\nManufacturing variability across lots.",
+        "alternative_approaches": "Transition to CD34âº humanization model if GVHD limits study window.\n\nAdjust tumor inoculum or use orthotopic implantation if dissemination pattern is inadequate.\n\nModify lymphodepletion or dosing schedule to enhance CAR-T expansion.\n\nDose de-escalation or altered sequencing if toxicity emerges.\n\nExpand DoE modeling to stabilize manufacturing parameters.\n\nIf combination toxicity exceeds acceptable thresholds, monotherapy IND strategy will be evaluated as fallback."
+      },
+      "phase1_complete": true,
+      "phase2_complete": true
+    },
+    "m6_fast_track": {
+      "phase1": {
+        "personnel_costs": 128000,
+        "supplies_costs": 72000,
+        "travel_costs": 5000,
+        "subaward_costs": 60000,
+        "budget_justification": "Personnel:\nFunds are requested to support the scientific and translational activities necessary to execute Phase I mechanistic validation studies. Dr. Houchen will oversee study design, data interpretation, and integration across aims. Dr. Hannafon will lead patient-derived organoid development and correlative analyses. A research technician and postdoctoral fellow will perform spheroid, PDO, and organ-on-chip experiments. The small business project lead will coordinate manufacturing planning, regulatory alignment, and commercialization strategy.\n\nSupplies:\nFunds are requested for cell culture reagents, organoid matrices, cytokine assay kits, flow cytometry antibodies, viability assays, and microphysiologic organ-on-chip consumables. These materials are essential for cytotoxicity, CSC depletion, immune activation, and safety profiling studies described in Aims 1â€“3.\n\nTravel:\nLimited funds are requested to support dissemination of findings at a scientific conference and participation in NIH-related meetings.\n\nSubaward:\nSubaward funds support academic laboratory execution of PDO development, flow cytometry core usage, and organ-on-chip safety testing.\n\nSmall Business Allocation:\nThe small business will perform project management, translational planning, regulatory alignment, and coordination of future manufacturing scale-up, consistent with STTR requirements. The small business portion exceeds the 40% minimum requirement.",
+        "direct_costs_total": 275000
+      },
+      "phase2": {
+        "direct_costs_total": 1750000,
+        "personnel_costs": 650000,
+        "equipment_costs": 0,
+        "supplies_costs": 310000,
+        "travel_costs": 20000,
+        "subaward_costs": 700000,
+        "budget_justification": "Personnel\n\nFunds support scientific leadership, manufacturing oversight, in vivo execution, data integration, and regulatory alignment. Personnel effort is calibrated to ensure rigorous IND-enabling pharmacology and toxicology while maintaining manufacturing comparability and translational continuity.\n\nSupplies\n\nSupplies support CAR-T manufacturing runs, lentiviral vector production, animal studies in humanized NSG models, biodistribution assays, cytokine profiling, and histopathologic evaluation. These materials are essential to establish therapeutic index and NOAEL.\n\nSubaward\n\nSubaward funds support academic execution of in vivo efficacy and toxicology studies, core facility services, pathology evaluation, and regulatory-compliant documentation. IND-enabling work requires institutional animal infrastructure and specialized facilities.\n\nTravel\n\nFunds support regulatory engagement (including pre-IND consultation), CDMO alignment, and dissemination of findings at scientific meetings.\n\nSmall Business Allocation\n\nThe small business directs manufacturing translation, regulatory planning, commercialization strategy, and IND coordination. Allocation exceeds the STTR minimum requirement of 40%, ensuring strong commercialization oversight."
+      },
+      "phase1_complete": true,
+      "phase2_complete": true
+    },
+    "m7_fast_track": {
+      "shared": {
+        "human_subjects_involved": true,
+        "vertebrate_animals_involved": true,
+        "biohazards_involved": true,
+        "facilities_description": "The academic partner institution provides fully equipped laboratory facilities to support cell culture, molecular biology, flow cytometry, organoid development, and in vivo animal studies. The institution maintains:\n\nDedicated BSL-2 laboratory space for lentiviral and genetically modified cell handling\n\nFlow cytometry core facility\n\nHistology and pathology core\n\nBioluminescent imaging capability\n\nAAALAC-accredited animal facility with NSG mouse expertise\n\nMicrophysiologic organ-on-chip research infrastructure\n\n21 CFR Part 11â€“aligned data management systems\n\nThe small business (COARE Holdings Inc.) provides project management, regulatory strategy, manufacturing translation oversight, and commercialization coordination. CDMO manufacturing services will be conducted in GMP-compliant facilities under future IND-enabling alignment.\n\nThese facilities are fully adequate to complete the proposed mechanistic, safety, manufacturing, and translational activities.",
+        "letters_of_support": [
+          "The following Letters of Support will be included:",
+          "Academic Institutional Letter",
+          "Commitment of laboratory space, core facilities, and PDO access.",
+          "Confirmation of IRB and IACUC infrastructure.",
+          "Manufacturing Partner (e.g., ProMab or CDMO)",
+          "Commitment to lentiviral production and CAR-T engineering runs.",
+          "Confirmation of scalability and GMP transition feasibility.",
+          "Core Facilities",
+          "Flow cytometry core support.",
+          "Imaging and pathology core support.",
+          "Clinical Collaborator (if applicable)",
+          "Access to platinum-resistant ascites samples.",
+          "Commitment to translational collaboration.",
+          "Small Business Commitment Letter",
+          "Commercialization strategy oversight.",
+          "IND planning commitment.",
+          "Resource allocation confirmation."
+        ]
+      },
+      "phase2_additional": {
+        "commercialization_plan": "CBT-611H is a first-in-class, DCLK1-targeted CAR-T therapy designed for platinum-resistant high-grade serous ovarian cancer (HGSOC). The Phase II program is structured to generate the CMC, pharmacology, biodistribution, and toxicology data required to support IND submission and transition into first-in-human clinical trials.\n\nThe commercialization strategy follows a staged value-creation model:\n\nPhase II (Current STTR): IND-enabling data package + manufacturing lock\n\nPost-Phase II: IND submission and Phase I clinical trial initiation\n\nValue Inflection: Clinical proof-of-mechanism in platinum-resistant HGSOC\n\nExit/Expansion: Strategic partnership, licensing, or co-development with oncology-focused biopharma\n\nThe long-term objective is to establish a DCLK1-targeted cellular immunotherapy franchise across CSC-driven solid tumors.",
+        "market_analysis": "Disease Burden\n\nHigh-grade serous ovarian cancer accounts for approximately 70% of ovarian cancer deaths. In the United States:\n\n~19,000 new ovarian cancer cases annually\n\n~12,000+ deaths per year\n\n~75% diagnosed at advanced stage\n\n~80% relapse after platinum therapy\n\nMedian survival for platinum-resistant patients â‰ˆ 12 months\n\nGlobally, ovarian cancer exceeds 300,000 cases annually, with a substantial proportion progressing to platinum resistance. Addressable Market\n\nThe initial commercial target population is:\n\nPlatinum-resistant HGSOC in the U.S. and EU.\n\nEstimated U.S. addressable population annually:\n~8,000â€“10,000 patients.\n\nCAR-T therapies in hematologic malignancies are priced between:\n$375,000â€“$475,000 per treatment.\n\nEven at conservative adoption rates:\n\n25% penetration Ã— 8,000 patients Ã— $350,000 = ~$700M annual U.S. opportunity\n\nExpansion to EU and other markets increases total addressable market (TAM) beyond $1.5B\n\nIf expanded into earlier-line disease or additional DCLK1-enriched solid tumors, TAM increases significantly.\n\nCompetitive Landscape\n\nCurrent platinum-resistant HGSOC treatments include:\n\nCytotoxic chemotherapy\n\nPARP inhibitors\n\nAnti-angiogenic agents\n\nAntibody-drug conjugates\n\nThere are no FDA-approved CAR-T therapies for solid tumors and none specifically targeting CSC-associated antigens such as DCLK1.\n\nCBT-611H differentiators:\n\nCSC-directed mechanism\n\nRational carboplatin combination strategy\n\nIntraperitoneal delivery alignment with disease biology\n\nPotential platform expansion across DCLK1-driven malignancies\n\nMarket Drivers\n\nHigh unmet clinical need\n\nLimited durable response rates in platinum-resistant disease\n\nGrowing acceptance of high-value cellular therapies\n\nIncreasing oncology investment in solid tumor immunotherapy\n\nRegulatory incentives (Orphan Drug potential)",
+        "manufacturing_plan": "Phase II Manufacturing Objectives\n\nThe Phase II program will:\n\nLock a scalable, closed-system pre-GMP manufacturing process\n\nQualify analytical release assays\n\nDemonstrate comparability across engineering runs\n\nEstablish stability and cryopreservation protocols\n\nGenerate material for IND-enabling toxicology\n\nLentiviral Vector Manufacturing\n\nSuspension-adapted HEK293T production system\n\nFour-plasmid self-inactivating vector system\n\nPurification via filtration + chromatography\n\nRCL testing, endotoxin control, residual DNA quantification\n\nThis process will be structured for future cGMP translation.\n\nCAR-T Manufacturing Workflow\n\nCD3/CD28 activation\n\nLentiviral transduction (controlled MOI)\n\nIL-7/IL-15 expansion to promote central memory phenotype\n\nGas-permeable closed culture systems\n\nControlled-rate cryopreservation\n\nCritical Quality Attributes (CQAs):\n\nCAR expression â‰¥ 40%\n\nViability â‰¥ 80%\n\nVCN â‰¤ 5 copies/genome\n\nPotency via DCLK1-dependent cytotoxicity assay\n\nCommercial Manufacturing Strategy\n\nPost-IND, manufacturing will transition to:\n\nGMP-certified CDMO partner\n\nClosed, scalable production suites\n\nDefined batch release criteria\n\nAnalytical comparability framework\n\nIntraperitoneal administration may reduce systemic dose requirements and manufacturing burden compared to systemic infusion strategies. Cost of Goods Strategy\n\nCost drivers:\n\nLentiviral vector production\n\nT-cell expansion yield\n\nQC release testing\n\nStrategies to manage COGS:\n\nProcess optimization during Phase II\n\nScalable vector production methods\n\nEarly CDMO engagement\n\nDefined release panel to avoid excessive testing redundancy\n\nRegulatory Pathway\n\nPre-IND interaction following Phase II completion\n\nOrphan Drug designation exploration\n\nFast Track or RMAT designation potential\n\nCBER oversight (gene-modified cellular therapy)\n\nThe Phase II program is structured specifically to align with CMC and nonclinical requirements for IND submission."
+      },
+      "shared_complete": true,
+      "phase2_complete": true
+    },
+    "legacy_budget": {
+      "directCosts": 0,
+      "personnelCosts": 0,
+      "subawardCosts": 0,
+      "smallBusinessPercent": 67,
+      "researchInstitutionPercent": 0
+    },
+    "legacy_checklist": {}
+  },
+  "exportedAt": "2026-02-03T06:37:33.878Z"
+}
