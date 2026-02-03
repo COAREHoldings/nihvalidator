@@ -10,7 +10,7 @@ import { AuditMode } from './components/AuditMode'
 import type { ProjectSchemaV2, ValidationResult } from './types'
 import { INSTITUTE_BUDGET_CAPS } from './types'
 import { createNewProject, updateModuleStates, runFullValidation, checkAIGating, getBudgetCap } from './validation'
-import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, ChevronLeft, Briefcase, Upload, FileText, Home, Menu, X, BookOpen, FileOutput, ListOrdered } from 'lucide-react'
+import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, ChevronLeft, Briefcase, Upload, FileText, Home, Menu, X, BookOpen, FileOutput, ListOrdered, AlertCircle } from 'lucide-react'
 import { DocumentImport } from './components/DocumentImport'
 import { SpecificAimsGenerator } from './components/SpecificAimsGenerator'
 
@@ -33,6 +33,7 @@ export default function App() {
   const [showDocGenerator, setShowDocGenerator] = useState<'titles' | 'research' | 'references' | 'commercialization' | null>(null)
   const [generatedContent, setGeneratedContent] = useState<{ type: string; content: string } | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [pendingNavigation, setPendingNavigation] = useState<{ target: number | 'config' | 'validate' } | null>(null)
 
   // Update module states when project changes
   useEffect(() => {
@@ -63,6 +64,53 @@ export default function App() {
   const startModules = () => {
     setShowConfig(false)
     setActiveModule(1)
+  }
+
+  // Check if current module is incomplete
+  const getCurrentModuleMissingFields = () => {
+    const currentState = project.module_states.find(m => m.module_id === activeModule)
+    if (!currentState) return []
+    const missing = currentState.required_fields.filter(f => !currentState.completed_fields.includes(f))
+    return missing
+  }
+
+  // Handle navigation with validation warning
+  const handleModuleNavigation = (target: number | 'config' | 'validate') => {
+    if (showConfig) {
+      // No warning needed when leaving config
+      if (target === 'validate') {
+        runValidation()
+      } else if (target === 'config') {
+        setShowConfig(true)
+      } else {
+        setActiveModule(target)
+        setShowConfig(false)
+      }
+      return
+    }
+
+    const missingFields = getCurrentModuleMissingFields()
+    if (missingFields.length > 0) {
+      setPendingNavigation({ target })
+    } else {
+      executeNavigation(target)
+    }
+  }
+
+  const executeNavigation = (target: number | 'config' | 'validate') => {
+    setPendingNavigation(null)
+    if (target === 'validate') {
+      runValidation()
+    } else if (target === 'config') {
+      setShowConfig(true)
+    } else {
+      setActiveModule(target)
+      setShowConfig(false)
+    }
+  }
+
+  const dismissWarning = () => {
+    setPendingNavigation(null)
   }
 
   const aiGating = checkAIGating(project)
@@ -296,8 +344,8 @@ export default function App() {
             <div className="h-12 flex items-center justify-between px-4 md:px-6">
               <button
                 onClick={() => {
-                  if (activeModule === 1) setShowConfig(true);
-                  else setActiveModule(prev => Math.max(1, prev - 1));
+                  if (activeModule === 1) handleModuleNavigation('config');
+                  else handleModuleNavigation(activeModule - 1);
                 }}
                 className="flex items-center gap-1 px-3 py-1.5 text-sm text-neutral-600 hover:bg-white rounded-lg border border-transparent hover:border-neutral-200"
               >
@@ -314,7 +362,7 @@ export default function App() {
                   return (
                     <button
                       key={num}
-                      onClick={() => setActiveModule(num)}
+                      onClick={() => handleModuleNavigation(num)}
                       title={moduleName}
                       className={`flex-shrink-0 px-2 py-1 rounded-lg text-xs font-medium transition-all ${
                         activeModule === num 
@@ -334,9 +382,9 @@ export default function App() {
               <button
                 onClick={() => {
                   if (activeModule === totalModules) {
-                    runValidation();
+                    handleModuleNavigation('validate');
                   } else {
-                    setActiveModule(prev => Math.min(totalModules, prev + 1));
+                    handleModuleNavigation(activeModule + 1);
                   }
                 }}
                 className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border ${
@@ -418,13 +466,13 @@ export default function App() {
               <ModuleNav 
                 modules={project.module_states.filter(m => showCommercializationModule ? true : m.module_id <= 8)} 
                 activeModule={activeModule} 
-                onSelectModule={id => { setShowConfig(false); setActiveModule(id) }} 
+                onSelectModule={id => handleModuleNavigation(id)} 
               />
               
               {/* Commercialization Module Button */}
               {showCommercializationModule && (
                 <button
-                  onClick={() => { setShowConfig(false); setActiveModule(9) }}
+                  onClick={() => handleModuleNavigation(9)}
                   className={`w-full mt-2 p-3 rounded-lg border text-left flex items-center gap-3 transition-all ${
                     activeModule === 9 && !showConfig
                       ? 'border-primary-500 bg-primary-50'
@@ -699,7 +747,7 @@ export default function App() {
                     moduleId={activeModule}
                     moduleState={project.module_states.find(m => m.module_id === activeModule)!}
                     onUpdate={updateProject}
-                    onNext={() => setActiveModule(prev => Math.min(totalModules, prev + 1))}
+                    onNext={() => handleModuleNavigation(Math.min(totalModules, activeModule + 1))}
                     onValidate={runValidation}
                     isLastModule={activeModule === totalModules}
                     totalModules={totalModules}
@@ -852,6 +900,55 @@ export default function App() {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Inline Validation Warning Modal */}
+      {pendingNavigation && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-neutral-900">Incomplete Module</h3>
+                <p className="text-sm text-neutral-600 mt-1">
+                  Module {activeModule} has {getCurrentModuleMissingFields().length} empty required field{getCurrentModuleMissingFields().length !== 1 ? 's' : ''}.
+                </p>
+              </div>
+            </div>
+            
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6">
+              <p className="text-xs font-medium text-amber-800 mb-2">Missing fields:</p>
+              <ul className="text-xs text-amber-700 space-y-1 max-h-32 overflow-y-auto">
+                {getCurrentModuleMissingFields().slice(0, 5).map((field, i) => (
+                  <li key={i} className="flex items-center gap-1">
+                    <span className="w-1 h-1 bg-amber-500 rounded-full" />
+                    {field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </li>
+                ))}
+                {getCurrentModuleMissingFields().length > 5 && (
+                  <li className="text-amber-600 italic">...and {getCurrentModuleMissingFields().length - 5} more</li>
+                )}
+              </ul>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={dismissWarning}
+                className="flex-1 px-4 py-2.5 border border-neutral-300 text-neutral-700 font-medium rounded-lg hover:bg-neutral-50 transition-colors"
+              >
+                Stay & Complete
+              </button>
+              <button
+                onClick={() => executeNavigation(pendingNavigation.target)}
+                className="flex-1 px-4 py-2.5 bg-amber-500 text-white font-medium rounded-lg hover:bg-amber-600 transition-colors"
+              >
+                Continue Anyway
+              </button>
+            </div>
           </div>
         </div>
       )}
