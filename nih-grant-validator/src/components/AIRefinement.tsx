@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { AIGatingResult } from '../types'
 
 const supabase = createClient(
-  'https://raqkwtjsxohnhtcacakb.supabase.co',
+  'https://dvuhtfzsvcacyrlfettz.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2dWh0ZnpzdmNhY3lybGZldHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDk3OTYsImV4cCI6MjA4NTIyNTc5Nn0.vUtnPXeQrzU0kO0E7qK2qJtZ_RCqnXCEFSa60adHld0'
 )
 

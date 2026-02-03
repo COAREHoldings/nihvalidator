@@ -12,8 +12,8 @@ import mammoth from 'mammoth'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://raqkwtjsxohnhtcacakb.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhcWt3dGpzeG9obmh0Y2FjYWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDIyNTQsImV4cCI6MjA4NTI3ODI1NH0.pDpNp4UlpCinhi6gl2qtKhT3t20uUGHU_FUxTxYjttI'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://dvuhtfzsvcacyrlfettz.supabase.co'
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2dWh0ZnpzdmNhY3lybGZldHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDk3OTYsImV4cCI6MjA4NTIyNTc5Nn0.vUtnPXeQrzU0kO0E7qK2qJtZ_RCqnXCEFSa60adHld0'
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 type Mechanism = 'Phase I' | 'Phase II' | 'Direct-to-Phase II' | 'Fast Track' | 'Phase IIB'

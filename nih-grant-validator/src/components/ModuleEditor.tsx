@@ -4,8 +4,8 @@ import { MODULE_DEFINITIONS } from '../types'
 import { getBudgetCap } from '../validation'
 import { Plus, Trash2, AlertTriangle, Lock, CheckCircle, Sparkles, Loader2, X, Lightbulb, FileText, ShieldCheck, ArrowRight, ChevronRight, FileCheck } from 'lucide-react'
 
-const SUPABASE_URL = 'https://raqkwtjsxohnhtcacakb.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhcWt3dGpzeG9obmh0Y2FjYWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDIyNTQsImV4cCI6MjA4NTI3ODI1NH0.pDpNp4UlpCinhi6gl2qtKhT3t20uUGHU_FUxTxYjttI'
+const SUPABASE_URL = 'https://dvuhtfzsvcacyrlfettz.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR2dWh0ZnpzdmNhY3lybGZldHR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2NDk3OTYsImV4cCI6MjA4NTIyNTc5Nn0.vUtnPXeQrzU0kO0E7qK2qJtZ_RCqnXCEFSa60adHld0'
 
 interface Props {
   project: ProjectSchemaV2
