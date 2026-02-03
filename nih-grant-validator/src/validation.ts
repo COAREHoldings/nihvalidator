@@ -124,16 +124,67 @@ function isFieldPopulated(value: unknown): boolean {
   return false
 }
 
-// Get module data by ID
+// Get module data by ID - handles Fast Track phase-specific data
 function getModuleData(project: ProjectSchemaV2, moduleId: number): Record<string, unknown> {
+  const isFastTrack = project.grant_type === 'Fast Track'
+  
   switch (moduleId) {
     case 1: return project.m1_title_concept as Record<string, unknown>
     case 2: return project.m2_hypothesis as Record<string, unknown>
-    case 3: return project.m3_specific_aims as Record<string, unknown>
+    case 3: 
+      if (isFastTrack) {
+        // Merge phase1 and phase2 data for Fast Track validation
+        return {
+          ...project.m3_fast_track.phase1,
+          ...project.m3_fast_track.phase2,
+          // Mark complete if either phase has the field
+          aim1_statement: project.m3_fast_track.phase1?.aim1_statement || project.m3_specific_aims?.aim1_statement,
+          aim1_milestones: project.m3_fast_track.phase1?.aim1_milestones || project.m3_specific_aims?.aim1_milestones,
+          aim2_statement: project.m3_fast_track.phase1?.aim2_statement || project.m3_fast_track.phase2?.aim1_statement || project.m3_specific_aims?.aim2_statement,
+          aim2_milestones: project.m3_fast_track.phase1?.aim2_milestones || project.m3_fast_track.phase2?.aim1_milestones || project.m3_specific_aims?.aim2_milestones,
+          timeline_summary: project.m3_fast_track.phase1?.timeline_summary || project.m3_fast_track.phase2?.timeline_summary || project.m3_specific_aims?.timeline_summary,
+          interdependencies: project.m3_fast_track.phase1?.interdependencies || project.m3_fast_track.phase2?.interdependencies || project.m3_specific_aims?.interdependencies
+        } as Record<string, unknown>
+      }
+      return project.m3_specific_aims as Record<string, unknown>
     case 4: return project.m4_team_mapping as Record<string, unknown>
-    case 5: return project.m5_experimental_approach as Record<string, unknown>
-    case 6: return project.m6_budget as Record<string, unknown>
-    case 7: return project.m7_regulatory as Record<string, unknown>
+    case 5: 
+      if (isFastTrack) {
+        return {
+          ...project.m5_fast_track.phase1,
+          ...project.m5_fast_track.phase2,
+          methodology_overview: project.m5_fast_track.phase1?.methodology_overview || project.m5_experimental_approach?.methodology_overview,
+          experimental_design: project.m5_fast_track.phase1?.experimental_design || project.m5_experimental_approach?.experimental_design,
+          data_collection_methods: project.m5_fast_track.phase1?.data_collection_methods || project.m5_experimental_approach?.data_collection_methods,
+          analysis_plan: project.m5_fast_track.phase1?.analysis_plan || project.m5_experimental_approach?.analysis_plan,
+          statistical_approach: project.m5_fast_track.phase1?.statistical_approach || project.m5_experimental_approach?.statistical_approach,
+          expected_results: project.m5_fast_track.phase1?.expected_results || project.m5_experimental_approach?.expected_results,
+          potential_pitfalls: project.m5_fast_track.phase1?.potential_pitfalls || project.m5_experimental_approach?.potential_pitfalls,
+          alternative_approaches: project.m5_fast_track.phase1?.alternative_approaches || project.m5_experimental_approach?.alternative_approaches
+        } as Record<string, unknown>
+      }
+      return project.m5_experimental_approach as Record<string, unknown>
+    case 6: 
+      if (isFastTrack) {
+        return {
+          ...project.m6_fast_track.phase1,
+          ...project.m6_fast_track.phase2,
+          direct_costs_total: project.m6_fast_track.phase1?.direct_costs_total || project.m6_budget?.direct_costs_total,
+          personnel_costs: project.m6_fast_track.phase1?.personnel_costs || project.m6_budget?.personnel_costs,
+          small_business_percent: project.m6_fast_track.phase1?.small_business_percent || project.m6_budget?.small_business_percent,
+          budget_justification: project.m6_fast_track.phase1?.budget_justification || project.m6_budget?.budget_justification
+        } as Record<string, unknown>
+      }
+      return project.m6_budget as Record<string, unknown>
+    case 7: 
+      if (isFastTrack) {
+        return {
+          ...project.m7_fast_track.shared,
+          ...project.m7_fast_track.phase2_additional,
+          facilities_description: project.m7_fast_track.shared?.facilities_description || project.m7_regulatory?.facilities_description
+        } as Record<string, unknown>
+      }
+      return project.m7_regulatory as Record<string, unknown>
     case 8: return project.m8_compilation as Record<string, unknown>
     case 9: return project.m9_commercialization as Record<string, unknown>
     default: return {}
