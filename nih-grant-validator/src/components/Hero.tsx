@@ -1,11 +1,12 @@
-import { FileCheck, Upload } from 'lucide-react'
+import { FileCheck, Upload, FlaskConical } from 'lucide-react'
 
 interface HeroProps {
   onStart: () => void
   onAudit: () => void
+  onResearchIntel?: () => void
 }
 
-export function Hero({ onStart, onAudit }: HeroProps) {
+export function Hero({ onStart, onAudit, onResearchIntel }: HeroProps) {
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-6">
       <div className="text-center max-w-2xl">
@@ -33,6 +34,17 @@ export function Hero({ onStart, onAudit }: HeroProps) {
             Upload & Audit Existing Grant
           </button>
         </div>
+        {onResearchIntel && (
+          <div className="mt-4">
+            <button
+              onClick={onResearchIntel}
+              className="px-8 py-4 bg-cyan-500 text-white font-semibold rounded-md hover:bg-cyan-600 transition-colors shadow-card hover:shadow-float flex items-center justify-center gap-2 mx-auto"
+            >
+              <FlaskConical className="w-5 h-5" />
+              Research Intelligence Dashboard
+            </button>
+          </div>
+        )}
         <p className="mt-6 text-sm text-neutral-500">
           Validate Phase I, Phase II, Fast Track, Direct to Phase II, and Phase IIB applications
         </p>

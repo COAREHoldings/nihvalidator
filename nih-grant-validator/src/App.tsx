@@ -8,17 +8,18 @@ import { AIRefinement } from './components/AIRefinement'
 import { CommercializationDirector } from './components/CommercializationDirector'
 import { AuditMode } from './components/AuditMode'
 import { ComplianceAuditPanel } from './components/ComplianceAuditPanel'
+import { ResearchIntelligence } from './components/ResearchIntelligence'
 import type { ProjectSchemaV2, ValidationResult } from './types'
 import { getBudgetCapForPhase, getInstituteConfig } from './compliance'
 import { updateModuleStates, runFullValidation, checkAIGating } from './validation'
-import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, ChevronLeft, Briefcase, Upload, FileText, Home, Menu, X, BookOpen, FileOutput, ListOrdered, AlertCircle, ShieldCheck } from 'lucide-react'
+import { ClipboardCheck, Sparkles, Settings, FileCheck, Lock, CheckCircle, XCircle, Download, RotateCcw, ArrowRight, ChevronRight, ChevronLeft, Briefcase, Upload, FileText, Home, Menu, X, BookOpen, FileOutput, ListOrdered, AlertCircle, ShieldCheck, FlaskConical } from 'lucide-react'
 import { DocumentImport } from './components/DocumentImport'
 import { SpecificAimsGenerator } from './components/SpecificAimsGenerator'
 import { FOAUpload } from './components/FOAUpload'
 
 type AppMode = 'modules' | 'ai-refinement' | 'results'
 type ConfigTab = 'lifecycle' | 'overview'
-type MainView = 'home' | 'build' | 'audit'
+type MainView = 'home' | 'build' | 'audit' | 'research-intelligence'
 
 export default function App() {
   const [mainView, setMainView] = useState<MainView>('home')
@@ -197,13 +198,18 @@ export default function App() {
     return <AuditMode onBack={() => setMainView('home')} />
   }
 
+  // Show research intelligence dashboard
+  if (mainView === 'research-intelligence') {
+    return <ResearchIntelligence project={project} onBack={() => setMainView(started ? 'build' : 'home')} />
+  }
+
   // Show wizard if active
   if (showWizard) {
     return <ProjectCreationWizard onComplete={handleWizardComplete} onCancel={handleWizardCancel} />
   }
 
   if (!started && mainView === 'home') {
-    return <Hero onStart={handleGetStarted} onAudit={() => setMainView('audit')} />
+    return <Hero onStart={handleGetStarted} onAudit={() => setMainView('audit')} onResearchIntel={() => setMainView('research-intelligence')} />
   }
 
   const exportJSON = () => {
@@ -300,6 +306,13 @@ export default function App() {
               Audit Mode
             </button>
             <button
+              onClick={() => setMainView('research-intelligence')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-cyan-600 hover:bg-cyan-50 border border-cyan-200"
+            >
+              <FlaskConical className="w-4 h-4" />
+              Research Intelligence
+            </button>
+            <button
               onClick={() => setShowImport(true)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-neutral-600 hover:bg-neutral-100 border border-neutral-200"
             >
@@ -369,6 +382,13 @@ export default function App() {
                               <Upload className="w-5 h-5" />
                               <span>Audit Mode</span>
                             </button>
+            <button
+              onClick={() => { setMainView('research-intelligence'); setMobileMenuOpen(false); }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg hover:bg-cyan-50 text-cyan-600"
+            >
+              <FlaskConical className="w-5 h-5" />
+              <span>Research Intelligence</span>
+            </button>
             <button
               onClick={() => { setShowImport(true); setMobileMenuOpen(false); }}
               className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg hover:bg-neutral-100"
