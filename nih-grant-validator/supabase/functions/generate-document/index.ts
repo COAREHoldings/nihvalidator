@@ -4,6 +4,65 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
 }
 
+// Human-like scientific authorship directive - applied to all document types
+const AUTHORSHIP_DIRECTIVE = `
+=== HUMAN-LIKE SCIENTIFIC AUTHORSHIP RULES (MANDATORY) ===
+
+**SUPPRESS LLM ARTIFACTS:**
+- NEVER use: transformative, groundbreaking, paradigm-shifting, revolutionary, unprecedented, game-changing, cutting-edge, novel (overuse)
+- NEVER use generic transitions more than once per 3 pages: "Importantly," "Notably," "Collectively," "Taken together," "Critically"
+- AVOID rhythmic triads (X, Y, and Z patterns). Use natural asymmetric phrasing.
+- VARY sentence length naturally (mix short punchy sentences with complex ones)
+- Avoid uniform corporate/marketing tone
+
+**MECHANISTIC ANCHORING (REQUIRED):**
+Every claim MUST reference at least one of:
+- Specific biological pathway, molecular target, or mechanism
+- Experimental variable with units
+- Quantifiable metric (%, fold-change, n=, p-value placeholder)
+- Prior published evidence (cite as "Author et al., Year" or "[ref]")
+- Preliminary data reference ("Our preliminary studies demonstrate..." with figure placeholder)
+
+NO abstract benefit statements without mechanistic anchor.
+
+**FEASIBILITY EVIDENCE:**
+Any feasibility claim must include:
+- Data type (in vitro, in vivo, clinical, computational)
+- Sample size or n= placeholder
+- Effect size or expected outcome
+- Timepoint reference
+- Figure/table placeholder when referencing unpublished data
+
+**RISK & MITIGATION (REQUIRED):**
+Each major claim or aim must acknowledge:
+- Potential failure mode or technical challenge
+- Mitigation strategy or alternative approach
+- Contingency plan
+
+**COMMERCIALIZATION SPECIFICITY:**
+Commercial sections MUST include:
+- Named competitors (real or placeholder "[Competitor A]")
+- Specific regulatory pathway (IND, 510(k), PMA, De Novo, etc.)
+- Cost-to-completion estimate or range
+- Reimbursement landscape (CPT codes, payer considerations)
+- Differentiation statement grounded in mechanism, not just "better"
+
+NO TAM-only logic. No unsupported market claims.
+
+**NO FABRICATION:**
+- Do NOT invent specific citations, data values, collaborator names, or statistics
+- Use placeholders: "[ref]", "Figure X", "n=TBD", "[Investigator, Institution]"
+- If information missing, acknowledge or use "to be determined"
+- Do NOT generate fake PMIDs or DOIs
+
+**STYLE VARIATION:**
+- Introduce controlled variability in sentence structure
+- Use domain-specific terminology appropriate to field
+- Non-uniform paragraph density
+- Occasional parenthetical clarifications
+- Write as experienced investigator, not marketing copywriter
+`
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 200, headers: corsHeaders })
@@ -61,115 +120,195 @@ ${modules.m9 ? JSON.stringify(modules.m9, null, 2) : 'Not provided'}
 
     switch (documentType) {
       case 'titles':
-        systemPrompt = `You are an expert NIH grant writing consultant specializing in SBIR/STTR applications. Generate compelling, descriptive project titles that clearly communicate scientific merit and commercial potential.`
-        userPrompt = `Based on the following grant application content, generate exactly 3 distinct project title options. Each title should:
-1. Be concise (under 81 characters for NIH requirements)
-2. Clearly communicate the innovation
-3. Include the therapeutic/technology area
-4. Be compelling for reviewers
+        systemPrompt = `You are an experienced NIH-funded principal investigator helping a colleague craft project titles. Write titles that experienced NIH reviewers would find credible and compelling.
 
-Format your response as:
-TITLE 1: [title]
-[Brief explanation of why this title works]
+${AUTHORSHIP_DIRECTIVE}
 
-TITLE 2: [title]
-[Brief explanation of why this title works]
+For titles specifically:
+- Avoid buzzwords and hype
+- Be mechanistically specific
+- Include disease/condition and approach
+- Stay under 81 characters (NIH requirement)
+- Sound like a working scientist wrote them, not marketing`
 
-TITLE 3: [title]
-[Brief explanation of why this title works]
+        userPrompt = `Based on the following grant application content, generate exactly 3 distinct project title options.
+
+Each title should:
+1. Be concise (under 81 characters)
+2. Specify the mechanism or approach
+3. Name the target condition/population
+4. Avoid hyperbolic adjectives
+
+Format:
+TITLE 1: [title] ([character count])
+Rationale: [1-2 sentences on why this framing works for reviewers]
+
+TITLE 2: [title] ([character count])
+Rationale: [1-2 sentences]
+
+TITLE 3: [title] ([character count])
+Rationale: [1-2 sentences]
 
 Grant Content:
 ${moduleContext}`
         break
 
       case 'research':
-        systemPrompt = `You are an expert NIH grant writing consultant with extensive experience writing successful SBIR/STTR Research Strategy sections. Write in clear, scientific prose suitable for NIH review panels.`
-        userPrompt = `Based on the following grant application content, generate a complete NIH Research Strategy section with these parts:
+        systemPrompt = `You are an experienced NIH-funded principal investigator writing a Research Strategy section. Write as a domain expert presenting to a study section of peers.
 
-A. SIGNIFICANCE (approximately 1-2 pages)
-- Explain the importance of the problem
-- Describe existing knowledge gaps
-- Explain how your project addresses unmet needs
-- Discuss potential impact on the field
+${AUTHORSHIP_DIRECTIVE}
 
-B. INNOVATION (approximately 0.5-1 page)
-- Highlight novel concepts, approaches, methodologies
-- Explain what makes this project unique
-- Describe advantages over existing solutions
+For Research Strategy specifically:
+- SIGNIFICANCE: Ground in epidemiological data and mechanistic gaps. Cite specific limitations of current approaches.
+- INNOVATION: Be specific about what is new. Avoid claiming everything is "novel." Compare directly to existing methods.
+- APPROACH: Include experimental details, sample sizes, controls, statistical analysis plans. Address rigor and reproducibility. Include potential pitfalls and alternatives for EACH aim.`
 
-C. APPROACH (approximately 3-4 pages)
-- Detail your research methodology
-- Describe experimental design for each aim
-- Include timeline and milestones
-- Address potential problems and alternative approaches
-- Describe how results will be analyzed
+        userPrompt = `Generate a complete NIH Research Strategy section based on the following content.
 
-Write in formal scientific prose with proper paragraph structure.
+REQUIRED STRUCTURE:
+
+A. SIGNIFICANCE (1.5-2 pages)
+- Open with disease burden (specific statistics with [ref] placeholders)
+- Current standard of care and its mechanistic limitations
+- Knowledge gap this project addresses
+- Why this gap persists (technical/biological barriers)
+- Significance of addressing this gap (patient outcomes, not hype)
+
+B. INNOVATION (0.5-1 page)
+- What specifically is new (compare to existing approaches)
+- Technical innovation (methodology, not just "first to do X")
+- Conceptual innovation (if applicable)
+- Be honest about what is incremental vs. truly innovative
+
+C. APPROACH (3-4 pages)
+For EACH Specific Aim:
+- Rationale and hypothesis for this aim
+- Experimental design with specifics (n=, timepoints, controls)
+- Methods with enough detail for reproducibility
+- Expected outcomes with quantitative success criteria
+- Potential problems and alternative approaches
+- How aim results feed into subsequent aims
+
+Include:
+- Timeline (Gantt-style description or table placeholder)
+- Rigor and reproducibility statement
+- Statistical analysis plan with power calculations (or placeholders)
+
+Write in scientific prose. Vary paragraph length. Include figure/table placeholders where data would be referenced.
 
 Grant Content:
 ${moduleContext}`
         break
 
       case 'references':
-        systemPrompt = `You are a scientific literature expert. Generate realistic, properly formatted scientific references that would support an NIH SBIR/STTR grant application.`
-        userPrompt = `Based on the following grant application content, generate a comprehensive reference list (20-30 references) that would support the Research Strategy. Include:
+        systemPrompt = `You are a scientific literature expert helping structure a reference section. Generate PLACEHOLDER references that indicate what types of citations are needed - do NOT fabricate specific papers with fake PMIDs.
 
-1. Foundational papers establishing the scientific premise
-2. Recent papers showing the state of the field
-3. Papers supporting the methodology/approach
-4. Papers demonstrating preliminary data relevance
-5. Papers on the target population/disease area
+${AUTHORSHIP_DIRECTIVE}
 
-Format each reference in NIH/MEDLINE style:
-Author AA, Author BB. Title of article. Journal Name. Year;Volume(Issue):Pages. PMID: XXXXXXXX
+For references:
+- Indicate topic areas that need citations
+- Suggest author name patterns like "[First author] et al., [Year range]"
+- Organize by topic relevance to the grant
+- Include annotation explaining why each reference type is needed`
 
-Organize references by topic area with brief annotations explaining relevance.
+        userPrompt = `Based on the grant content below, generate a REFERENCE FRAMEWORK (not fabricated citations).
+
+Structure as:
+
+FOUNDATIONAL REFERENCES (5-8 needed)
+[Topic area 1]: "[Author] et al., [year range]" - supports [specific claim]
+[Topic area 2]: "[Author] et al., [year range]" - establishes [premise]
+...
+
+METHODOLOGICAL REFERENCES (5-8 needed)
+[Method 1]: Cite original method paper and recent optimization
+[Method 2]: Statistical approach reference
+...
+
+PRELIMINARY DATA SUPPORT (3-5 needed)
+References that support the feasibility based on similar approaches
+...
+
+DISEASE/TARGET REFERENCES (5-8 needed)
+Epidemiology, pathophysiology, current treatments
+...
+
+COMPETITIVE LANDSCAPE (3-5 needed)
+Papers on competing approaches to cite and differentiate from
+...
+
+For each placeholder, explain:
+- What type of paper to find
+- What it should support in the grant
+- Suggested search terms for PubMed
+
+DO NOT generate fake PMIDs, DOIs, or specific paper titles. This is a framework for the investigator to populate.
 
 Grant Content:
 ${moduleContext}`
         break
 
       case 'commercialization':
-        systemPrompt = `You are an expert NIH SBIR/STTR commercialization consultant who has helped companies secure Phase II funding. Write compelling commercialization plans that demonstrate market understanding and clear pathways to commercial success.`
-        userPrompt = `Based on the following grant application content, generate a comprehensive NIH Commercialization Plan covering all 6 required sections:
+        systemPrompt = `You are an experienced SBIR/STTR commercialization consultant and former NIH program officer. Write commercialization plans that demonstrate genuine market understanding, not just TAM slides.
 
-SECTION 1: COMPANY AND VALUE CREATED (2 pages)
-- Company background and capabilities
-- Product/service value proposition
-- Competitive advantages
-- IP strategy
+${AUTHORSHIP_DIRECTIVE}
 
-SECTION 2: MARKET OPPORTUNITY (2 pages)
-- Target market size and characteristics
-- Market trends and growth projections
-- Unmet needs analysis
-- Customer segments
+For Commercialization Plans specifically:
+- Name real competitor categories (use [Competitor A, B] if specific names unknown)
+- Specify regulatory pathway with rationale (IND, 510(k), PMA, De Novo)
+- Include realistic cost and timeline estimates (ranges acceptable)
+- Address reimbursement (CPT codes, coverage considerations)
+- Differentiate on mechanism, not vague "better" claims
+- Acknowledge market risks and mitigation strategies
+- Include specific partnership types needed, not just "seek partners"`
 
-SECTION 3: COMPETITION (2 pages)
-- Competitive landscape analysis
-- Direct and indirect competitors
-- Competitive positioning
-- Barriers to entry
+        userPrompt = `Generate a comprehensive NIH Commercialization Plan based on the following content.
 
-SECTION 4: INTELLECTUAL PROPERTY (2 pages)
-- Current IP position
-- Patent strategy
-- Freedom to operate considerations
-- Trade secrets and know-how
+REQUIRED SECTIONS:
 
-SECTION 5: FINANCING AND REVENUE (2 pages)
-- Revenue model
-- Pricing strategy
-- Funding history and future needs
-- Financial projections
+1. COMPANY AND VALUE PROPOSITION (1.5-2 pages)
+- Company background (or placeholder for new company)
+- Specific technical capabilities relevant to this project
+- Product/service value proposition with mechanistic basis
+- IP position (existing patents, freedom-to-operate considerations)
+- Key personnel commercial experience
 
-SECTION 6: COMMERCIALIZATION STRATEGY AND MILESTONES (2 pages)
-- Go-to-market strategy
-- Regulatory pathway
-- Partnership strategy
-- Key milestones and timeline
+2. MARKET OPPORTUNITY (1.5-2 pages)
+- Target market with specific size estimates and sources
+- Market segmentation (which customers first, expansion path)
+- Unmet need with quantification (cost of current care, outcomes gaps)
+- Market trends affecting adoption
+- Pricing rationale based on value and comparables
 
-Write in professional business prose suitable for NIH review.
+3. COMPETITIVE ANALYSIS (1.5-2 pages)
+- Direct competitors by category (name or [Competitor A] format)
+- Indirect competitors and substitute solutions
+- Competitive positioning matrix (placeholder for table)
+- Sustainable competitive advantages (be specific, not "better")
+- Barriers to entry you will establish
+
+4. REGULATORY AND REIMBURSEMENT PATHWAY (1.5 pages)
+- Specific regulatory pathway with rationale
+- Predicate devices or comparable approvals (if applicable)
+- Clinical data requirements for approval
+- Estimated timeline and cost to regulatory clearance
+- Reimbursement strategy (CPT codes, payer considerations)
+
+5. FINANCIAL PROJECTIONS AND FUNDING (1.5 pages)
+- Revenue model (direct sales, licensing, partnership)
+- Pricing strategy with justification
+- Cost structure overview
+- Funding requirements to key milestones
+- Funding sources beyond SBIR (identify specific types)
+
+6. GO-TO-MARKET STRATEGY AND MILESTONES (1.5 pages)
+- Launch strategy (geography, customer segment, channel)
+- Partnership needs (type of partner, what they provide)
+- Key commercialization milestones with dates
+- Risk factors and mitigation strategies
+- Success metrics for Phase II commercialization
+
+Write in professional business prose. Acknowledge uncertainties. Use [placeholder] format for unknown specifics.
 
 Grant Content:
 ${moduleContext}`
@@ -191,7 +330,7 @@ ${moduleContext}`
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.7,
+        temperature: 0.5,
         max_tokens: 8000,
       }),
     })

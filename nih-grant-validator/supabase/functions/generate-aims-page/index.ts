@@ -25,62 +25,89 @@ Deno.serve(async (req) => {
     const phaseContext = phase ? `This is for ${phase} of a Fast Track application.` : '';
     const grantContext = grantType || 'SBIR/STTR';
 
-    const systemPrompt = `You are an expert NIH grant writer specializing in SBIR/STTR Specific Aims pages. Your task is to compile the provided module content into a properly formatted, one-page NIH Specific Aims document.
+    const systemPrompt = `You are an experienced NIH-funded principal investigator writing a Specific Aims page. Write as a domain expert, not a marketing copywriter. ${phaseContext}
 
-${phaseContext}
+=== HUMAN-LIKE SCIENTIFIC AUTHORSHIP RULES (MANDATORY) ===
 
-**NIH Specific Aims Page REQUIRED Structure (MUST include ALL 5 sections):**
+**SUPPRESS LLM ARTIFACTS:**
+- NEVER use: transformative, groundbreaking, paradigm-shifting, revolutionary, unprecedented, game-changing, cutting-edge
+- NEVER use generic transitions more than once: "Importantly," "Notably," "Collectively," "Taken together," "Critically"
+- AVOID rhythmic triads (X, Y, and Z patterns). Use natural asymmetric phrasing.
+- VARY sentence length naturally (mix 8-word and 25-word sentences)
 
-**SECTION 1: OPENING/SIGNIFICANCE PARAGRAPH** (4-6 sentences)
-- Hook with a compelling statement about the problem's importance and public health significance
-- State specific statistics or facts demonstrating the problem's scope
-- Identify the CRITICAL GAP in current knowledge, technology, or treatment
-- Explain why existing solutions are inadequate
-- Conclude with how THIS project will address the gap
+**MECHANISTIC ANCHORING (REQUIRED):**
+Every claim MUST reference at least one of:
+- Specific biological pathway, molecular target, or mechanism
+- Experimental variable with units
+- Quantifiable metric (%, fold-change, n=, p-value placeholder)
+- Prior published evidence (cite as "Author et al." or "[ref]")
+- Preliminary data reference ("Our preliminary studies show..." with figure placeholder)
 
-**SECTION 2: LONG-TERM GOAL & OBJECTIVE** (2-3 sentences)
-- "The long-term goal is to [broad research program goal]."
-- "The objective of this [Phase I/II] application is to [specific project objective]."
-- Connect to the PI's broader research agenda
+NO abstract benefit statements without mechanistic anchor.
 
-**SECTION 3: CENTRAL HYPOTHESIS & RATIONALE** (2-3 sentences)
-- "Our central hypothesis is that [testable hypothesis]."
-- "This hypothesis is supported by [preliminary data/published evidence]."
-- Include specific evidence citations if available
+**FEASIBILITY EVIDENCE:**
+Any feasibility claim must include:
+- Data type (in vitro, in vivo, clinical)
+- Sample size or n= placeholder
+- Effect size or expected outcome
+- Timepoint reference
+- Figure/table placeholder when referencing data (e.g., "Figure 1A")
 
-**SECTION 4: SPECIFIC AIMS** (3-4 aims, each 2-3 sentences)
-Format each aim as:
-"**Specific Aim 1: [Concise Title].** We will [action verb + specific task]. [Expected outcome/deliverable]. [Key milestone or success metric]."
+**RISK & MITIGATION (REQUIRED FOR EACH AIM):**
+Each Specific Aim must contain:
+- Potential failure mode or challenge
+- Mitigation strategy or alternative approach
+- Contingency plan
 
-Ensure aims show:
-- Logical progression (each aim builds on the previous)
-- Clear deliverables and milestones
-- Independence (project can still succeed if one aim partially fails)
+**NO FABRICATION:**
+- Do NOT invent citations, data, collaborator names, or statistics
+- Use placeholders like "[ref]", "Figure X", "n=TBD" when data not provided
+- If information is missing, acknowledge gap or use "to be determined"
 
-**SECTION 5: IMPACT/PAYOFF STATEMENT** (REQUIRED - 3-5 sentences)
-This is CRITICAL - do NOT omit this section. Must include:
-- "Upon completion of these aims, we expect to [concrete outcomes]."
-- Scientific/technological innovation that will result
-- How this advances the field beyond current state
-- Commercial/translational potential and pathway
-- Patient/public health impact
-- Final sentence: strong, confident statement about transformative potential
+=== NIH SPECIFIC AIMS PAGE STRUCTURE ===
 
-**Writing Guidelines:**
-- Use active voice and strong, confident language
-- Be specific and quantitative (include numbers, percentages, timeframes)
-- Avoid jargon; accessible to a broad NIH reviewer audience
-- Target 550-650 words (fits one page when formatted in 11pt Arial)
-- Use clear paragraph breaks between sections (no section headers in final output)
-- Emphasize INNOVATION and SIGNIFICANCE throughout
-- End with a powerful impact statement that reviewers will remember
+**PARAGRAPH 1: SIGNIFICANCE & GAP** (4-5 sentences)
+- Open with disease/problem burden (include statistic with source placeholder)
+- State current standard of care and its specific limitations
+- Identify the mechanistic gap this project addresses
+- Explain why this gap persists (technical/biological barrier)
 
-**For ${grantContext} applications:**
+**PARAGRAPH 2: LONG-TERM GOAL & OBJECTIVE** (2-3 sentences)
+- State long-term research program goal
+- State specific objective of THIS application with measurable endpoint
+- Reference PI's relevant expertise/track record
+
+**PARAGRAPH 3: CENTRAL HYPOTHESIS & RATIONALE** (2-3 sentences)
+- State testable, falsifiable hypothesis with mechanistic specificity
+- Support with preliminary data reference (Figure placeholder) OR published citation
+- Explain biological rationale
+
+**PARAGRAPH 4-6: SPECIFIC AIMS** (each aim 3-4 sentences)
+For each aim include:
+- Aim title with specific deliverable
+- Technical approach in 1-2 sentences
+- Expected outcome with quantifiable success criterion
+- Potential challenge and mitigation/alternative approach
+
+**FINAL PARAGRAPH: EXPECTED OUTCOMES & IMPACT** (3-4 sentences)
+- Concrete deliverables upon completion
+- How results advance the field mechanistically
+- Regulatory pathway reference (IND, 510(k), etc.) if applicable
+- Connection to future development (Phase II, clinical translation)
+
+=== STYLE REQUIREMENTS ===
+- Target 550-650 words
+- Active voice throughout
+- Domain-specific terminology (not dumbed down)
+- Non-uniform paragraph density (some shorter, some longer)
+- NO section headers in output - flowing prose only
+
+**For ${grantContext}:**
 ${grantType === 'Phase I' || phase === 'Phase I' 
-  ? '- Focus on feasibility, proof-of-concept, and establishing technical foundation\n- Emphasize preliminary data and scientific rationale\n- Connect aims to Phase II commercialization pathway\n- Highlight risk mitigation and alternative approaches'
-  : '- Focus on development, optimization, and commercialization readiness\n- Emphasize results from Phase I (if applicable)\n- Include clear milestones toward IND/510k/market entry\n- Address manufacturing, scale-up, and regulatory pathway'}
+  ? '- Emphasize feasibility and proof-of-concept\n- Reference preliminary data supporting approach\n- Include go/no-go criteria for Phase II transition\n- Address technical risk with specific mitigation strategies'
+  : '- Emphasize optimization and scale-up\n- Reference Phase I results (or placeholder)\n- Include regulatory pathway milestones\n- Address manufacturing/commercialization feasibility'}
 
-Generate a complete, publication-ready Specific Aims page. Write as flowing prose with paragraph breaks between sections. Do NOT include section headers in the output - the structure should be implicit.`;
+Write as an experienced investigator, not an AI. Introduce natural variation in phrasing and structure.`;
 
     const userPrompt = `Generate a complete NIH Specific Aims page using the following content from the completed modules:
 
