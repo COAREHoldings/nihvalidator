@@ -285,44 +285,70 @@ export default function App() {
 
         {/* Module Navigation Bar (when in modules mode) */}
         {mode === 'modules' && !showConfig && configComplete && (
-          <div className="h-12 flex items-center justify-between px-4 md:px-6 bg-neutral-50 border-t border-neutral-100">
-            <button
-              onClick={() => {
-                if (activeModule === 1) setShowConfig(true);
-                else setActiveModule(prev => Math.max(1, prev - 1));
-              }}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm text-neutral-600 hover:bg-white rounded-lg border border-transparent hover:border-neutral-200"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">{activeModule === 1 ? 'Config' : `Module ${activeModule - 1}`}</span>
-              <span className="sm:hidden">Prev</span>
-            </button>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: totalModules }, (_, i) => i + 1).map(num => (
-                <button
-                  key={num}
-                  onClick={() => setActiveModule(num)}
-                  className={`w-8 h-8 rounded-full text-xs font-medium ${
-                    activeModule === num 
-                      ? 'bg-primary-500 text-white' 
-                      : project.module_states[num - 1]?.status === 'complete'
-                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                        : 'bg-white text-neutral-600 hover:bg-neutral-100 border border-neutral-200'
-                  }`}
-                >
-                  {num}
-                </button>
-              ))}
+          <div className="bg-neutral-50 border-t border-neutral-100">
+            {/* Current Module Title */}
+            <div className="h-10 flex items-center justify-center px-4 border-b border-neutral-100">
+              <span className="text-sm font-semibold text-primary-700">
+                Module {activeModule}: {project.module_states[activeModule - 1]?.name || 'Unknown'}
+              </span>
             </div>
-            <button
-              onClick={() => setActiveModule(prev => Math.min(totalModules, prev + 1))}
-              disabled={activeModule === totalModules}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm text-neutral-600 hover:bg-white rounded-lg border border-transparent hover:border-neutral-200 disabled:opacity-50"
-            >
-              <span className="hidden sm:inline">{activeModule === totalModules ? 'Last' : `Module ${activeModule + 1}`}</span>
-              <span className="sm:hidden">Next</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
+            {/* Navigation Controls */}
+            <div className="h-12 flex items-center justify-between px-4 md:px-6">
+              <button
+                onClick={() => {
+                  if (activeModule === 1) setShowConfig(true);
+                  else setActiveModule(prev => Math.max(1, prev - 1));
+                }}
+                className="flex items-center gap-1 px-3 py-1.5 text-sm text-neutral-600 hover:bg-white rounded-lg border border-transparent hover:border-neutral-200"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>{activeModule === 1 ? 'Config' : `M${activeModule - 1}`}</span>
+              </button>
+              
+              {/* Module Pills with Labels */}
+              <div className="flex items-center gap-1 overflow-x-auto max-w-[60%] scrollbar-hide">
+                {Array.from({ length: totalModules }, (_, i) => i + 1).map(num => {
+                  const moduleName = project.module_states[num - 1]?.name || `Module ${num}`;
+                  const shortName = moduleName.split(' ').slice(0, 2).join(' ');
+                  const isComplete = project.module_states[num - 1]?.status === 'complete';
+                  return (
+                    <button
+                      key={num}
+                      onClick={() => setActiveModule(num)}
+                      title={moduleName}
+                      className={`flex-shrink-0 px-2 py-1 rounded-lg text-xs font-medium transition-all ${
+                        activeModule === num 
+                          ? 'bg-primary-500 text-white shadow-sm' 
+                          : isComplete
+                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                            : 'bg-white text-neutral-600 hover:bg-neutral-100 border border-neutral-200'
+                      }`}
+                    >
+                      <span className="hidden md:inline">{shortName}</span>
+                      <span className="md:hidden">{num}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              
+              <button
+                onClick={() => {
+                  if (activeModule === totalModules) {
+                    runValidation();
+                  } else {
+                    setActiveModule(prev => Math.min(totalModules, prev + 1));
+                  }
+                }}
+                className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border ${
+                  activeModule === totalModules 
+                    ? 'bg-green-600 text-white hover:bg-green-700 border-green-600' 
+                    : 'text-neutral-600 hover:bg-white border-transparent hover:border-neutral-200'
+                }`}
+              >
+                <span>{activeModule === totalModules ? 'Validate' : `M${activeModule + 1}`}</span>
+                {activeModule === totalModules ? <FileCheck className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
         )}
       </header>
