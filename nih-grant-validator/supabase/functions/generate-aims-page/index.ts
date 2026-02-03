@@ -29,47 +29,58 @@ Deno.serve(async (req) => {
 
 ${phaseContext}
 
-**NIH Specific Aims Page Structure (MUST follow this exact format):**
+**NIH Specific Aims Page REQUIRED Structure (MUST include ALL 5 sections):**
 
-1. **Opening Paragraph** (3-5 sentences)
-   - Start with the significance of the problem
-   - Identify the critical gap in current knowledge/technology
-   - State the critical need that this project addresses
-   - End with a clear statement of how this project will address the need
+**SECTION 1: OPENING/SIGNIFICANCE PARAGRAPH** (4-6 sentences)
+- Hook with a compelling statement about the problem's importance and public health significance
+- State specific statistics or facts demonstrating the problem's scope
+- Identify the CRITICAL GAP in current knowledge, technology, or treatment
+- Explain why existing solutions are inadequate
+- Conclude with how THIS project will address the gap
 
-2. **Long-term Goal and Objective** (1-2 sentences)
-   - State the long-term goal of the research program
-   - State the specific objective of THIS application
+**SECTION 2: LONG-TERM GOAL & OBJECTIVE** (2-3 sentences)
+- "The long-term goal is to [broad research program goal]."
+- "The objective of this [Phase I/II] application is to [specific project objective]."
+- Connect to the PI's broader research agenda
 
-3. **Central Hypothesis** (1-2 sentences)
-   - State the central hypothesis clearly
-   - Include the rationale (based on preliminary data or published studies)
+**SECTION 3: CENTRAL HYPOTHESIS & RATIONALE** (2-3 sentences)
+- "Our central hypothesis is that [testable hypothesis]."
+- "This hypothesis is supported by [preliminary data/published evidence]."
+- Include specific evidence citations if available
 
-4. **Specific Aims** (numbered, each 2-3 sentences)
-   - Format as "Specific Aim 1: [Title]. [Description of what will be done and expected outcome]"
-   - Include milestones/deliverables for each aim
-   - Show logical progression between aims
+**SECTION 4: SPECIFIC AIMS** (3-4 aims, each 2-3 sentences)
+Format each aim as:
+"**Specific Aim 1: [Concise Title].** We will [action verb + specific task]. [Expected outcome/deliverable]. [Key milestone or success metric]."
 
-5. **Impact Statement** (Final paragraph, 2-4 sentences)
-   - Describe the expected outcomes
-   - State the positive impact on the field
-   - Connect to commercialization potential (for SBIR/STTR)
-   - End with a strong statement about transformative potential
+Ensure aims show:
+- Logical progression (each aim builds on the previous)
+- Clear deliverables and milestones
+- Independence (project can still succeed if one aim partially fails)
+
+**SECTION 5: IMPACT/PAYOFF STATEMENT** (REQUIRED - 3-5 sentences)
+This is CRITICAL - do NOT omit this section. Must include:
+- "Upon completion of these aims, we expect to [concrete outcomes]."
+- Scientific/technological innovation that will result
+- How this advances the field beyond current state
+- Commercial/translational potential and pathway
+- Patient/public health impact
+- Final sentence: strong, confident statement about transformative potential
 
 **Writing Guidelines:**
 - Use active voice and strong, confident language
-- Be specific and quantitative where possible
-- Avoid jargon; make it accessible to a broad NIH reviewer audience
-- Keep to approximately 500-600 words (one page when formatted)
-- Use clear transitions between sections
-- Emphasize innovation and significance throughout
+- Be specific and quantitative (include numbers, percentages, timeframes)
+- Avoid jargon; accessible to a broad NIH reviewer audience
+- Target 550-650 words (fits one page when formatted in 11pt Arial)
+- Use clear paragraph breaks between sections (no section headers in final output)
+- Emphasize INNOVATION and SIGNIFICANCE throughout
+- End with a powerful impact statement that reviewers will remember
 
 **For ${grantContext} applications:**
 ${grantType === 'Phase I' || phase === 'Phase I' 
-  ? '- Focus on feasibility, proof-of-concept, and establishing technical foundation\n- Emphasize preliminary data and scientific rationale\n- Connect aims to Phase II commercialization pathway'
-  : '- Focus on development, optimization, and commercialization readiness\n- Emphasize results from prior work (if applicable)\n- Include clear milestones toward market entry'}
+  ? '- Focus on feasibility, proof-of-concept, and establishing technical foundation\n- Emphasize preliminary data and scientific rationale\n- Connect aims to Phase II commercialization pathway\n- Highlight risk mitigation and alternative approaches'
+  : '- Focus on development, optimization, and commercialization readiness\n- Emphasize results from Phase I (if applicable)\n- Include clear milestones toward IND/510k/market entry\n- Address manufacturing, scale-up, and regulatory pathway'}
 
-Generate a complete, polished Specific Aims page ready for NIH submission. Do not include headers like "Opening Paragraph" - write it as flowing prose with clear paragraph breaks.`;
+Generate a complete, publication-ready Specific Aims page. Write as flowing prose with paragraph breaks between sections. Do NOT include section headers in the output - the structure should be implicit.`;
 
     const userPrompt = `Generate a complete NIH Specific Aims page using the following content from the completed modules:
 
