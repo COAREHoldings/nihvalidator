@@ -1,0 +1,306 @@
+# MINI MAX ENGINEERING DIRECTIVE
+
+## NIH / NCI SBIR-STTR FULL COMPLIANCE ENFORCEMENT SYSTEM
+
+---
+
+# OBJECTIVE
+
+Upgrade the AI generation engine to enforce strict NIH SBIR/STTR compliance at the system level. The system must not allow generation, compilation, or export of content that fails NIH/NCI structural, regulatory, statistical, or commercialization requirements.
+
+The system must operate as a regulatory-constrained generation engine, not a free-form writing assistant.
+
+---
+
+# LAYER 1: MECHANISM CONFIGURATION ENFORCEMENT
+
+Upon project creation, require selection of:
+
+* SBIR or STTR
+* Phase I, Phase II, or Fast Track
+* Funding Institute (e.g., NCI)
+* Clinical Trial Allowed? (Yes/No per FOA)
+
+Load mechanism-specific constraints dynamically:
+
+## Phase I Constraints
+
+* Direct cost cap: $400,000 (NCI-specific cap; verify FOA for deviations)
+* Feasibility focus only
+* No clinical trial claims unless FOA explicitly allows
+* Defined quantitative milestones required
+* Go/No-Go criteria required
+
+## Phase II Constraints
+
+* Direct cost cap: $2,000,000 (NCI-specific cap; verify FOA for deviations)
+* 12-page commercialization plan required (or FOA-specified length)
+* Manufacturing plan required
+* Regulatory pathway required
+* Revenue forecast required
+
+## STTR-Specific Rules
+
+* Small business ≥ 40%
+* Research institution ≥ 30%
+* Validate allocation calculation automatically
+
+Block compilation if allocation rules are violated.
+
+---
+
+# LAYER 2: NIH COMPLIANCE SYSTEM PROMPT (Injected into EVERY AI Call)
+
+You are generating text for an NIH SBIR/STTR grant application.
+
+All outputs must:
+
+1. Adhere strictly to NIH/NCI standards.
+2. Avoid speculative or exaggerated claims.
+3. Avoid promotional language.
+4. Include quantitative criteria when describing aims.
+5. Include statistical language when experiments are proposed.
+6. Avoid placeholders (e.g., TBD).
+7. Include regulatory awareness where applicable.
+8. Avoid implying clinical efficacy prior to IND approval.
+9. Maintain feasibility within budget constraints.
+10. Use neutral scientific tone.
+
+If required elements are missing, output:
+"Compliance element missing."
+
+Do not generate non-compliant content.
+
+---
+
+# LAYER 3: SECTION-SPECIFIC STRUCTURAL VALIDATION
+
+Before accepting AI output, validate required components per section.
+
+## Specific Aims Validation
+
+Require:
+
+* Explicit hypothesis
+* Defined endpoints
+* Quantitative success thresholds
+* Defined statistical method
+* Defined biological replicates
+* Go/No-Go criteria
+
+If any missing → regenerate.
+
+## Rigor and Reproducibility Validation
+
+Require:
+
+* Biological replicates
+* Statistical test specified
+* Power ≥ 80%
+* Significance threshold (alpha)
+* Cell line authentication statement
+* Mycoplasma testing statement
+* Randomization statement (if applicable)
+* Blinding statement (if applicable)
+
+## Vertebrate Animal Section Validation
+
+Require NIH 5 Points:
+
+1. Description of procedures
+2. Justification of species and numbers
+3. Minimization of pain and distress
+4. Euthanasia method
+5. Statistical justification of group size
+
+## Human Subjects Section Validation
+
+Require:
+
+* Classification (Human Subjects or Not)
+* IRB status
+* Risk level
+* De-identification explanation
+
+## Commercialization Plan Validation (Phase II Only)
+
+Require:
+
+* Company overview
+* Market size (TAM/SAM)
+* Competitive landscape
+* IP position
+* Freedom-to-operate statement
+* Regulatory pathway
+* Manufacturing plan
+* Revenue model (5-year projection)
+* Reimbursement strategy
+* Exit strategy
+
+If any missing → block compile.
+
+---
+
+# LAYER 4: AUTOMATED COMPLIANCE AUDIT ENGINE
+
+Before export or PDF compilation, execute full compliance scan.
+
+Scan for:
+
+* "TBD" or placeholder text
+* Absence of statistical tests
+* Absence of power calculation language
+* Missing Go/No-Go criteria
+* Promotional terms (cure, revolutionary, guaranteed)
+* Budget cap violations
+* Small business % violation
+* Missing commercialization elements (Phase II)
+
+Generate Compliance Score (0–100).
+
+Score Calculation:
+
+* Structure completeness: 30 points
+* Statistical rigor: 20 points
+* Regulatory compliance: 20 points
+* Commercialization completeness: 20 points
+* Tone and scientific neutrality: 10 points
+
+If score < 90:
+
+* Block export
+* Display compliance error report
+
+---
+
+# LAYER 5: FOA-SPECIFIC PARSING (ADVANCED MODE)
+
+Allow user to upload Funding Opportunity Announcement (FOA).
+
+System must:
+
+* Extract page limits
+* Extract required attachments
+* Extract clinical trial designation
+* Extract budget caps
+* Extract additional review criteria
+
+Cross-check application against FOA requirements.
+
+Flag mismatches before compile.
+
+---
+
+# LAYER 6: CLAIM CONTROL AND TONE ENFORCEMENT
+
+Automatically flag and rewrite:
+
+* Overstated novelty claims
+* Claims of clinical efficacy
+* Marketing-style language
+* Unsupported generalizations
+
+Require balanced risk acknowledgment in all sections.
+
+---
+
+# LAYER 7: VERSION LOCKING AND AUDIT TRAIL
+
+Log:
+
+* Compliance score per module
+* Date/time of last compliance check
+* Sections revised due to non-compliance
+
+Prevent user override of compliance failures.
+
+---
+
+# FINAL EXECUTION RULE
+
+The system must not allow compilation, export, or submission package generation unless:
+
+* Compliance score ≥ 90
+* All mandatory elements validated
+* Budget rules satisfied
+* Mechanism rules satisfied
+
+The AI engine functions as a regulatory compliance enforcement tool.
+
+---
+
+# LAYER 8: DYNAMIC AGENCY ALIGNMENT ENGINE (MANDATORY)
+
+The system must not rely on static budget caps, ratios, or policy assumptions.
+
+Implement a Dynamic Agency Alignment Engine with the following requirements:
+
+1. Institute-Specific Budget Tables
+
+   * Maintain structured configuration tables for each NIH Institute (e.g., NCI, NHLBI, NINDS, NIAID, etc.).
+   * Store Phase I and Phase II direct cost caps per institute.
+   * Store STTR/SBIR allocation percentage requirements.
+   * Store clinical trial allowance flags per FOA.
+
+2. FOA Parsing Requirement (Authoritative Override)
+
+   * Require FOA upload or FOA number entry before final compilation.
+   * Automatically parse FOA to extract:
+     • Phase I and Phase II budget caps
+     • Small business percentage requirements
+     • Research institution percentage requirements
+     • Clinical trial policy
+     • Commercialization plan length requirement
+     • Page limits
+   * If FOA-specific rules differ from stored defaults, FOA rules override system defaults.
+
+3. Mandatory Real-Time Rule Verification
+   Before compile/export:
+
+   * Cross-check budget entries against:
+     • Institute defaults
+     • FOA overrides
+   * Recalculate small business and research institution allocation percentages dynamically.
+   * Flag mismatch if:
+     • Budget exceeds cap
+     • Percentage requirements not met
+     • Clinical trial designation conflicts with FOA
+
+4. Annual Policy Update Safeguard
+
+   * Include a policy version control variable (e.g., NIH Policy Version YYYY).
+   * Require administrative confirmation of current NIH policy tables at least annually.
+   * Display warning if policy tables are older than 12 months.
+
+5. Agency Alignment Validation Score
+   Add an "Agency Alignment Score" (0–100) calculated as:
+
+   * Budget cap compliance (25 points)
+   * Percentage allocation compliance (25 points)
+   * FOA-specific rule compliance (25 points)
+   * Clinical trial designation compliance (25 points)
+
+   If score < 100 → block compilation.
+
+6. No Hardcoded Values Rule
+
+   * Do not hardcode caps globally (e.g., "$400K always").
+   * All caps must reference institute configuration or parsed FOA data.
+
+7. Compliance Failure Output
+   If agency misalignment is detected, output:
+   "Agency Compliance Error: Budget or allocation rules do not align with current FOA/institute requirements. Revision required before export."
+
+8. Logging and Audit Trail
+   Log:
+
+   * Institute selected
+   * FOA number
+   * Policy version used
+   * Budget cap applied
+   * Percentage allocation results
+   * Date of last rule verification
+
+The system must always ensure that the latest NIH or institute-specific budget caps and ratio requirements are applied prior to allowing export.
+
+End Directive.
