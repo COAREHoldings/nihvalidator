@@ -19,6 +19,8 @@ interface BudgetCalculations {
   totalDirectCosts: number
   mtdc: number
   indirectCosts: number
+  subtotal: number
+  feeProfit: number
   totalProjectCosts: number
   remainingBudget: number
   budgetUtilization: number
@@ -116,8 +118,14 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
     // Indirect Costs = MTDC x F&A Rate
     const indirectCosts = Math.round(mtdc * (faRate / 100))
 
-    // Total Project Costs = Total Direct + Indirect
-    const totalProjectCosts = totalDirectCosts + indirectCosts
+    // Subtotal = Total Direct + Indirect
+    const subtotal = totalDirectCosts + indirectCosts
+
+    // Fee/Profit (7%) = Subtotal * 0.07
+    const feeProfit = Math.round(subtotal * 0.07)
+
+    // Total Project Costs = Subtotal + Fee
+    const totalProjectCosts = subtotal + feeProfit
 
     // Remaining budget (based on direct costs cap)
     const remainingBudget = budgetCap - totalDirectCosts
@@ -129,6 +137,8 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
       totalDirectCosts,
       mtdc,
       indirectCosts,
+      subtotal,
+      feeProfit,
       totalProjectCosts,
       remainingBudget,
       budgetUtilization
@@ -476,11 +486,33 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
             </div>
           </div>
 
+          {/* Subtotal */}
+          <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-neutral-200">
+            <div>
+              <span className="font-medium text-neutral-900">Subtotal</span>
+              <p className="text-xs text-neutral-500">Direct Costs + Indirect Costs</p>
+            </div>
+            <span className="text-lg font-bold text-neutral-900">
+              ${calculations.subtotal.toLocaleString()}
+            </span>
+          </div>
+
+          {/* Fee/Profit (7%) */}
+          <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg border border-amber-200">
+            <div>
+              <span className="font-medium text-amber-900">Fee/Profit (7%)</span>
+              <p className="text-xs text-amber-700">Calculated on Subtotal (Direct + Indirect)</p>
+            </div>
+            <span className="text-lg font-bold text-amber-900">
+              ${calculations.feeProfit.toLocaleString()}
+            </span>
+          </div>
+
           {/* Total Project Costs */}
           <div className="flex justify-between items-center p-3 bg-primary-50 rounded-lg border border-primary-200">
             <div>
               <span className="font-semibold text-primary-900">Total Project Costs</span>
-              <p className="text-xs text-primary-700">Direct Costs + Indirect Costs</p>
+              <p className="text-xs text-primary-700">Subtotal + Fee/Profit</p>
             </div>
             <span className="text-xl font-bold text-primary-900">
               ${calculations.totalProjectCosts.toLocaleString()}
@@ -578,18 +610,22 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
       {/* Summary Card */}
       <div className={`p-4 rounded-lg border-2 ${colors.border} ${colors.bg}`}>
         <h4 className={`font-semibold ${colors.text} mb-3`}>Budget Summary</h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="text-center">
             <p className={`text-xs ${colors.text} opacity-75`}>Direct Costs</p>
             <p className={`text-lg font-bold ${colors.text}`}>${calculations.totalDirectCosts.toLocaleString()}</p>
           </div>
           <div className="text-center">
-            <p className={`text-xs ${colors.text} opacity-75`}>MTDC</p>
-            <p className={`text-lg font-bold ${colors.text}`}>${calculations.mtdc.toLocaleString()}</p>
-          </div>
-          <div className="text-center">
             <p className={`text-xs ${colors.text} opacity-75`}>Indirect ({faRate}%)</p>
             <p className={`text-lg font-bold ${colors.text}`}>${calculations.indirectCosts.toLocaleString()}</p>
+          </div>
+          <div className="text-center">
+            <p className={`text-xs ${colors.text} opacity-75`}>Subtotal</p>
+            <p className={`text-lg font-bold ${colors.text}`}>${calculations.subtotal.toLocaleString()}</p>
+          </div>
+          <div className="text-center">
+            <p className={`text-xs ${colors.text} opacity-75`}>Fee (7%)</p>
+            <p className={`text-lg font-bold ${colors.text}`}>${calculations.feeProfit.toLocaleString()}</p>
           </div>
           <div className="text-center">
             <p className={`text-xs ${colors.text} opacity-75`}>Total Project</p>
