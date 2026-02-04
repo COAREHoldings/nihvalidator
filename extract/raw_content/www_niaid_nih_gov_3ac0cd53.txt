@@ -1,0 +1,471 @@
+# Source URL: https://www.niaid.nih.gov/grants-contracts/draft-specific-aims
+# Content Length: 44270 characters
+# Extracted at: 2026-02-05 04:25:10
+#============================================================
+
+[Skip to main content](https://www.niaid.nih.gov/grants-contracts/draft-specific-aims#main-content)
+[Skip to Back](https://www.niaid.nih.gov/grants-contracts/draft-specific-aims#)
+Research
+[Resources for Researchers](https://www.niaid.nih.gov/research/resources)
+[Research in NIAID Labs](https://www.niaid.nih.gov/research/research-conducted-niaid)
+[Division of Intramural Research Labs](https://www.niaid.nih.gov/research/division-intramural-research-labs)
+[Research at Vaccine Research Center](https://www.niaid.nih.gov/research/vaccine-research-center-labs)
+[Intramural Scientist & Clinician Directory](https://www.niaid.nih.gov/research/intramural-scientist-clinician-directory)
+[Research Rules & Policies](https://www.niaid.nih.gov/research/rules)
+[Clinical Research](https://www.niaid.nih.gov/research/clinical-research)
+[Contracts](https://www.niaid.nih.gov/research/contracts-sops-resources)
+[Grants & Funding](https://www.niaid.nih.gov/research/rules-policies-grants)
+[NIAID Role in Research](https://www.niaid.nih.gov/research/role)
+[Accomplishments](https://www.niaid.nih.gov/research/accomplishments)
+[HIV/AIDS](https://www.niaid.nih.gov/diseases-conditions/hivaids)
+[Infectious Diseases](https://www.niaid.nih.gov/research/infectious-diseases)
+[Allergy, Immunology & Transplantation](https://www.niaid.nih.gov/research/allergy-immunology-transplantation)
+[Research in NIAID Labs](https://www.niaid.nih.gov/research/research-conducted-niaid)
+[Research Funded by NIAID](https://www.niaid.nih.gov/research/research-funded-niaid)
+[Resources for Researchers](https://www.niaid.nih.gov/research/resources)
+[Programs & Networks](https://www.niaid.nih.gov/research/programs-networks)
+[Partnerships](https://www.niaid.nih.gov/research/partnering-niaid)
+Research Areas
+[Antimicrobial (Drug) Resistance](https://www.niaid.nih.gov/research/antimicrobial-resistance)
+[Antimicrobial Resistance Threats](https://www.niaid.nih.gov/research/antimicrobial-resistance-threats)
+[Research Initiatives](https://www.niaid.nih.gov/research/recent-initiatives-antimicrobial-resistance)
+[Basic Research](https://www.niaid.nih.gov/research/antimicrobial-resistance-basic-research-support)
+[Causes](https://www.niaid.nih.gov/research/antimicrobial-resistance-causes)
+[Prevention](https://www.niaid.nih.gov/research/antimicrobial-resistance-prevention)
+[Diagnosis](https://www.niaid.nih.gov/research/antimicrobial-resistance-diagnosis)
+[Treatment](https://www.niaid.nih.gov/research/antimicrobial-resistance-treatment)
+[Information for Researchers](https://www.niaid.nih.gov/research/antimicrobial-resistance-researchers)
+[Asthma](https://www.niaid.nih.gov/diseases-conditions/asthma)
+[Risk Factors & Prevention Research](https://www.niaid.nih.gov/diseases-conditions/asthma-risk-factors-and-prevention-research)
+[Managing Symptoms](https://www.niaid.nih.gov/diseases-conditions/managing-asthma-symptoms)
+[Understanding Triggers](https://www.niaid.nih.gov/diseases-conditions/understanding-asthma-triggers)
+[Autoimmune Diseases](https://www.niaid.nih.gov/diseases-conditions/autoimmune-diseases)
+[Immune Tolerance Processes](https://www.niaid.nih.gov/diseases-conditions/immune-tolerance-processes-autoimmune-disease)
+[Risk Factors](https://www.niaid.nih.gov/diseases-conditions/factors-influence-autoimmunity)
+[Treatment and Management](https://www.niaid.nih.gov/diseases-conditions/autoimmune-disease-treatment-and-management)
+[Disease-Specific Research](https://www.niaid.nih.gov/diseases-conditions/autoimmune-disease-research)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/autoimmune-diseases-researchers)
+[Autoimmune Lymphoproliferative Syndrome (ALPS)](https://www.niaid.nih.gov/diseases-conditions/autoimmune-lymphoproliferative-syndrome-alps)
+[Causes](https://www.niaid.nih.gov/diseases-conditions/autoimmune-lymphoproliferative-syndrome-causes)
+[Symptoms & Diagnosis](https://www.niaid.nih.gov/diseases-conditions/alps-symptoms-diagnosis)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/autoimmune-lymphoproliferative-syndrome-treatment)
+[Biodefense](https://www.niaid.nih.gov/research/biodefense)
+[Biodefense & Emerging Infectious Diseases](https://www.niaid.nih.gov/research/biodefense-emerging-infectious-diseases)
+[Chemical Countermeasures Research Program](https://www.niaid.nih.gov/research/chemical-countermeasures-program)
+[Radiation & Nuclear Countermeasures Program](https://www.niaid.nih.gov/research/radiation-nuclear-countermeasures-program)
+[Cholera](https://www.niaid.nih.gov/diseases-conditions/cholera)
+[Biology & Genetics](https://www.niaid.nih.gov/diseases-conditions/cholera-biology-and-genetics)
+[Treatment & Prevention](https://www.niaid.nih.gov/diseases-conditions/cholera-treatment-and-prevention)
+[Coronaviruses](https://www.niaid.nih.gov/diseases-conditions/coronaviruses)
+[Basic & Preclinical Research](https://www.niaid.nih.gov/diseases-conditions/basic-preclinical-coronavirus-research)
+[Vaccines & Prevention](https://www.niaid.nih.gov/diseases-conditions/coronavirus-vaccines-prevention)
+[Diagnostics & Serology](https://www.niaid.nih.gov/diseases-conditions/coronavirus-diagnostics-serology)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/coronavirus-treatment)
+[Long COVID and MIS-C](https://www.niaid.nih.gov/diseases-conditions/long-covid-multisystem-inflammatory-syndrome-children-misc)
+[Strategic Planning](https://www.niaid.nih.gov/diseases-conditions/coronavirus-strategic-planning)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/coronaviruses-researchers)
+[Dengue Fever](https://www.niaid.nih.gov/diseases-conditions/dengue-fever)
+[Biology & Transmission](https://www.niaid.nih.gov/diseases-conditions/dengue-biology-and-transmission)
+[Prevention](https://www.niaid.nih.gov/diseases-conditions/dengue-prevention)
+[Diagnosis](https://www.niaid.nih.gov/diseases-conditions/dengue-diagnosis)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/dengue-treatment)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/dengue-researchers)
+[E. coli](https://www.niaid.nih.gov/diseases-conditions/e-coli)
+[Shiga Toxin-Producing E. coli (STEC)](https://www.niaid.nih.gov/diseases-conditions/shiga-toxin-producing-e-coli)
+[Prevention](https://www.niaid.nih.gov/diseases-conditions/e-coli-prevention)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/e-coli-treatment)
+[Ebola and Marburg](https://www.niaid.nih.gov/diseases-conditions/ebola-marburg)
+[Vaccines](https://www.niaid.nih.gov/diseases-conditions/ebola-vaccines)
+[Diagnosis](https://www.niaid.nih.gov/diseases-conditions/ebola-diagnosis)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/ebola-treatment)
+[Researching Ebola in Africa](https://www.niaid.nih.gov/diseases-conditions/researching-ebola-africa)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/ebola-marburg-researchers)
+[Eczema](https://www.niaid.nih.gov/diseases-conditions/eczema-atopic-dermatitis)
+[Causes & Triggers](https://www.niaid.nih.gov/diseases-conditions/eczema-causes-and-triggers)
+[Prevention](https://www.niaid.nih.gov/diseases-conditions/eczema-prevention-research)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/eczema-treatment)
+[Complications](https://www.niaid.nih.gov/diseases-conditions/eczema-complications)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/eczema-atopic-dermatitis-researchers)
+[Food Allergy](https://www.niaid.nih.gov/diseases-conditions/food-allergy)
+[Why Food Allergy is a Priority for NIAID](https://www.niaid.nih.gov/diseases-conditions/food-allergy-priority-niaid)
+[Causes & Prevention](https://www.niaid.nih.gov/diseases-conditions/food-allergy-causes-prevention)
+[Risk Factors](https://www.niaid.nih.gov/diseases-conditions/risk-factors-food-allergy)
+[Diagnosis](https://www.niaid.nih.gov/diseases-conditions/diagnosing-food-allergy)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/food-allergy-treatment-research)
+[Characterizing Food Allergy & Addressing Related Disorders](https://www.niaid.nih.gov/diseases-conditions/food-allergy-characterizing)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/food-allergy-researchers)
+[Diagnosis & Management Guidelines](https://www.niaid.nih.gov/diseases-conditions/guidelines-clinicians-and-patients-food-allergy)
+[Fungal Diseases](https://www.niaid.nih.gov/diseases-conditions/fungal-diseases)
+[Disease-Specific Research](https://www.niaid.nih.gov/diseases-conditions/fungal-disease-specific-research)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/fungal-diseases-researchers)
+[Genomics & Advanced Technologies](https://www.niaid.nih.gov/research/genomics-advanced-technologies)
+[Pathogen-Based Initiatives](https://www.niaid.nih.gov/research/pathogen-genomics-related-initiatives)
+[Information for Researchers](https://www.niaid.nih.gov/research/genomics-advanced-technologies-researchers)
+[Global Research](https://www.niaid.nih.gov/research/global-research)
+[NIAID's Role](https://www.niaid.nih.gov/research/global-research-niaid-role)
+[Regions](https://www.niaid.nih.gov/research/global-research-region)
+[Information for Researchers](https://www.niaid.nih.gov/research/global-research-information-researchers)
+[Group A Streptococcal Infections](https://www.niaid.nih.gov/diseases-conditions/group-streptococcal-infections)
+[Types of Group A Strep](https://www.niaid.nih.gov/diseases-conditions/group-strep-types)
+[Biology & Genetics](https://www.niaid.nih.gov/diseases-conditions/group-streptococcal-infections-biology-genetics)
+[Vaccine Research](https://www.niaid.nih.gov/diseases-conditions/group-strep-vaccine-research)
+[Hepatitis](https://www.niaid.nih.gov/diseases-conditions/hepatitis)
+[Disease-Specific Research](https://www.niaid.nih.gov/diseases-conditions/hepatitis-research)
+[HIV/AIDS](https://www.niaid.nih.gov/diseases-conditions/hivaids)
+[Prevention](https://www.niaid.nih.gov/diseases-conditions/hiv-prevention)
+[Vaccine Development](https://www.niaid.nih.gov/diseases-conditions/hiv-vaccine-development)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/hiv-treatment)
+[Cure](https://www.niaid.nih.gov/diseases-conditions/hiv-cure-research)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/hivaids-researchers)
+[Immune System Research](https://www.niaid.nih.gov/research/immune-system-research)
+[Overview of the Immune System](https://www.niaid.nih.gov/research/immune-system-overview)
+[Features of an Immune Response](https://www.niaid.nih.gov/research/immune-response-features)
+[Immune Cells](https://www.niaid.nih.gov/research/immune-cells)
+[Immune Tolerance](https://www.niaid.nih.gov/research/immune-tolerance)
+[Disorders](https://www.niaid.nih.gov/research/immune-system-disorders)
+[Research Frontiers](https://www.niaid.nih.gov/research/research-frontiers-immune-system)
+[Information for Researchers](https://www.niaid.nih.gov/research/immune-system-researchers)
+[Influenza](https://www.niaid.nih.gov/diseases-conditions/influenza)
+[Basic Research](https://www.niaid.nih.gov/diseases-conditions/influenza-basic-research)
+[Diagnosis](https://www.niaid.nih.gov/diseases-conditions/influenza-diagnosis)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/influenza-treatment)
+[Vaccines](https://www.niaid.nih.gov/diseases-conditions/influenza-vaccines)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/influenza-researchers)
+[Leishmaniasis](https://www.niaid.nih.gov/diseases-conditions/leishmaniasis)
+[Parasite & Vector](https://www.niaid.nih.gov/diseases-conditions/leishmaniasis-parasite-vector)
+[Leprosy (Hansen's Disease)](https://www.niaid.nih.gov/diseases-conditions/leprosy-hansens-disease)
+[Basic Research](https://www.niaid.nih.gov/diseases-conditions/leprosy-basic-research)
+[Transmission](https://www.niaid.nih.gov/diseases-conditions/leprosy-transmission)
+[Research Next Steps](https://www.niaid.nih.gov/diseases-conditions/leprosy-research-next-steps)
+[Lyme Disease](https://www.niaid.nih.gov/diseases-conditions/lyme-disease)
+[How NIAID is Addressing Lyme Disease](https://www.niaid.nih.gov/diseases-conditions/addressing-lyme-disease)
+[Diagnostics](https://www.niaid.nih.gov/diseases-conditions/lyme-disease-diagnostics-research)
+[Antibiotic Treatment](https://www.niaid.nih.gov/diseases-conditions/lyme-disease-antibiotic-treatment-research)
+[Chronic Lyme Disease](https://www.niaid.nih.gov/diseases-conditions/chronic-lyme-disease)
+[Co-Infection](https://www.niaid.nih.gov/diseases-conditions/lyme-disease-co-infection)
+[Vaccines](https://www.niaid.nih.gov/diseases-conditions/lyme-disease-vaccines)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/lyme-disease-researchers)
+[Malaria](https://www.niaid.nih.gov/diseases-conditions/malaria)
+[Parasite, Mosquito & Human Host](https://www.niaid.nih.gov/diseases-conditions/malaria-parasite)
+[Prevention, Treatment & Control Strategies](https://www.niaid.nih.gov/diseases-conditions/malaria-strategies)
+[Strategic Partnerships & Research Capacity](https://www.niaid.nih.gov/diseases-conditions/malaria-strategic-partnerships)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/malaria-researchers)
+[Mpox](https://www.niaid.nih.gov/diseases-conditions/mpox)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/mpox-treatment)
+[Vaccines](https://www.niaid.nih.gov/diseases-conditions/mpox-vaccines)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/mpox-researchers)
+[Neglected Tropical Diseases](https://www.niaid.nih.gov/research/neglected-tropical-diseases)
+[NIAID's Role](https://www.niaid.nih.gov/research/niaid-role-neglected-tropical-diseases-ntd-research)
+[Types of NTDs](https://www.niaid.nih.gov/research/neglected-tropical-diseases-types)
+[Quick Facts](https://www.niaid.nih.gov/research/neglected-tropical-diseases-quick-facts)
+[Scientific Findings](https://www.niaid.nih.gov/research/neglected-tropical-diseases-scientific-findings)
+[Information for Researchers](https://www.niaid.nih.gov/research/neglected-tropical-diseases-researchers)
+[Pandemic Preparedness](https://www.niaid.nih.gov/research/pandemic-preparedness)
+[Research Approach](https://www.niaid.nih.gov/research/pandemic-preparedness-research-approach)
+[Preclinical Research](https://www.niaid.nih.gov/research/pandemic-preparedness-preclinical)
+[Translational & Clinical Research](https://www.niaid.nih.gov/research/pandemic-preparedness-translational-clinical)
+[Cross-cutting Preparedness](https://www.niaid.nih.gov/research/pandemic-preparedness-cross-cutting-efforts)
+[Pertussis](https://www.niaid.nih.gov/diseases-conditions/pertussis-whooping-cough)
+[Vaccines](https://www.niaid.nih.gov/diseases-conditions/pertussis-vaccine-research)
+[Molecular & Genetic Research](https://www.niaid.nih.gov/diseases-conditions/pertussis-molecular-genetic)
+[Plague](https://www.niaid.nih.gov/diseases-conditions/plague)
+[Biology & Genetics](https://www.niaid.nih.gov/diseases-conditions/biology-yersinia-pestis)
+[Primary Immune Deficiency Diseases (PIDDs)](https://www.niaid.nih.gov/diseases-conditions/primary-immune-deficiency-diseases-pidds)
+[Types of PIDDs](https://www.niaid.nih.gov/diseases-conditions/types-pidds)
+[Genetics & Inheritance](https://www.niaid.nih.gov/diseases-conditions/pidds-genetics-inheritance)
+[Talking to Your Doctor](https://www.niaid.nih.gov/diseases-conditions/pidds-talking-your-doctor)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/pidds-researchers)
+[Prion Diseases](https://www.niaid.nih.gov/diseases-conditions/prion-diseases)
+[Biology & Genetics](https://www.niaid.nih.gov/diseases-conditions/prion-biology-genetics)
+[Therapeutic Approaches](https://www.niaid.nih.gov/diseases-conditions/prion-therapeutic-approaches)
+[Animal Prion Diseases and Humans](https://www.niaid.nih.gov/diseases-conditions/prion-research)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/prion-diseases-researchers)
+[Respiratory Syncytial Virus (RSV)](https://www.niaid.nih.gov/diseases-conditions/respiratory-syncytial-virus-rsv)
+[Prevention](https://www.niaid.nih.gov/diseases-conditions/rsv-prevention)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/rsv-treatment)
+[Schistosomiasis (Bilharzia)](https://www.niaid.nih.gov/diseases-conditions/schistosomiasis-bilharzia)
+[Vaccines](https://www.niaid.nih.gov/diseases-conditions/schistosomiasis-vaccine-development)
+[Genomics](https://www.niaid.nih.gov/diseases-conditions/schistosomiasis-genomics)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/schistosomiasis-treatment)
+[Research in Endemic Regions](https://www.niaid.nih.gov/diseases-conditions/schistosomiasis-research)
+[Sexually Transmitted Infections (STIs)](https://www.niaid.nih.gov/diseases-conditions/sexually-transmitted-infections)
+[NIAID's Research Approach](https://www.niaid.nih.gov/diseases-conditions/research-sexually-transmitted-infection-sti)
+[Pathogens and Syndromes](https://www.niaid.nih.gov/diseases-conditions/sti-pathogens-and-syndromes)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/sexually-transmitted-infections-researchers)
+[Shigellosis](https://www.niaid.nih.gov/diseases-conditions/shigellosis)
+[Biology & Genetics](https://www.niaid.nih.gov/diseases-conditions/shigellosis-biology)
+[Smallpox](https://www.niaid.nih.gov/diseases-conditions/smallpox)
+[Vaccine](https://www.niaid.nih.gov/diseases-conditions/smallpox-vaccine)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/smallpox-treatment)
+[Tickborne Diseases](https://www.niaid.nih.gov/diseases-conditions/tickborne-diseases)
+[Disease-Specific Research](https://www.niaid.nih.gov/diseases-conditions/tickborne-diseases-specific)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/tickborne-diseases-researchers)
+[Tuberculosis](https://www.niaid.nih.gov/diseases-conditions/tuberculosis)
+[Basic Research](https://www.niaid.nih.gov/diseases-conditions/tuberculosis-basic-research)
+[Vaccine Development](https://www.niaid.nih.gov/diseases-conditions/tuberculosis-vaccine-development)
+[Diagnosis](https://www.niaid.nih.gov/diseases-conditions/tuberculosis-diagnosis)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/tb-treatment)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/tuberculosis-researchers)
+[Vaccines](https://www.niaid.nih.gov/research/vaccines)
+[Types](https://www.niaid.nih.gov/research/vaccine-types)
+[Disease-Specific Vaccines](https://www.niaid.nih.gov/research/disease-specific-vaccines)
+[Vaccine Adjuvants](https://www.niaid.nih.gov/research/vaccine-adjuvants)
+[Reports & Strategic Plans](https://www.niaid.nih.gov/research/vaccine-reports-strategic-plans)
+[Information for Researchers](https://www.niaid.nih.gov/research/vaccines-researchers)
+[Vector Biology](https://www.niaid.nih.gov/research/vector-bio)
+[Basic Research](https://www.niaid.nih.gov/research/vector-biology-basic-research)
+[Translational & Clinical Research](https://www.niaid.nih.gov/research/vector-biology-translational-and-clinical-research)
+[Vector-Host Interactions](https://www.niaid.nih.gov/research/vector-host-interactions)
+[Information for Researchers](https://www.niaid.nih.gov/research/vector-biology-information-researchers)
+[West Nile Virus](https://www.niaid.nih.gov/diseases-conditions/west-nile-virus)
+[Biology, Genetics & Clinical Research](https://www.niaid.nih.gov/diseases-conditions/west-nile-virus-biology-genetics-clinical)
+[Diagnosis](https://www.niaid.nih.gov/diseases-conditions/west-nile-virus-diagnosis)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/wnv-treatment)
+[Vaccines](https://www.niaid.nih.gov/diseases-conditions/wnv-vaccines)
+[Women's Health](https://www.niaid.nih.gov/research/womens-health)
+[NIAID's Approach to Women's Health Research](https://www.niaid.nih.gov/research/approach-womens-health-research)
+[Scientific Advances](https://www.niaid.nih.gov/research/scientific-advances-womens-health-research)
+[Sex-Specific Health Challenges Facing Women](https://www.niaid.nih.gov/research/sex-specific-womens-health-challenges)
+[Biennial Report (FY 2019-2020)](https://www.niaid.nih.gov/research/niaid-womens-health-research-fy-2019-2020)
+[Information for Researchers](https://www.niaid.nih.gov/research/womens-health-information-researchers)
+[Zika Virus](https://www.niaid.nih.gov/diseases-conditions/zika-virus)
+[Why NIAID Is Researching Zika Virus](https://www.niaid.nih.gov/diseases-conditions/why-niaid-researches-zika)
+[Addressing Zika Virus](https://www.niaid.nih.gov/diseases-conditions/addressing-zika)
+[Basic Research](https://www.niaid.nih.gov/diseases-conditions/zika-basic-research)
+[Vaccines](https://www.niaid.nih.gov/diseases-conditions/zika-vaccines)
+[Diagnosis](https://www.niaid.nih.gov/diseases-conditions/zika-diagnosis)
+[Treatment](https://www.niaid.nih.gov/diseases-conditions/zika-treatment)
+[Information for Researchers](https://www.niaid.nih.gov/diseases-conditions/zika-virus-researchers)
+Grants & Contracts
+[Find a Funding Opportunity](https://www.niaid.nih.gov/grants-contracts/find-funding-opportunity)
+[Types of Funding Opportunities](https://www.niaid.nih.gov/grants-contracts/types-funding-opportunities)
+[NIAID Research Priorities](https://www.niaid.nih.gov/grants-contracts/research-priorities)
+[See Funded Projects](https://www.niaid.nih.gov/grants-contracts/reporter)
+[Timelines & Due Dates](https://www.niaid.nih.gov/grants-contracts/timelines-due-dates)
+[Apply for a Grant](https://www.niaid.nih.gov/grants-contracts/apply-grant)
+[Sample Applications](https://www.niaid.nih.gov/grants-contracts/sample-applications)
+[Determine Eligibility](https://www.niaid.nih.gov/grants-contracts/determine-eligibility-niaid-grants)
+[Prepare Your Application](https://www.niaid.nih.gov/grants-contracts/prepare-your-application)
+[Plan Your Budget & Personnel](https://www.niaid.nih.gov/grants-contracts/plan-budget-personnel)
+[Additional Application Elements](https://www.niaid.nih.gov/grants-contracts/additional-application-elements)
+[Research with Special Considerations](https://www.niaid.nih.gov/grants-contracts/research-considerations)
+[Submit an Application](https://www.niaid.nih.gov/grants-contracts/submit-application)
+[After You Submit an Application](https://www.niaid.nih.gov/grants-contracts/after-you-submit-application)
+[Paylines & Funding](https://www.niaid.nih.gov/grants-contracts/paylines-funding)
+[Track Your Application](https://www.niaid.nih.gov/grants-contracts/track-application)
+[Understand the Review Process](https://www.niaid.nih.gov/grants-contracts/review-process)
+[Respond to Pre-Award Requests](https://www.niaid.nih.gov/grants-contracts/pre-award-requests)
+[Manage Your Award](https://www.niaid.nih.gov/grants-contracts/manage-your-award)
+[After Award](https://www.niaid.nih.gov/grants-contracts/after-award)
+[Negotiation & Initial Award](https://www.niaid.nih.gov/grants-contracts/negotiate-initial-award)
+[Contracts](https://www.niaid.nih.gov/grants-contracts/contracts)
+[Contract Solicitations](https://www.niaid.nih.gov/grants-contracts/contract-solicitations)
+[Rules & Policies](https://www.niaid.nih.gov/grants-contracts/contracts-rules-policies)
+[Contact the Office of Acquisitions](https://www.niaid.nih.gov/grants-contracts/contact-office-acquisitions)
+[NIAID Funding News](https://www.niaid.nih.gov/grants-contracts/funding-news)
+[Most Recent Edition](https://www.niaid.nih.gov/grants-contracts/funding-news)
+[Browse by Edition Date](https://www.niaid.nih.gov/grants-contracts/funding-news-editions)
+[Search All Funding News](https://www.niaid.nih.gov/grants-contracts/funding-news-search)
+Clinical Trials
+[Find a Clinical Trial](https://www.niaid.nih.gov/clinical-trials/find-a-clinical-trial)
+[Become a Healthy Volunteer](https://www.niaid.nih.gov/clinical-trials/become-healthy-volunteer)
+[Participant's Guide to Clinical Trials](https://www.niaid.nih.gov/clinical-trials/participant-guide)
+[Participant Testimonials](https://www.niaid.nih.gov/clinical-trials/participant-testimonials)
+[HIV and Emerging Infectious Diseases](https://www.niaid.nih.gov/clinical-trials/hiv-and-emerging-infectious-diseases-program)
+[Partnership for Access to Clinical Trials (PACT)](https://www.niaid.nih.gov/clinical-trials/pact)
+[Laboratory of Infectious Diseases](https://www.niaid.nih.gov/clinical-trials/laboratory-infectious-diseases)
+[Primary Immune Deficiency Clinic](https://www.niaid.nih.gov/clinical-trials/primary-immune-deficiency-clinic)
+[Vaccine Research Center Clinical Studies](https://www.niaid.nih.gov/clinical-trials/vaccine-research-center-clinical-studies)
+[Fill Out the Volunteer Form](https://www.niaid.nih.gov/clinical-trials/vrc-volunteer-form)
+[Q&A: Vaccine Clinical Studies](https://www.niaid.nih.gov/clinical-trials/vaccine-clinical-studies-faq)
+[Vaccine Clinical Studies Safeguards](https://www.niaid.nih.gov/clinical-trials/vaccine-clinical-studies-safeguards)
+[Clinical Trial Publications](https://www.niaid.nih.gov/clinical-trials/vrc-clinical-trial-publications)
+News & Events
+[Newsroom](https://www.niaid.nih.gov/news-events/newsroom)
+[News Releases](https://www.niaid.nih.gov/news-events/news-releases)
+[NIAID Now Blog](https://www.niaid.nih.gov/news-events/blog)
+[Media Inquiries](https://www.niaid.nih.gov/news-events/media-inquiries)
+[NIAID-Funded Research News](https://www.niaid.nih.gov/news-events/niaid-funded-research-news)
+[Events](https://www.niaid.nih.gov/news-events/events)
+[Past Events](https://www.niaid.nih.gov/news-events/past-events)
+About NIAID
+[Organization](https://www.niaid.nih.gov/about/niaid-organization)
+[Office of the Director](https://www.niaid.nih.gov/about/office-director)
+[Division of AIDS](https://www.niaid.nih.gov/about/daids)
+[Division of Allergy, Immunology, and Transplantation](https://www.niaid.nih.gov/about/dait)
+[Division of Microbiology and Infectious Diseases](https://www.niaid.nih.gov/about/dmid)
+[Division of Extramural Activities](https://www.niaid.nih.gov/about/dea)
+[Division of Clinical Research](https://www.niaid.nih.gov/about/dcr)
+[Division of Intramural Research](https://www.niaid.nih.gov/about/dir)
+[Vaccine Research Center](https://www.niaid.nih.gov/about/vrc)
+[Organizational Chart](https://www.niaid.nih.gov/about/niaid-organizational-chart)
+[Find NIAID Staff](https://www.niaid.nih.gov/about/find-niaid-staff)
+[History](https://www.niaid.nih.gov/about/niaid-history)
+[Dr. Joseph J. Kinyoun: Father of the NIH](https://www.niaid.nih.gov/about/joseph-kinyoun)
+[Dr. Joseph Kinyoun The Indispensable Forgotten Man](https://www.niaid.nih.gov/about/joseph-kinyoun-indispensable-man)
+[Dr. Joseph Kinyoun: Selected Bibliography](https://www.niaid.nih.gov/about/joseph-kinyoun-bibliography)
+[NIAID 60th Anniversary Timeline](https://www.niaid.nih.gov/about/niaid-60th-anniversary)
+[Budget & Planning](https://www.niaid.nih.gov/about/budget-planning)
+[Unified Funding Strategy](https://www.niaid.nih.gov/about/unified-funding-strategy)
+[Evaluation at NIAID](https://www.niaid.nih.gov/about/evaluation)
+[Careers & Training](https://www.niaid.nih.gov/about/careers-training)
+[NIAID Careers](https://www.niaid.nih.gov/about/careers)
+[Research Training at NIAID Campuses](https://www.niaid.nih.gov/about/fellowships-internships-and-training)
+[Grant Programs that NIAID Funds](https://www.niaid.nih.gov/about/training-career-development-grants)
+[Councils & Committees](https://www.niaid.nih.gov/about/committees-council-federal-advisory)
+[AIDS Research Advisory Committee](https://www.niaid.nih.gov/about/committees-aids-research)
+[AIDS Vaccine Research Subcommittee](https://www.niaid.nih.gov/about/aids-vaccine-research-subcommittee)
+[Board of Scientific Counselors Members](https://www.niaid.nih.gov/about/scientific-counselors)
+[Executive Committee](https://www.niaid.nih.gov/about/committees-executive)
+[Advisory Council](https://www.niaid.nih.gov/about/advisory-council)
+[Advisory and Peer Review Committees](https://www.niaid.nih.gov/about/advisory-committees)
+[Autoimmune Diseases Committee](https://www.niaid.nih.gov/about/autoimmune-diseases-committee)
+[Visitor Information](https://www.niaid.nih.gov/about/visitor-information)
+[Mission](https://www.niaid.nih.gov/grants-contracts/draft-specific-aims)
+[NIAID Mission](https://www.niaid.nih.gov/about/mission-planning-overview)
+Website Policies and Notices
+[Accessibility on the Web](https://www.niaid.nih.gov/global/web-accessibility)
+[Comment Policy](https://www.niaid.nih.gov/global/comment-policy)
+[Conflicts of Interest](https://www.niaid.nih.gov/global/conflicts-interest)
+[Copyright and Reuse of Graphics and Text](https://www.niaid.nih.gov/global/copyright-and-reuse)
+[External Link Icon and Disclaimers](https://www.niaid.nih.gov/global/disclaimers)
+[Freedom of Information Act (FOIA)](https://www.niaid.nih.gov/global/freedom-information-act)
+[No FEAR Act](https://www.niaid.nih.gov/global/no-fear-act-notice)
+[NIAID Privacy Policy](https://www.niaid.nih.gov/global/privacy-policy)
+[PathogenAR Privacy Policy](https://www.niaid.nih.gov/global/pathogenar-privacy-policy)
+[Voluntarily Submitted Information](https://www.niaid.nih.gov/global/voluntarily-submitted-information)
+[Website Help](https://www.niaid.nih.gov/global/website-help)
+[Contact Us](https://www.niaid.nih.gov/global/contact-us)
+[Información en español](https://www.niaid.nih.gov/global/informacion-en-espanol)
+[Temas de salud](https://www.niaid.nih.gov/global/temas-de-salud)
+Policy Archive
+[Skip to Front](https://www.niaid.nih.gov/grants-contracts/draft-specific-aims#)
+[![NIAID Logo](https://www.niaid.nih.gov/themes/custom/niaid-drupal-theme/patternlab/src/images/global/niaid/logo-niaid.svg)![NIAID Logo](https://www.niaid.nih.gov/themes/custom/niaid-drupal-theme/patternlab/src/images/global/niaid/logo-niaid-mobile.svg)](https://www.niaid.nih.gov/)
+[Skip to Close](https://www.niaid.nih.gov/grants-contracts/draft-specific-aims#)
+[Skip to Search](https://www.niaid.nih.gov/grants-contracts/draft-specific-aims#)
+[facebook](https://www.facebook.com/sharer.php?u=https%3A%2F%2Fwww.niaid.nih.gov%2Fgrants-contracts%2Fdraft-specific-aims)
+[x-twitter](https://x.com/intent/tweet?text=Draft%20Specific%20Aims%20%7C%20NIAID%3A%20National%20Institute%20of%20Allergy%20and%20Infectious%20Diseases+https%3A%2F%2Fwww.niaid.nih.gov%2Fgrants-contracts%2Fdraft-specific-aims)
+[linkedin](https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fwww.niaid.nih.gov%2Fgrants-contracts%2Fdraft-specific-aims&title=Draft%20Specific%20Aims%20%7C%20NIAID%3A%20National%20Institute%20of%20Allergy%20and%20Infectious%20Diseases)
+![stage indicator - apply for a grant](https://www.niaid.nih.gov/sites/default/files/stage-indicator-02-apply.png)
+# Draft Specific Aims
+Due to current HHS and NIH restructuring, some content on niaid.nih.gov is not being updated regularly. Please refer to [clinicaltrials.gov](https://clinicaltrials.gov/) and [nih.gov](https://www.nih.gov/) for the most up-to-date information on NIH research.
+After you have decided the area of research to pursue, start thinking about your planned experiments by first drafting objectives, known in NIH lingo as Specific Aims.
+Be sure you can complete your Aims within the typical timeframe for your chosen Notice of Funding Opportunity (NOFO). For an R01, that’s typically four to five years.
+Your project should tackle important research within your niche: it must be able to move your field forward. Beware of concepts that can’t be strongly supported with your own preliminary data or published data from other laboratories.
+Thinking high level, ask yourself what objectives you could reasonably achieve within the timeframe of a grant. Start broadly with an emphasis on significance, and then focus on generating experiments with clear endpoints reviewers can readily assess.
+While you could design a project around two to four Specific Aims, many people create three.
+Limiting your application to a few Specific Aims keeps you clear of the very common mistake of being overly ambitious. It's much better to think small and propose less than to do the opposite.
+## There Are Good Aims and There Are Poor Aims
+A common type of Specific Aim might ask a question like “Does A cause B?” However, your project could come to an end if A doesn’t turn out to cause B.
+It’s better to design an aim where the result doesn’t depend on only one outcome, but where one or more different outcomes would also be of interest. Then the question becomes “Does A cause B or non-B,” so make sure the “non-B” outcomes make sense based on both your central hypothesis and preliminary data.
+Another common type of Specific Aim is descriptive. For example, “We will measure levels of X in 1,000 samples of Y to characterize the pattern of expression of X."
+Though this may be very doable, it is rarely a highly significant finding in itself and often should be avoided unless you have no other choice. Such descriptive findings should usually be part of your preliminary data, not part of your proposal.
+Like your topic, your Specific Aims should build on your previous experience.
+### [Sample Applications and More](https://www.niaid.nih.gov/grants-contracts/sample-applications)
+Find examples of Specific Aims used by others.
+## Form a Gestalt between Aims and Experiments
+Although it may seem an early stage to think about specific experiments, cost of those experiments, needed expertise, and resources, these variables go hand-in-hand with picking a project that is both impactful and feasible.
+If the project is not feasible, you will need to rethink your experiments or even your Specific Aims.
+Because you have several items to juggle, we recommend using the following iterative process:
+1. Staying in your niche, propose a project that
+- Addresses a highly significant problem.
+- Is innovative—can create new knowledge.
+- Is unique. For details, see [What Does NIH Look For?](https://grants.nih.gov/grants/what-does-nih-look-for.htm#:~:text=By%20law%2C%20NIH%20cannot%20support,PHS%20with%20the%20same%20application.), and search NIH’s [Research Portfolio Online Reporting Tools](https://report.nih.gov/)—commonly known as RePORT—to check whether your project is unique.
+2. Outline draft Specific Aims and one or more hypotheses.
+3. Identify a potential funding institute and a study section that would likely embrace your research.
+4. Outline experiments.
+5. Assess feasibility.
+- See whether you have access to all needed resources and expertise.
+- Make sure the project is not growing too big for your targeted time and budget.
+6. If you hit a roadblock, go back to the failure point and revise your plans.
+## Draft Specific Aims and One or More Hypotheses
+Thinking high level, ask yourself what objectives you could achieve within the timeframe of the grant. Your goal is to create aims that are achievable in four to five years and have clear endpoints your reviewers can readily assess.
+Some people write their Specific Aims first and then develop a hypothesis; others do the reverse—use the approach that works best for you.
+You can create one hypothesis for the entire application or one for each Specific Aim.
+### Hypothetically Speaking . . .
+Why do you need a central hypothesis (or multiple hypotheses)? Because that's what reviewers expect and what anchors your different Specific Aims to a common theme, not just a common field of research. Following a central hypothesis also keeps you focused with both writing the proposal and actually doing the research if the grant is funded.
+A strong hypothesis should be well-focused and testable by the Specific Aims and experiments.
+After you create your hypothesis, go back and take stock again of your prospective reviewers and their level of interest in light of your draft aims and hypothesis.
+## Assess Your Specific Aims
+Here we show you how to put to the test your draft objectives—Specific Aims—you have planned for your project.
+This step provides a check of your aims in light of the study section you identified and advice on presenting your aims if you propose highly innovative research.
+Start assessing your Specific Aims by taking a hard look at the significance and innovation of your planned research.
+Ask yourself
+- Would my reviewers see my proposed project as tackling an important problem in a significant field?
+- Would they view my Specific Aims as capable of opening up new discoveries in my field?
+- Would my reviewers regard the work as new and unique?
+- Would they view my Specific Aims as likely to exert a significant influence on the research field(s) involved?
+- Are my Specific Aims written clearly and are they easy to understand?
+You'll want to get outside opinions for a fresh perspective. Don't assume others, including your reviewers, will consider a research area to have the same priority that you do.
+Also discuss your draft aims with colleagues who aren’t in your field. If they can understand your project and get excited about it, you have a better chance your reviewers will as well.
+It is particularly useful to have your application reviewed by a colleague who has been successful in getting NIH funding, or better yet, has served on an NIH study section.
+At this point, you may want to go back and reconsider your Specific Aims so you can be as certain as possible that the committee will appreciate your research plans.
+### Oh Innovation, Where Art Thou?
+It’s important to propose hypothesis-driven research with well-defined and feasible Specific Aims. But where does this leave innovative ideas that are less likely to fit inside "the box"?
+Here are a few points to keep in mind:
+Hypothesis-driven research does not necessarily constrain paradigm-shifting or "outside-the-box" research, nor does it necessarily mean sticking with the paradigm du jour. Paradigm-shifting and outside-the-box concepts can still lend themselves to focused hypotheses that can help guide the crafting of solid Specific Aims. Such focused hypotheses need not be tied to a broader theory or paradigm; they may simply provide a rationale that can be used to test the strength of the proposed aim or experiment.
+Current criteria for scoring applications provide a transparent and fair guide to evaluate large numbers of diverse applications based on the aggregate merit of scientific significance, innovation, and feasibility.
+For projects predominantly focused on innovation and outside-the-box research, investigators always have the option to use grant mechanisms, other than R01s, that may better suit their needs \[e.g., exploratory/developmental research (R21) grants, NIH Director's Pioneer Award Program (DP1), and NIH Director's New Innovator Award Program (DP2)\].
+Serendipity is likely to happen just as frequently regardless of the grant mechanism supporting the research. As Louis Pasteur said, "Chance favors the prepared mind." NIH strongly encourages investigators to follow up on chance discoveries made in the course of executing R01-supported research programs.
+### How to Handle Innovation in Your Application
+Although innovation is one of the five peer review criteria, many experienced investigators report that it's difficult to succeed in review with so called "high-risk" research.
+Heed these words from an investigator who was the PI of an NIH New Innovator Award:
+"It's always more difficult to convince people against commonly held beliefs (even though they may not be based on experimental data). Moreover, due to the higher risk of our work, we may also have a higher failure rate," says Sanjay K. Jain, M.D., of Johns Hopkins University School of Medicine and Bloomberg School of Public Health.
+As you scrutinize your Specific Aims, make sure your reviewers will view them to be reasonably close to the scientific mainstream.
+If your proposal challenges commonly held beliefs, be sure that you include sufficient evidence in your preliminary data to convince the reviewers that these beliefs may not be scientifically valid. If your research is high risk, it is likely to be highly innovative. Your job is to make the reviewers feel confident that the risk is worth taking.
+So the research you propose should be new and unique and able to push forward the frontier of knowledge just ahead starting from what's known.
+When you write your application, you'll put the information about your project's importance and innovation in the Significance and Innovation sections.
+Never forget that reviewers also look at the feasibility of the proposed research. Novelty alone will not help you if the proposed studies are not feasible given the available time, funds, and resources to do the work.
+### [Sample Applications and More](https://www.niaid.nih.gov/grants-contracts/sample-applications)
+Get an idea of how investigators who wrote outstanding applications balanced these complexities.
+## Checklist
+Print
+\*\*Iterative Approach to Application Planning Checklist\*\*
+Staying in your niche, propose a project that
+- Addresses a highly significant problem.
+- Is innovative—can create new knowledge.
+- Is unique.
+Outline three Specific Aims and one or more testable hypotheses.
+- Create (usually) three Specific Aims you can achieve in four or five years.
+- Make sure they have clear endpoints reviewers can readily assess.
+- Create a hypothesis (or hypotheses) that is well focused and testable by the aims and experiments.
+- Identify a potential funding institute and a study section that would likely embrace your research.
+- Outline experiments.
+- Assess feasibility.
+- See whether you have access to all needed resources and expertise.
+- Make sure the project is not growing too big for your targeted time and budget.
+- If you hit a roadblock, go back to the failure point and revise your plans.
+## [Previous Step](https://www.niaid.nih.gov/grants-contracts/prepare-your-application)
+[Prepare Your Application](https://www.niaid.nih.gov/grants-contracts/prepare-your-application)
+## [Next Step](https://www.niaid.nih.gov/grants-contracts/outline-your-experiments)
+[Outline Your Experiments](https://www.niaid.nih.gov/grants-contracts/outline-your-experiments)
+## Have Questions?
+A program officer in your area of science can give you application advice, NIAID's perspective on your research, and confirmation that your proposed research fits within NIAID’s mission.
+\*\*Find contacts and instructions at\*\* [\*\*When to Contact an NIAID Program Officer\*\*](https://www.niaid.nih.gov/grants-contracts/contact-niaid-program-officer#PO).
+## Related Rules & Policies:
+- [Program Officers SOP](https://www.niaid.nih.gov/research/program-officers)
+Content last reviewed on November 15, 2023
+Was This Page Helpful?
+## Was This Page Helpful?
+YesNo
+NextNext
+Form approved OMB#: 0925-0668, EXP. DATE: 07/31/2028
+I did not find this page helpful because the content on the page (check all that apply):
+## I did not find this page helpful because the content on the page (check all that apply):
+Had too little information
+Had too much information
+Was confusing
+Was out-of-date
+Other
+Explain:
+PreviousNext
+Form approved OMB#: 0925-0668, EXP. DATE: 07/31/2028
+## What can we do to improve this page?
+What can we do to improve this page?
+PreviousFinish
+Form approved OMB#: 0925-0668, EXP. DATE: 07/31/2028
+We thank you for your time taking this survey.
+Your response has been recorded.
+Form approved OMB#: 0925-0668, EXP. DATE: 07/31/2028
+\*\*Burden Disclosure:\*\*
+Public reporting burden for this collection of information is estimated to average 2 minutes per response, including the time for reviewing instructions, searching existing data sources, gathering and maintaining the data needed, and completing and reviewing the collection of information. An agency may not conduct or sponsor, and a person is not required to respond to, a collection of information unless it displays a currently valid OMB control number. Send comments regarding this burden estimate or any other aspect of this collection of information, including suggestions for reducing this burden, to: NIH, Project Clearance Branch, 6705 Rockledge Drive, MSC 7974, Bethesda, MD 20892-7974, ATTN: PRA# 0925-0668. Do not return the completed form to this address.
