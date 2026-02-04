@@ -95,6 +95,9 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
   // Budget justification
   const [justification, setJustification] = useState<string>(budgetData.budget_justification || '')
 
+  // Fee/Profit percentage state (1-7%, default 7%)
+  const [feePercent, setFeePercent] = useState<number>((budgetData as any).fee_percent || 7)
+
   // Calculate all budget values
   const calculations = useMemo<BudgetCalculations>(() => {
     // Total Direct Costs = Sum of all line items
@@ -121,8 +124,8 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
     // Subtotal = Total Direct + Indirect
     const subtotal = totalDirectCosts + indirectCosts
 
-    // Fee/Profit (7%) = Subtotal * 0.07
-    const feeProfit = Math.round(subtotal * 0.07)
+    // Fee/Profit = Subtotal * feePercent%
+    const feeProfit = Math.round(subtotal * (feePercent / 100))
 
     // Total Project Costs = Subtotal + Fee
     const totalProjectCosts = subtotal + feeProfit
@@ -143,7 +146,7 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
       remainingBudget,
       budgetUtilization
     }
-  }, [lineItems, faRate, budgetCap])
+  }, [lineItems, faRate, budgetCap, feePercent])
 
   // Validate STTR allocation
   const sttrValidation = useMemo<STTRAllocation>(() => {
@@ -217,7 +220,9 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
       mtdc: calculations.mtdc,
       small_business_percent: sttrAllocation.smallBusiness,
       research_institution_percent: sttrAllocation.researchInstitution,
-      budget_justification: justification
+      budget_justification: justification,
+      fee_percent: feePercent,
+      fee_amount: calculations.feeProfit
     }
 
     if (isFastTrack) {
@@ -254,7 +259,7 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
         }
       })
     }
-  }, [lineItems, faRate, sttrAllocation, justification, calculations])
+  }, [lineItems, faRate, sttrAllocation, justification, calculations, feePercent])
 
   // Number input component
   const CurrencyInput = ({ label, value, onChange, hint }: { label: string; value: number; onChange: (v: number) => void; hint?: string }) => (
@@ -497,15 +502,52 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
             </span>
           </div>
 
-          {/* Fee/Profit (7%) */}
-          <div className="flex justify-between items-center p-3 bg-amber-50 rounded-lg border border-amber-200">
-            <div>
-              <span className="font-medium text-amber-900">Fee/Profit (7%)</span>
-              <p className="text-xs text-amber-700">Calculated on Subtotal (Direct + Indirect)</p>
+          {/* Fee/Profit (Configurable) */}
+          <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <span className="font-medium text-amber-900">Fee/Profit Rate</span>
+                <p className="text-xs text-amber-700">Configurable 1-7% (calculated on Subtotal)</p>
+              </div>
+              <span className="text-lg font-bold text-amber-900">
+                ${calculations.feeProfit.toLocaleString()}
+              </span>
             </div>
-            <span className="text-lg font-bold text-amber-900">
-              ${calculations.feeProfit.toLocaleString()}
-            </span>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <input
+                  type="range"
+                  min={1}
+                  max={7}
+                  step={0.5}
+                  value={feePercent}
+                  onChange={e => setFeePercent(parseFloat(e.target.value))}
+                  className="w-full h-2 bg-amber-200 rounded-lg appearance-none cursor-pointer accent-amber-600"
+                />
+                <div className="flex justify-between text-xs text-amber-700 mt-1">
+                  <span>1%</span>
+                  <span>4%</span>
+                  <span>7%</span>
+                </div>
+              </div>
+              <div className="w-20">
+                <div className="relative">
+                  <input
+                    type="number"
+                    min={1}
+                    max={7}
+                    step={0.5}
+                    value={feePercent}
+                    onChange={e => {
+                      const val = parseFloat(e.target.value)
+                      if (val >= 1 && val <= 7) setFeePercent(val)
+                    }}
+                    className="w-full pr-6 pl-2 py-1 text-sm border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                  />
+                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-amber-700 text-sm">%</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Total Project Costs */}
@@ -624,7 +666,7 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
             <p className={`text-lg font-bold ${colors.text}`}>${calculations.subtotal.toLocaleString()}</p>
           </div>
           <div className="text-center">
-            <p className={`text-xs ${colors.text} opacity-75`}>Fee (7%)</p>
+            <p className={`text-xs ${colors.text} opacity-75`}>Fee ({feePercent}%)</p>
             <p className={`text-lg font-bold ${colors.text}`}>${calculations.feeProfit.toLocaleString()}</p>
           </div>
           <div className="text-center">

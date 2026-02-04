@@ -1,6 +1,7 @@
 import { Lightbulb, Target, FileText, Plus, Trash2 } from 'lucide-react'
 import type { ProjectSchemaV2 } from '../../types'
 import { TextField } from '../shared/FormField'
+import { AIGenerateButton } from '../shared/AIGenerateButton'
 
 interface StepCoreConceptProps {
   project: ProjectSchemaV2
@@ -65,6 +66,34 @@ export function StepCoreConcept({ project, onUpdate }: StepCoreConceptProps) {
             <p className="text-sm text-neutral-500">Define your project's title, problem, hypothesis, and specific aims</p>
           </div>
         </div>
+      </div>
+
+      {/* AI Generation Section */}
+      <div className="grid lg:grid-cols-2 gap-4">
+        <AIGenerateButton
+          project={project}
+          documentType="project-summary"
+          onGenerated={(doc) => {
+            if (doc.content) {
+              onUpdate({ m1_title_concept: { ...m1, scientific_abstract: doc.content.trim() } })
+            }
+          }}
+        />
+        <AIGenerateButton
+          project={project}
+          documentType="project-narrative"
+        />
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-4">
+        <AIGenerateButton
+          project={project}
+          documentType="specific-aims"
+        />
+        <AIGenerateButton
+          project={project}
+          documentType="specific-aims-page"
+        />
       </div>
 
       {/* Section 1: Title & Concept */}

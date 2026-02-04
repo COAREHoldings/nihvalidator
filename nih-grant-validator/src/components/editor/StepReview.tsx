@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { FileCheck, CheckCircle, XCircle, AlertTriangle, Download, RefreshCw, ChevronDown, ChevronUp, ExternalLink, Briefcase } from 'lucide-react'
+import { FileCheck, CheckCircle, XCircle, AlertTriangle, Download, RefreshCw, ChevronDown, ChevronUp, ExternalLink, Briefcase, FileText, BookOpen } from 'lucide-react'
 import type { ProjectSchemaV2, ValidationResult } from '../../types'
 import { runFullValidation } from '../../validation'
 import { ComplianceAuditPanel } from '../ComplianceAuditPanel'
 import { CommercializationDirector } from '../CommercializationDirector'
+import { AIGenerateButton } from '../shared/AIGenerateButton'
 
 interface StepReviewProps {
   project: ProjectSchemaV2
@@ -311,6 +312,38 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
           )}
         </div>
       )}
+
+      {/* AI Document Generation */}
+      <div className="bg-white rounded-xl border border-neutral-200 p-6">
+        <div className="flex items-center gap-2 mb-6">
+          <FileText className="w-5 h-5 text-neutral-400" />
+          <h3 className="text-lg font-semibold text-neutral-900">AI Document Generation</h3>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-4">
+          {/* References */}
+          <AIGenerateButton
+            project={project}
+            documentType="references"
+          />
+
+          {/* Compiled Grant */}
+          <AIGenerateButton
+            project={project}
+            documentType="compiled-grant"
+          />
+        </div>
+
+        {/* Commercialization for Phase II+ */}
+        {showCommercializationModule && (
+          <div className="mt-4">
+            <AIGenerateButton
+              project={project}
+              documentType="commercialization"
+            />
+          </div>
+        )}
+      </div>
 
       {/* Export Section */}
       <div className="bg-white rounded-xl border border-neutral-200 p-6">

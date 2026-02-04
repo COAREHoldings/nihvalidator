@@ -2,6 +2,29 @@ import { supabase } from '../lib/supabase'
 import type { ProjectSchemaV2 } from '../types'
 import { createDefaultProject } from '../types'
 
+// Map UI values to database-accepted values
+function mapPhaseType(grantType: string): string {
+  const mapping: Record<string, string> = {
+    'Phase I': 'phase1',
+    'Phase II': 'phase2',
+    'Phase IIB': 'phase2b',
+    'Fast-Track': 'fasttrack',
+    'Direct-to-Phase II': 'phase2',
+    // Default fallbacks
+    'phase1': 'phase1',
+    'phase2': 'phase2',
+    'phase2b': 'phase2b',
+    'fasttrack': 'fasttrack'
+  }
+  return mapping[grantType] || 'phase1'
+}
+
+// For award_type, we default to 'grant' since SBIR/STTR are typically grants
+function mapAwardType(grantType: string): string {
+  // All SBIR/STTR are grants unless otherwise specified
+  return 'grant'
+}
+
 export interface DBProject {
   id: string
   user_id: string
@@ -94,8 +117,8 @@ export async function createProject(
       user_id: userId,
       title: '',
       funding_program: programType,
-      award_type: grantType,
-      phase_type: grantType,
+      award_type: mapAwardType(grantType),
+      phase_type: mapPhaseType(grantType),
       status: 'draft',
       data: defaultProject
     })
@@ -146,8 +169,8 @@ export async function updateProject(
     .update({
       title: mergedData.m1_title_concept?.project_title || '',
       funding_program: mergedData.program_type,
-      award_type: mergedData.grant_type || '',
-      phase_type: mergedData.grant_type,
+      award_type: mapAwardType(mergedData.grant_type || ''),
+      phase_type: mapPhaseType(mergedData.grant_type || ''),
       data: mergedData,
       updated_at: new Date().toISOString()
     })

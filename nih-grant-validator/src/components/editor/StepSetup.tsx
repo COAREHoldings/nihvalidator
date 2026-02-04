@@ -4,6 +4,7 @@ import type { ProjectSchemaV2, GrantType, ProgramType, NIHInstitute } from '../.
 import { NIH_INSTITUTES, getBudgetCapForPhase } from '../../types'
 import { SelectField, CheckboxField } from '../shared/FormField'
 import { FOAUpload } from '../FOAUpload'
+import { AIGenerateButton } from '../shared/AIGenerateButton'
 
 interface StepSetupProps {
   project: ProjectSchemaV2
@@ -72,6 +73,17 @@ export function StepSetup({ project, onUpdate }: StepSetupProps) {
           </div>
         </div>
       )}
+
+      {/* AI Generate Title */}
+      <AIGenerateButton
+        project={project}
+        documentType="title"
+        onGenerated={(doc) => {
+          if (doc.content) {
+            onUpdate({ m1_title_concept: { ...project.m1_title_concept, project_title: doc.content.trim() } })
+          }
+        }}
+      />
 
       {/* Program Type */}
       <div className="bg-white rounded-xl border border-neutral-200 p-6">

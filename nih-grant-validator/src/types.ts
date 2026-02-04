@@ -383,6 +383,9 @@ export interface BudgetData {
 
 // Complete Project Schema v2 (Extended for 8-Layer Compliance)
 export interface ProjectSchemaV2 {
+  // Database ID (optional, set when saved to DB)
+  id?: string
+  
   schema_version: 2
   project_id: string
   created_at: string
@@ -444,6 +447,13 @@ export interface ProjectSchemaV2 {
     suggested_replacement: string | null
     resolved: boolean
   }[]
+  
+  // AI Generated Documents storage
+  generated_documents?: Record<string, {
+    content: string
+    generatedAt: string
+    wordCount: number
+  }>
 }
 
 // Legacy Schema v1 (for migration)
@@ -589,4 +599,158 @@ export const LIFECYCLE_TRANSITIONS: Record<string, { from: string; to: string; r
   'zero_to_direct_phase2': { from: 'Zero', to: 'Direct to Phase II', requirements: DIRECT_PHASE2_REQUIRED_FIELDS },
   'phase1_to_phase2': { from: 'Phase I Award', to: 'Phase II', requirements: ['phase1_success_documented', 'awardNumber', 'completionDate'] },
   'phase2_to_phase2b': { from: 'Phase II Award', to: 'Phase IIB', requirements: ['phase2_success_documented', 'awardNumber', 'completionDate'] }
+}
+
+// Helper Functions
+
+/**
+ * Create a default project with initial values
+ */
+export function createDefaultProject(
+  programType: ProgramType = 'SBIR',
+  grantType?: GrantType | null
+): ProjectSchemaV2 {
+  const now = new Date().toISOString()
+  return {
+    schema_version: 2,
+    project_id: crypto.randomUUID(),
+    created_at: now,
+    updated_at: now,
+    grant_type: grantType || null,
+    program_type: programType,
+    institute: 'Standard NIH',
+    foa_config: {
+      direct_phase2_allowed: true,
+      fast_track_allowed: true,
+      phase2b_allowed: false,
+      commercialization_required: false
+    },
+    clinical_trial_included: false,
+    foa_number: '',
+    audit_trail: {
+      entries: [],
+      lastComplianceCheck: null,
+      lastSuccessfulExport: null,
+      totalRevisions: 0
+    },
+    last_compliance_score: null,
+    last_agency_alignment_score: null,
+    compliance_export_allowed: false,
+    module_states: MODULE_DEFINITIONS.map(def => ({
+      module_id: def.id,
+      name: def.name,
+      required_fields: def.required_fields,
+      completed_fields: [],
+      status: 'incomplete' as ModuleStatus,
+      locked: false,
+      last_updated: now
+    })),
+    m1_title_concept: {},
+    m2_hypothesis: {},
+    m3_specific_aims: {},
+    m4_team_mapping: {},
+    m5_experimental_approach: {},
+    m6_budget: {},
+    m7_regulatory: {},
+    m8_compilation: {},
+    m9_commercialization: {},
+    phase1_commercialization: {},
+    m3_fast_track: {
+      phase1: {},
+      phase2: {},
+      phase1_complete: false,
+      phase2_complete: false
+    },
+    m5_fast_track: {
+      phase1: {},
+      phase2: {},
+      phase1_complete: false,
+      phase2_complete: false
+    },
+    m6_fast_track: {
+      phase1: {},
+      phase2: {},
+      phase1_complete: false,
+      phase2_complete: false
+    },
+    m7_fast_track: {
+      shared: {},
+      phase2_additional: {},
+      shared_complete: false,
+      phase2_complete: false
+    },
+    prior_phase: {
+      awardNumber: '',
+      completionDate: '',
+      fundingSource: '',
+      findings: '',
+      phase1_success_documented: false,
+      phase2_success_documented: false
+    },
+    direct_phase2_feasibility: {},
+    legacy_budget: {
+      directCosts: 0,
+      personnelCosts: 0,
+      subawardCosts: 0,
+      smallBusinessPercent: 67,
+      researchInstitutionPercent: 0
+    },
+    legacy_checklist: {},
+    flagged_claims: [],
+    generated_documents: {}
+  }
+}
+
+/**
+ * Update module states based on project data
+ */
+export function updateModuleStates(project: ProjectSchemaV2): ModuleState[] {
+  const now = new Date().toISOString()
+  
+  const getFieldValue = (moduleData: Record<string, unknown>, field: string): boolean => {
+    const value = moduleData[field]
+    if (value === undefined || value === null) return false
+    if (typeof value === 'string') return value.trim().length > 0
+    if (Array.isArray(value)) return value.length > 0
+    if (typeof value === 'object') return Object.keys(value).length > 0
+    if (typeof value === 'boolean') return value
+    if (typeof value === 'number') return value > 0
+    return false
+  }
+  
+  const moduleDataMap: Record<number, Record<string, unknown>> = {
+    1: project.m1_title_concept as Record<string, unknown>,
+    2: project.m2_hypothesis as Record<string, unknown>,
+    3: project.m3_specific_aims as Record<string, unknown>,
+    4: project.m4_team_mapping as Record<string, unknown>,
+    5: project.m5_experimental_approach as Record<string, unknown>,
+    6: project.m6_budget as Record<string, unknown>,
+    7: project.m7_regulatory as Record<string, unknown>,
+    8: project.m8_compilation as Record<string, unknown>,
+    9: project.m9_commercialization as Record<string, unknown>
+  }
+  
+  return MODULE_DEFINITIONS.map(def => {
+    const moduleData = moduleDataMap[def.id] || {}
+    const completedFields = def.required_fields.filter(field => getFieldValue(moduleData, field))
+    const totalRequired = def.required_fields.length
+    const completedCount = completedFields.length
+    
+    let status: ModuleStatus = 'incomplete'
+    if (completedCount === totalRequired && totalRequired > 0) {
+      status = 'complete'
+    } else if (completedCount > 0) {
+      status = 'partial'
+    }
+    
+    return {
+      module_id: def.id,
+      name: def.name,
+      required_fields: def.required_fields,
+      completed_fields: completedFields,
+      status,
+      locked: false,
+      last_updated: now
+    }
+  })
 }

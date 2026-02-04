@@ -1,6 +1,7 @@
 import { FlaskConical, ClipboardList, Shield, AlertTriangle } from 'lucide-react'
 import type { ProjectSchemaV2 } from '../../types'
 import { TextField, CheckboxField } from '../shared/FormField'
+import { AIGenerateButton } from '../shared/AIGenerateButton'
 
 interface StepResearchPlanProps {
   project: ProjectSchemaV2
@@ -172,6 +173,12 @@ export function StepResearchPlan({ project, onUpdate }: StepResearchPlanProps) {
           </div>
         </div>
       </div>
+
+      {/* AI Generate Research Strategy */}
+      <AIGenerateButton
+        project={project}
+        documentType="research-strategy"
+      />
 
       {/* Experimental Approach */}
       <div className="bg-white rounded-xl border border-neutral-200 p-6">

@@ -3,9 +3,9 @@
     "Coordinator": {
       "1": {
         "id": "1",
-        "content": "Implement NIH Grant Validator UI Redesign",
-        "details": "Rebuild the UI with cleaner, more intuitive design: Dashboard home, step-based editor, review page. Preserve all existing backend functionality.",
-        "status": "in_progress",
+        "content": "Implement complete NIH Grant Validator enhancement",
+        "details": "Add all 9 AI generation features, budget fee calculation, DOCX export, and create downloadable archive",
+        "status": "completed",
         "priority": "high"
       }
     }

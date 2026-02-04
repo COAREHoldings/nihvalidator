@@ -13,6 +13,9 @@ interface GrantEditorProps {
   project: ProjectSchemaV2
   onUpdate: (updates: Partial<ProjectSchemaV2>) => void
   onBackToDashboard: () => void
+  onSave?: () => void
+  saving?: boolean
+  lastSaved?: Date | null
 }
 
 const STEPS = [
@@ -23,11 +26,15 @@ const STEPS = [
   { id: 5, name: 'Review & Export', description: 'Validation, Compliance, Export' },
 ]
 
-export function GrantEditor({ project, onUpdate, onBackToDashboard }: GrantEditorProps) {
+export function GrantEditor({ project, onUpdate, onBackToDashboard, onSave, saving: externalSaving, lastSaved: externalLastSaved }: GrantEditorProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [showAI, setShowAI] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  
+  // Use external save state if provided, otherwise use internal
+  const actualSaving = externalSaving !== undefined ? externalSaving : isSaving
+  const actualLastSaved = externalLastSaved !== undefined ? externalLastSaved : lastSaved
 
   // Calculate step completion status
   const getStepStatus = useCallback((stepId: number): 'completed' | 'current' | 'locked' => {
@@ -108,13 +115,17 @@ export function GrantEditor({ project, onUpdate, onBackToDashboard }: GrantEdito
   }, [])
 
   const handleSaveDraft = () => {
-    setIsSaving(true)
-    // Trigger update to persist
-    onUpdate({ updated_at: new Date().toISOString() })
-    setTimeout(() => {
-      setIsSaving(false)
-      setLastSaved(new Date())
-    }, 500)
+    if (onSave) {
+      onSave()
+    } else {
+      setIsSaving(true)
+      // Trigger update to persist
+      onUpdate({ updated_at: new Date().toISOString() })
+      setTimeout(() => {
+        setIsSaving(false)
+        setLastSaved(new Date())
+      }, 500)
+    }
   }
 
   const handleStepClick = (stepId: number) => {
@@ -184,22 +195,22 @@ export function GrantEditor({ project, onUpdate, onBackToDashboard }: GrantEdito
 
             {/* Actions */}
             <div className="flex items-center gap-3">
-              {lastSaved && (
+              {actualLastSaved && (
                 <span className="text-xs text-neutral-400">
-                  Last saved {lastSaved.toLocaleTimeString()}
+                  Last saved {actualLastSaved.toLocaleTimeString()}
                 </span>
               )}
               <button
                 onClick={handleSaveDraft}
-                disabled={isSaving}
+                disabled={actualSaving}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-neutral-700 bg-neutral-100 rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-50"
               >
-                {isSaving ? (
+                {actualSaving ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Save className="w-4 h-4" />
                 )}
-                {isSaving ? 'Saving...' : 'Save Draft'}
+                {actualSaving ? 'Saving...' : 'Save Draft'}
               </button>
             </div>
           </div>
