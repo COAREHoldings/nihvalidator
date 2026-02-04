@@ -322,24 +322,42 @@ ${grantType === 'Phase I' || phase === 'Phase I' ? `
 - State No-Go action if criteria not met
 ` : ''}
 
-**SECTION: STATISTICAL CONSIDERATIONS** (3-4 paragraphs, DETAILED)
+**SECTION: STATISTICAL CONSIDERATIONS** (4-5 paragraphs, DETAILED)
 
 This section is CRITICAL for NIH reviewers. Generic statements will result in poor scores. Include ALL of the following with SPECIFIC details:
 
-**Paragraph 1: Sample Size Justification**
+**Paragraph 1: Sample Size Justification & Effect Size Rationale**
 - State sample sizes (n=) for EACH experiment group
-- Provide power analysis with specific parameters: α = 0.05, power = 80%, expected effect size (e.g., Cohen's d = 0.8, 2-fold difference, 30% improvement)
-- If preliminary data exists, reference the observed variance and effect sizes to justify n
-- Example: "Based on our preliminary data showing a mean difference of X ± Y (SD), with α=0.05 and 80% power, we calculated n=Z per group using [formula/software]."
+- Provide power analysis with specific parameters: α = 0.05, power = 80%, expected effect size
+- CRITICAL: JUSTIFY EFFECT SIZE SOURCE explicitly:
+  - From preliminary data: "Based on our preliminary studies (Figure X), we observed a mean difference of X ± Y (SD), yielding effect size d = Z"
+  - From literature: "Published studies [ref] report effect sizes of X-Y for similar interventions"
+  - From clinical relevance: "A 30% reduction is considered clinically meaningful based on [published threshold/clinical consensus]"
+- Example: "Power analysis using G*Power (α=0.05, power=0.80, effect size d=1.2 based on our preliminary data showing 45% ± 12% inhibition) yields n=12 per group."
 
-**Paragraph 2: Statistical Tests & Data Analysis**
+**Paragraph 2: Statistical Tests & Advanced Modeling Approaches**
 - Specify EXACT statistical tests for each type of comparison:
   - Continuous data: t-test (paired/unpaired), ANOVA (one-way, two-way, repeated measures), linear regression
   - Categorical data: Chi-square, Fisher's exact, logistic regression
   - Time-to-event: Kaplan-Meier, log-rank test, Cox regression
   - Multiple groups: Tukey's HSD, Dunnett's test, Bonferroni correction
-- State data distribution assumptions and how violations will be handled (e.g., "Data will be tested for normality using Shapiro-Wilk. Non-normal data will be analyzed using Mann-Whitney U test or log-transformed.")
-- Specify primary vs. secondary endpoints
+
+**FOR PATIENT-DERIVED ORGANOIDS (PDOs) OR PATIENT SAMPLES:**
+- MANDATORY: Use hierarchical/mixed-effects models to account for:
+  - Between-patient variability (random effect for patient ID)
+  - Within-patient technical replicates (nested design)
+  - Example: "PDO responses will be analyzed using linear mixed-effects models (lme4 package in R) with treatment as fixed effect and patient as random effect to account for inter-patient heterogeneity."
+- Report both within-patient and between-patient variance components
+- Consider intraclass correlation coefficient (ICC) in power calculations
+
+**FOR DRUG COMBINATION STUDIES:**
+- MANDATORY: Specify synergy quantification method:
+  - Bliss independence model: Expected_AB = Effect_A + Effect_B - (Effect_A × Effect_B)
+  - Loewe additivity model: Combination Index analysis
+  - Chou-Talalay method: CI < 1 (synergy), CI = 1 (additive), CI > 1 (antagonism)
+  - Response surface methodology (RSM) for dose-response matrices
+- Example: "Drug synergy will be quantified using the Chou-Talalay method (CompuSyn software). CI values < 0.9 will indicate synergy, 0.9-1.1 additivity, and > 1.1 antagonism."
+- Include isobologram analysis for visual representation
 
 **Paragraph 3: Multiple Comparisons & Type I Error Control**
 - State how multiple comparisons will be handled
@@ -347,8 +365,17 @@ This section is CRITICAL for NIH reviewers. Generic statements will result in po
 - For complex designs, describe family-wise error rate control strategy
 - Example: "For the 4 planned comparisons in Aim 1, Bonferroni-adjusted α = 0.0125 will be used to maintain family-wise error rate at 0.05."
 
-**Paragraph 4: Software, Randomization & Blinding**
-- Specify statistical software: R (version X, specific packages), SAS, SPSS, GraphPad Prism, Python (statsmodels, scipy)
+**Paragraph 4: Translational Statistics - Manufacturing & Safety Linkage**
+- Connect statistical approach to translational milestones:
+  - Process development: Describe how in vitro/in vivo variability informs manufacturing process parameters
+  - Dose selection: Link preclinical PK/PD modeling to human dose predictions (allometric scaling, PBPK)
+  - Safety margins: Calculate therapeutic index, NOAEL to MRSD conversion using appropriate safety factors
+- Example: "The observed IC50 variability (CV = 25%) will inform manufacturing specifications, with process capability index (Cpk) target of ≥1.33."
+- For IND-enabling studies: Reference ICH S9 (oncology), ICH M3 (timing of toxicology studies)
+- Include dose-response modeling for toxicology endpoints (BMD analysis, NOAEL determination)
+
+**Paragraph 5: Software, Randomization & Blinding**
+- Specify statistical software with versions: R (v4.x, packages: lme4, survival, drc, synergyfinder), SAS, GraphPad Prism, CompuSyn
 - Describe randomization method: simple randomization, block randomization, stratified randomization
 - Describe blinding: single-blind, double-blind, who will be blinded (experimenters, analysts, assessors)
 - State interim analysis plan if applicable (O'Brien-Fleming boundaries, alpha spending function)
@@ -459,6 +486,21 @@ For the Statistical Considerations section, you MUST include:
 6. Blinding approach (single/double, who is blinded)
 7. Software with version (R, GraphPad Prism, SAS, SPSS)
 8. How non-normal data will be handled (transformations, non-parametric alternatives)
+
+**EXPERIMENTAL MODEL CONTEXT (infer from content above):**
+Analyze the project content to determine which specialized statistical approaches are needed:
+
+- If using Patient-Derived Organoids (PDOs), patient-derived xenografts (PDX), or patient samples:
+  → MUST include hierarchical/mixed-effects modeling for inter-patient variability
+  
+- If evaluating drug combinations or multi-agent therapies:
+  → MUST include synergy analysis (Chou-Talalay CI, Bliss independence, or Loewe additivity)
+  
+- If developing therapeutics toward IND filing:
+  → MUST include translational statistics linking preclinical data to manufacturing specs and safety margins
+
+- If dose-response studies are planned:
+  → Include IC50/EC50 modeling with confidence intervals, Hill slope analysis
 
 **REGULATORY CONTEXT:**
 - Human Subjects: ${moduleContent.m7?.human_subjects_involved ? 'Yes' : 'No'}
