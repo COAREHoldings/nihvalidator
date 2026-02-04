@@ -187,12 +187,12 @@ Module 2 - Hypothesis:
 - Success Criteria: ${m2.success_criteria || 'Not provided'}
 
 Module 3 - Specific Aims:
-- Aim 1: ${m3.aim1_statement || 'Not provided'}
-  Milestones: ${(m3.aim1_milestones || []).join(', ') || 'Not provided'}
-- Aim 2: ${m3.aim2_statement || 'Not provided'}
-  Milestones: ${(m3.aim2_milestones || []).join(', ') || 'Not provided'}
-- Aim 3: ${m3.aim3_statement || 'Not provided'}
-- Timeline: ${m3.timeline_summary || 'Not provided'}
+${(m3.aims || []).length > 0 
+  ? (m3.aims || []).map((aim: any, idx: number) => `- Aim ${idx + 1}: ${aim.statement || 'Not provided'}
+  Milestones: ${(aim.milestones || []).join(', ') || 'Not provided'}
+  Timeline: ${aim.timeline || 'Not provided'}`).join('\n')
+  : '- No aims defined yet'}
+- Overall Timeline: ${m3.timeline_summary || 'Not provided'}
 - Interdependencies: ${m3.interdependencies || 'Not provided'}
 
 Module 4 - Team:
