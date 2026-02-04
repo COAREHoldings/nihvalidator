@@ -68,34 +68,6 @@ export function StepCoreConcept({ project, onUpdate }: StepCoreConceptProps) {
         </div>
       </div>
 
-      {/* AI Generation Section */}
-      <div className="grid lg:grid-cols-2 gap-4">
-        <AIGenerateButton
-          project={project}
-          documentType="project-summary"
-          onGenerated={(doc) => {
-            if (doc.content) {
-              onUpdate({ m1_title_concept: { ...m1, scientific_abstract: doc.content.trim() } })
-            }
-          }}
-        />
-        <AIGenerateButton
-          project={project}
-          documentType="project-narrative"
-        />
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-4">
-        <AIGenerateButton
-          project={project}
-          documentType="specific-aims"
-        />
-        <AIGenerateButton
-          project={project}
-          documentType="specific-aims-page"
-        />
-      </div>
-
       {/* Section 1: Title & Concept */}
       <div className="bg-white rounded-xl border border-neutral-200 p-6">
         <div className="flex items-center gap-2 mb-6">
@@ -445,6 +417,42 @@ export function StepCoreConcept({ project, onUpdate }: StepCoreConceptProps) {
             />
           </div>
         )}
+      </div>
+
+      {/* AI Generation Section - positioned after all form fields */}
+      <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl border border-primary-200 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Lightbulb className="w-5 h-5 text-primary-600" />
+          <h3 className="text-lg font-semibold text-neutral-900">AI Document Generation</h3>
+        </div>
+        <p className="text-sm text-neutral-600 mb-4">
+          Generate polished documents based on the information you've entered above.
+        </p>
+        <div className="grid lg:grid-cols-2 gap-4">
+          <AIGenerateButton
+            project={project}
+            documentType="project-summary"
+            onGenerated={(doc) => {
+              if (doc.content) {
+                onUpdate({ m1_title_concept: { ...m1, scientific_abstract: doc.content.trim() } })
+              }
+            }}
+          />
+          <AIGenerateButton
+            project={project}
+            documentType="project-narrative"
+          />
+        </div>
+        <div className="grid lg:grid-cols-2 gap-4 mt-4">
+          <AIGenerateButton
+            project={project}
+            documentType="specific-aims"
+          />
+          <AIGenerateButton
+            project={project}
+            documentType="specific-aims-page"
+          />
+        </div>
       </div>
     </div>
   )

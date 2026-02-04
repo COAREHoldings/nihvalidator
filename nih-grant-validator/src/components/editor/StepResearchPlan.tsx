@@ -174,12 +174,6 @@ export function StepResearchPlan({ project, onUpdate }: StepResearchPlanProps) {
         </div>
       </div>
 
-      {/* AI Generate Research Strategy */}
-      <AIGenerateButton
-        project={project}
-        documentType="research-strategy"
-      />
-
       {/* Experimental Approach */}
       <div className="bg-white rounded-xl border border-neutral-200 p-6">
         <div className="flex items-center gap-2 mb-6">
@@ -415,6 +409,21 @@ export function StepResearchPlan({ project, onUpdate }: StepResearchPlanProps) {
           </div>
         </div>
       )}
+
+      {/* AI Generation Section - positioned after all form fields */}
+      <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl border border-primary-200 p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <FlaskConical className="w-5 h-5 text-primary-600" />
+          <h3 className="text-lg font-semibold text-neutral-900">AI Document Generation</h3>
+        </div>
+        <p className="text-sm text-neutral-600 mb-4">
+          Generate a comprehensive research strategy document based on the information you've entered above.
+        </p>
+        <AIGenerateButton
+          project={project}
+          documentType="research-strategy"
+        />
+      </div>
     </div>
   )
 }
