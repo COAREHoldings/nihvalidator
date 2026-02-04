@@ -1,7 +1,11 @@
 // Layer 5: FOA Parsing Edge Function
 // Extracts page limits, budget caps, clinical trial policy, and other requirements from NIH FOA documents
 
-import { corsHeaders } from '../_shared/compliancePrompt.ts'
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
