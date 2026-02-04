@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import type { ProjectSchemaV2, NIHInstitute, GrantType } from '../types'
+import type { ProjectSchemaV2, NIHInstitute, GrantType, SubAward, Vendor } from '../types'
 import { getBudgetCap } from '../validation'
-import { AlertTriangle, DollarSign, Calculator, TrendingUp, Info, Check, X, Briefcase } from 'lucide-react'
+import { AlertTriangle, DollarSign, Calculator, TrendingUp, Info, Check, X, Briefcase, Plus, Trash2, Building2, Users } from 'lucide-react'
 
 interface BudgetLineItems {
   personnel: number
@@ -9,7 +9,6 @@ interface BudgetLineItems {
   supplies: number
   travel: number
   consultants: number
-  subawards: number
   patientCare: number
   tuition: number
   otherDirect: number
@@ -24,6 +23,8 @@ interface BudgetCalculations {
   totalProjectCosts: number
   remainingBudget: number
   budgetUtilization: number
+  totalSubAwards: number
+  totalVendors: number
 }
 
 interface STTRAllocation {
@@ -40,8 +41,11 @@ interface Props {
   currentPhase?: 'phase1' | 'phase2'
 }
 
-// Threshold for subaward exclusion from MTDC
+// Threshold for subaward exclusion from MTDC (per sub-award)
 const SUBAWARD_MTDC_THRESHOLD = 25000
+
+// Generate unique ID
+const generateId = () => crypto.randomUUID()
 
 export function BudgetCalculator({ project, onUpdate, isFastTrack = false, currentPhase = 'phase1' }: Props) {
   const institute = project.institute || 'Standard NIH'
@@ -50,19 +54,18 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
 
   // Get the appropriate budget cap
   const budgetCap = useMemo(() => {
-    // Check for FOA override first
-    if (project.foa_config.parsed_foa?.budgetCapOverride) {
+    if (project.foa_config?.parsed_foa?.budgetCapOverride) {
       return project.foa_config.parsed_foa.budgetCapOverride
     }
     return getBudgetCap(institute, grantType, isFastTrack ? currentPhase : undefined)
-  }, [institute, grantType, isFastTrack, currentPhase, project.foa_config.parsed_foa?.budgetCapOverride])
+  }, [institute, grantType, isFastTrack, currentPhase, project.foa_config?.parsed_foa?.budgetCapOverride])
 
   // Get current budget data based on Fast Track status
   const getCurrentBudgetData = useCallback(() => {
     if (isFastTrack) {
       const ftData = currentPhase === 'phase1' 
-        ? project.m6_fast_track.phase1 
-        : project.m6_fast_track.phase2
+        ? project.m6_fast_track?.phase1 
+        : project.m6_fast_track?.phase2
       return ftData || {}
     }
     return project.m6_budget || {}
@@ -70,17 +73,28 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
 
   const budgetData = getCurrentBudgetData()
 
-  // Line items state
+  // Line items state (excluding subawards - now managed separately)
   const [lineItems, setLineItems] = useState<BudgetLineItems>({
     personnel: budgetData.personnel_costs || 0,
     equipment: budgetData.equipment_costs || 0,
     supplies: budgetData.supplies_costs || 0,
     travel: budgetData.travel_costs || 0,
     consultants: (budgetData as any).consultant_costs || 0,
-    subawards: budgetData.subaward_costs || 0,
     patientCare: (budgetData as any).patient_care_costs || 0,
     tuition: (budgetData as any).tuition_costs || 0,
     otherDirect: budgetData.other_costs || 0
+  })
+
+  // Sub Awards state (multiple academic institutions/partners)
+  const [subAwards, setSubAwards] = useState<SubAward[]>(() => {
+    const saved = (budgetData as any).sub_awards
+    return Array.isArray(saved) && saved.length > 0 ? saved : []
+  })
+
+  // Vendors state (multiple vendors/contractors)
+  const [vendors, setVendors] = useState<Vendor[]>(() => {
+    const saved = (budgetData as any).vendors
+    return Array.isArray(saved) && saved.length > 0 ? saved : []
   })
 
   // F&A Rate state
@@ -98,31 +112,104 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
   // Fee/Profit percentage state (1-7%, default 7%)
   const [feePercent, setFeePercent] = useState<number>((budgetData as any).fee_percent || 7)
 
+  // Add new sub-award
+  const addSubAward = useCallback(() => {
+    const newSubAward: SubAward = {
+      id: generateId(),
+      institutionName: '',
+      contactPI: '',
+      directCosts: 0,
+      faRate: 0,
+      indirectCosts: 0,
+      total: 0
+    }
+    setSubAwards(prev => [...prev, newSubAward])
+  }, [])
+
+  // Update sub-award
+  const updateSubAward = useCallback((id: string, field: keyof SubAward, value: string | number) => {
+    setSubAwards(prev => prev.map(sa => {
+      if (sa.id !== id) return sa
+      
+      const updated = { ...sa, [field]: value }
+      
+      // Recalculate indirect and total when direct costs or FA rate changes
+      if (field === 'directCosts' || field === 'faRate') {
+        updated.indirectCosts = Math.round(updated.directCosts * (updated.faRate / 100))
+        updated.total = updated.directCosts + updated.indirectCosts
+      }
+      
+      return updated
+    }))
+  }, [])
+
+  // Remove sub-award
+  const removeSubAward = useCallback((id: string) => {
+    setSubAwards(prev => prev.filter(sa => sa.id !== id))
+  }, [])
+
+  // Add new vendor
+  const addVendor = useCallback(() => {
+    const newVendor: Vendor = {
+      id: generateId(),
+      vendorName: '',
+      description: '',
+      amount: 0
+    }
+    setVendors(prev => [...prev, newVendor])
+  }, [])
+
+  // Update vendor
+  const updateVendor = useCallback((id: string, field: keyof Vendor, value: string | number) => {
+    setVendors(prev => prev.map(v => 
+      v.id === id ? { ...v, [field]: value } : v
+    ))
+  }, [])
+
+  // Remove vendor
+  const removeVendor = useCallback((id: string) => {
+    setVendors(prev => prev.filter(v => v.id !== id))
+  }, [])
+
   // Calculate all budget values
   const calculations = useMemo<BudgetCalculations>(() => {
-    // Total Direct Costs = Sum of all line items
+    // Sum all sub-award direct costs
+    const totalSubAwardDirect = subAwards.reduce((sum, sa) => sum + (sa.directCosts || 0), 0)
+    const totalSubAwardIndirect = subAwards.reduce((sum, sa) => sum + (sa.indirectCosts || 0), 0)
+    const totalSubAwards = totalSubAwardDirect + totalSubAwardIndirect
+
+    // Sum all vendor costs
+    const totalVendors = vendors.reduce((sum, v) => sum + (v.amount || 0), 0)
+
+    // Total Direct Costs = Line items + Sub Award Direct Costs + Vendors
     const totalDirectCosts = 
       lineItems.personnel +
       lineItems.equipment +
       lineItems.supplies +
       lineItems.travel +
       lineItems.consultants +
-      lineItems.subawards +
+      totalSubAwardDirect +
+      totalVendors +
       lineItems.patientCare +
       lineItems.tuition +
       lineItems.otherDirect
 
-    // MTDC = Total Direct - Equipment - (Subawards > $25K) - Patient Care - Tuition
-    // For subawards, only the amount over $25K per subaward is excluded
-    // Simplified: if total subawards > $25K, exclude the excess
-    const subawardExclusion = Math.max(0, lineItems.subawards - SUBAWARD_MTDC_THRESHOLD)
-    const mtdc = totalDirectCosts - lineItems.equipment - subawardExclusion - lineItems.patientCare - lineItems.tuition
+    // MTDC Calculation with per-subaward $25K threshold
+    // For each sub-award, only the first $25K of direct costs counts toward MTDC
+    const subAwardMTDCInclusion = subAwards.reduce((sum, sa) => {
+      return sum + Math.min(sa.directCosts || 0, SUBAWARD_MTDC_THRESHOLD)
+    }, 0)
+    const subAwardMTDCExclusion = totalSubAwardDirect - subAwardMTDCInclusion
+
+    // MTDC = Total Direct - Equipment - (Subaward amounts over $25K each) - Patient Care - Tuition
+    // Note: Vendors are typically included in MTDC unless specifically excluded
+    const mtdc = totalDirectCosts - lineItems.equipment - subAwardMTDCExclusion - lineItems.patientCare - lineItems.tuition
 
     // Indirect Costs = MTDC x F&A Rate
     const indirectCosts = Math.round(mtdc * (faRate / 100))
 
-    // Subtotal = Total Direct + Indirect
-    const subtotal = totalDirectCosts + indirectCosts
+    // Subtotal = Total Direct + Indirect (not including sub-award indirect which is already in sub-awards)
+    const subtotal = totalDirectCosts + indirectCosts + totalSubAwardIndirect
 
     // Fee/Profit = Subtotal * feePercent%
     const feeProfit = Math.round(subtotal * (feePercent / 100))
@@ -144,9 +231,11 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
       feeProfit,
       totalProjectCosts,
       remainingBudget,
-      budgetUtilization
+      budgetUtilization,
+      totalSubAwards,
+      totalVendors
     }
-  }, [lineItems, faRate, budgetCap, feePercent])
+  }, [lineItems, subAwards, vendors, faRate, budgetCap, feePercent])
 
   // Validate STTR allocation
   const sttrValidation = useMemo<STTRAllocation>(() => {
@@ -154,9 +243,8 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
     let isValid = true
 
     if (programType === 'STTR') {
-      // STTR requires: Small Business >= 40%, Research Institution >= 30%
-      const sbMin = project.foa_config.parsed_foa?.smallBusinessMinOverride || 40
-      const riMin = project.foa_config.parsed_foa?.researchInstitutionMinOverride || 30
+      const sbMin = project.foa_config?.parsed_foa?.smallBusinessMinOverride || 40
+      const riMin = project.foa_config?.parsed_foa?.researchInstitutionMinOverride || 30
 
       if (sttrAllocation.smallBusiness < sbMin) {
         errors.push(`Small Business must be at least ${sbMin}% (currently ${sttrAllocation.smallBusiness}%)`)
@@ -171,7 +259,6 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
         isValid = false
       }
     } else {
-      // SBIR requires: Small Business >= 67% for Phase I, >= 50% for Phase II
       const sbMin = grantType === 'Phase I' || (isFastTrack && currentPhase === 'phase1') ? 67 : 50
       if (sttrAllocation.smallBusiness < sbMin) {
         errors.push(`SBIR ${grantType || 'Phase I'} requires minimum ${sbMin}% small business effort (currently ${sttrAllocation.smallBusiness}%)`)
@@ -185,7 +272,7 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
       isValid,
       errors
     }
-  }, [programType, grantType, sttrAllocation, project.foa_config.parsed_foa, isFastTrack, currentPhase])
+  }, [programType, grantType, sttrAllocation, project.foa_config?.parsed_foa, isFastTrack, currentPhase])
 
   // Get budget status color
   const getBudgetStatusColor = useCallback((utilization: number) => {
@@ -203,6 +290,8 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
 
   // Sync to project state
   useEffect(() => {
+    const totalSubAwardDirect = subAwards.reduce((sum, sa) => sum + (sa.directCosts || 0), 0)
+    
     const budgetUpdate = {
       direct_costs_total: calculations.totalDirectCosts,
       personnel_costs: lineItems.personnel,
@@ -210,7 +299,7 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
       supplies_costs: lineItems.supplies,
       travel_costs: lineItems.travel,
       consultant_costs: lineItems.consultants,
-      subaward_costs: lineItems.subawards,
+      subaward_costs: totalSubAwardDirect,
       patient_care_costs: lineItems.patientCare,
       tuition_costs: lineItems.tuition,
       other_costs: lineItems.otherDirect,
@@ -222,13 +311,15 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
       research_institution_percent: sttrAllocation.researchInstitution,
       budget_justification: justification,
       fee_percent: feePercent,
-      fee_amount: calculations.feeProfit
+      fee_amount: calculations.feeProfit,
+      sub_awards: subAwards,
+      vendors: vendors
     }
 
     if (isFastTrack) {
       const ftData = project.m6_fast_track
       const phase = currentPhase
-      const updatedPhase = { ...ftData[phase], ...budgetUpdate }
+      const updatedPhase = { ...ftData?.[phase], ...budgetUpdate }
       const isComplete = calculations.totalDirectCosts > 0 && justification.trim().length > 0
 
       onUpdate({
@@ -241,7 +332,7 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
           ...project.legacy_budget,
           directCosts: calculations.totalDirectCosts,
           personnelCosts: lineItems.personnel,
-          subawardCosts: lineItems.subawards,
+          subawardCosts: totalSubAwardDirect,
           smallBusinessPercent: sttrAllocation.smallBusiness,
           researchInstitutionPercent: sttrAllocation.researchInstitution
         }
@@ -253,13 +344,13 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
           ...project.legacy_budget,
           directCosts: calculations.totalDirectCosts,
           personnelCosts: lineItems.personnel,
-          subawardCosts: lineItems.subawards,
+          subawardCosts: totalSubAwardDirect,
           smallBusinessPercent: sttrAllocation.smallBusiness,
           researchInstitutionPercent: sttrAllocation.researchInstitution
         }
       })
     }
-  }, [lineItems, faRate, sttrAllocation, justification, calculations, feePercent])
+  }, [lineItems, faRate, sttrAllocation, justification, calculations, feePercent, subAwards, vendors])
 
   // Number input component
   const CurrencyInput = ({ label, value, onChange, hint }: { label: string; value: number; onChange: (v: number) => void; hint?: string }) => (
@@ -414,12 +505,6 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
             onChange={v => updateLineItem('consultants', v)}
           />
           <CurrencyInput
-            label="Subawards/Consortium"
-            value={lineItems.subawards}
-            onChange={v => updateLineItem('subawards', v)}
-            hint="Partner institutions"
-          />
-          <CurrencyInput
             label="Patient Care Costs"
             value={lineItems.patientCare}
             onChange={v => updateLineItem('patientCare', v)}
@@ -438,6 +523,216 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
         </div>
       </div>
 
+      {/* Sub Awards Section (Multiple Academic Institutions/Partners) */}
+      <div className="bg-white border border-neutral-200 rounded-lg p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-neutral-900 flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-blue-500" />
+            Sub Awards (Academic Institutions/Partners)
+          </h3>
+          <button
+            onClick={addSubAward}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Sub Award
+          </button>
+        </div>
+
+        {subAwards.length === 0 ? (
+          <div className="text-center py-8 text-neutral-500">
+            <Building2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <p className="text-sm">No sub awards added yet</p>
+            <p className="text-xs mt-1">Click "Add Sub Award" to include academic partners or consortia</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {subAwards.map((sa, index) => (
+              <div key={sa.id} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-medium text-blue-900">Sub Award #{index + 1}</span>
+                  <button
+                    onClick={() => removeSubAward(sa.id)}
+                    className="p-1.5 text-red-600 hover:bg-red-100 rounded transition-colors"
+                    title="Remove sub award"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="grid md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">Institution Name</label>
+                    <input
+                      type="text"
+                      value={sa.institutionName}
+                      onChange={e => updateSubAward(sa.id, 'institutionName', e.target.value)}
+                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g., Harvard University"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">Contact PI</label>
+                    <input
+                      type="text"
+                      value={sa.contactPI}
+                      onChange={e => updateSubAward(sa.id, 'contactPI', e.target.value)}
+                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g., Dr. Jane Smith"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">Direct Costs</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">$</span>
+                      <input
+                        type="number"
+                        value={sa.directCosts || ''}
+                        onChange={e => updateSubAward(sa.id, 'directCosts', parseFloat(e.target.value) || 0)}
+                        className="w-full pl-8 pr-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">F&A Rate (%)</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={sa.faRate || ''}
+                        onChange={e => updateSubAward(sa.id, 'faRate', parseFloat(e.target.value) || 0)}
+                        className="w-full pr-8 pl-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="0"
+                        min={0}
+                        max={100}
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500">%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-blue-200 flex justify-between text-sm">
+                  <span className="text-blue-800">
+                    Indirect Costs: <strong>${sa.indirectCosts.toLocaleString()}</strong>
+                  </span>
+                  <span className="text-blue-900 font-semibold">
+                    Total: ${sa.total.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            ))}
+
+            {/* Sub Awards Summary */}
+            <div className="p-3 bg-blue-100 border border-blue-300 rounded-lg">
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div>
+                  <span className="text-blue-700">Total Direct:</span>
+                  <p className="font-semibold text-blue-900">
+                    ${subAwards.reduce((sum, sa) => sum + (sa.directCosts || 0), 0).toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-blue-700">Total Indirect:</span>
+                  <p className="font-semibold text-blue-900">
+                    ${subAwards.reduce((sum, sa) => sum + (sa.indirectCosts || 0), 0).toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-blue-700">Grand Total:</span>
+                  <p className="font-semibold text-blue-900">${calculations.totalSubAwards.toLocaleString()}</p>
+                </div>
+              </div>
+              <p className="text-xs text-blue-600 mt-2">
+                Note: Only the first $25,000 of each sub award's direct costs is included in MTDC calculation.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Vendors/Contractors Section */}
+      <div className="bg-white border border-neutral-200 rounded-lg p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-neutral-900 flex items-center gap-2">
+            <Users className="w-5 h-5 text-purple-500" />
+            Vendors/Contractors
+          </h3>
+          <button
+            onClick={addVendor}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-purple-600 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Vendor
+          </button>
+        </div>
+
+        {vendors.length === 0 ? (
+          <div className="text-center py-8 text-neutral-500">
+            <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <p className="text-sm">No vendors added yet</p>
+            <p className="text-xs mt-1">Click "Add Vendor" to include external contractors or service providers</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {vendors.map((v, index) => (
+              <div key={v.id} className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-medium text-purple-900">Vendor #{index + 1}</span>
+                  <button
+                    onClick={() => removeVendor(v.id)}
+                    className="p-1.5 text-red-600 hover:bg-red-100 rounded transition-colors"
+                    title="Remove vendor"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="grid md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">Vendor Name</label>
+                    <input
+                      type="text"
+                      value={v.vendorName}
+                      onChange={e => updateVendor(v.id, 'vendorName', e.target.value)}
+                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      placeholder="e.g., Lab Services Inc."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">Description</label>
+                    <input
+                      type="text"
+                      value={v.description}
+                      onChange={e => updateVendor(v.id, 'description', e.target.value)}
+                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      placeholder="e.g., Bioanalytical services"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">Amount</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">$</span>
+                      <input
+                        type="number"
+                        value={v.amount || ''}
+                        onChange={e => updateVendor(v.id, 'amount', parseFloat(e.target.value) || 0)}
+                        className="w-full pl-8 pr-3 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* Vendors Summary */}
+            <div className="p-3 bg-purple-100 border border-purple-300 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-purple-700 text-sm">Total Vendor Costs:</span>
+                <span className="font-semibold text-purple-900 text-lg">${calculations.totalVendors.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Calculations Summary */}
       <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
         <h3 className="font-semibold text-neutral-900 mb-4 flex items-center gap-2">
@@ -450,7 +745,7 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
           <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-neutral-200">
             <div>
               <span className="font-medium text-neutral-900">Total Direct Costs</span>
-              <p className="text-xs text-neutral-500">Sum of all line items above</p>
+              <p className="text-xs text-neutral-500">Line items + Sub Awards (direct) + Vendors</p>
             </div>
             <span className={`text-lg font-bold ${calculations.totalDirectCosts > budgetCap ? 'text-red-600' : 'text-neutral-900'}`}>
               ${calculations.totalDirectCosts.toLocaleString()}
@@ -461,7 +756,7 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
           <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-neutral-200">
             <div>
               <span className="font-medium text-neutral-900">Modified Total Direct Costs (MTDC)</span>
-              <p className="text-xs text-neutral-500">Excludes equipment, subawards over $25K, patient care, tuition</p>
+              <p className="text-xs text-neutral-500">Excludes equipment, sub award amounts over $25K each, patient care, tuition</p>
             </div>
             <span className="text-lg font-bold text-neutral-900">
               ${calculations.mtdc.toLocaleString()}
@@ -495,7 +790,7 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
           <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-neutral-200">
             <div>
               <span className="font-medium text-neutral-900">Subtotal</span>
-              <p className="text-xs text-neutral-500">Direct Costs + Indirect Costs</p>
+              <p className="text-xs text-neutral-500">Direct Costs + Indirect Costs + Sub Award Indirect</p>
             </div>
             <span className="text-lg font-bold text-neutral-900">
               ${calculations.subtotal.toLocaleString()}
@@ -652,7 +947,7 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
       {/* Summary Card */}
       <div className={`p-4 rounded-lg border-2 ${colors.border} ${colors.bg}`}>
         <h4 className={`font-semibold ${colors.text} mb-3`}>Budget Summary</h4>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
           <div className="text-center">
             <p className={`text-xs ${colors.text} opacity-75`}>Direct Costs</p>
             <p className={`text-lg font-bold ${colors.text}`}>${calculations.totalDirectCosts.toLocaleString()}</p>
@@ -662,8 +957,12 @@ export function BudgetCalculator({ project, onUpdate, isFastTrack = false, curre
             <p className={`text-lg font-bold ${colors.text}`}>${calculations.indirectCosts.toLocaleString()}</p>
           </div>
           <div className="text-center">
-            <p className={`text-xs ${colors.text} opacity-75`}>Subtotal</p>
-            <p className={`text-lg font-bold ${colors.text}`}>${calculations.subtotal.toLocaleString()}</p>
+            <p className={`text-xs ${colors.text} opacity-75`}>Sub Awards</p>
+            <p className={`text-lg font-bold ${colors.text}`}>${calculations.totalSubAwards.toLocaleString()}</p>
+          </div>
+          <div className="text-center">
+            <p className={`text-xs ${colors.text} opacity-75`}>Vendors</p>
+            <p className={`text-lg font-bold ${colors.text}`}>${calculations.totalVendors.toLocaleString()}</p>
           </div>
           <div className="text-center">
             <p className={`text-xs ${colors.text} opacity-75`}>Fee ({feePercent}%)</p>

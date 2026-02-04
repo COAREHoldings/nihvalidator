@@ -40,20 +40,42 @@ export interface DBProject {
 
 // Convert DB project to our schema
 function dbToProject(dbProject: DBProject): ProjectSchemaV2 {
-  if (dbProject.data) {
-    return {
-      ...dbProject.data,
-      id: dbProject.id,
-      updated_at: dbProject.updated_at
-    }
-  }
-  
-  // Fallback: create default project with DB values
+  // Create default project to ensure all required nested objects exist
   const defaultProject = createDefaultProject(
     dbProject.funding_program as 'SBIR' | 'STTR',
     dbProject.award_type as any
   )
   
+  if (dbProject.data) {
+    // Merge DB data with defaults to ensure no undefined nested objects
+    return {
+      ...defaultProject,
+      ...dbProject.data,
+      id: dbProject.id,
+      updated_at: dbProject.updated_at,
+      // Ensure critical nested objects have defaults if null/undefined
+      m1_title_concept: dbProject.data.m1_title_concept || {},
+      m2_hypothesis: dbProject.data.m2_hypothesis || {},
+      m3_specific_aims: dbProject.data.m3_specific_aims || {},
+      m4_team_mapping: dbProject.data.m4_team_mapping || {},
+      m5_experimental_approach: dbProject.data.m5_experimental_approach || {},
+      m6_budget: dbProject.data.m6_budget || {},
+      m7_regulatory: dbProject.data.m7_regulatory || {},
+      m8_compilation: dbProject.data.m8_compilation || {},
+      m9_commercialization: dbProject.data.m9_commercialization || {},
+      m3_fast_track: dbProject.data.m3_fast_track || defaultProject.m3_fast_track,
+      m5_fast_track: dbProject.data.m5_fast_track || defaultProject.m5_fast_track,
+      m6_fast_track: dbProject.data.m6_fast_track || defaultProject.m6_fast_track,
+      m7_fast_track: dbProject.data.m7_fast_track || defaultProject.m7_fast_track,
+      audit_trail: dbProject.data.audit_trail || defaultProject.audit_trail,
+      foa_config: dbProject.data.foa_config || defaultProject.foa_config,
+      prior_phase: dbProject.data.prior_phase || defaultProject.prior_phase,
+      legacy_budget: dbProject.data.legacy_budget || defaultProject.legacy_budget,
+      module_states: dbProject.data.module_states || defaultProject.module_states
+    }
+  }
+  
+  // Fallback: return default project with DB values
   return {
     ...defaultProject,
     id: dbProject.id,
