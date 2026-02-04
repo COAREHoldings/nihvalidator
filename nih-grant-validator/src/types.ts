@@ -151,14 +151,17 @@ export interface M2Hypothesis {
   success_criteria: string
 }
 
-// M3: Specific Aims (8 fields)
+// Single Aim structure for dynamic aims support
+export interface SpecificAim {
+  id: string
+  statement: string
+  milestones: string[]
+  timeline: string
+}
+
+// M3: Specific Aims (dynamic aims array - minimum 3, recommended max 5)
 export interface M3SpecificAims {
-  aim1_statement: string
-  aim1_milestones: string[]
-  aim2_statement: string
-  aim2_milestones: string[]
-  aim3_statement: string
-  aim3_milestones: string[]
+  aims: SpecificAim[]
   timeline_summary: string
   interdependencies: string
 }
@@ -169,6 +172,23 @@ export interface M3FastTrack {
   phase2: Partial<M3SpecificAims>
   phase1_complete: boolean
   phase2_complete: boolean
+}
+
+// Helper to create a default aim
+export function createDefaultAim(index: number): SpecificAim {
+  return {
+    id: crypto.randomUUID(),
+    statement: '',
+    milestones: [],
+    timeline: ''
+  }
+}
+
+// Recommended aim limits based on NIH guidelines
+export const AIM_LIMITS = {
+  minimum: 3,
+  recommended_max: 5,
+  warning_threshold: 4 // Show warning when adding 4th aim or more
 }
 
 // M4: Team Mapping (5 fields)
@@ -551,7 +571,7 @@ export const MODULE_DEFINITIONS: { id: number; name: string; required_fields: st
   {
     id: 3,
     name: 'Specific Aims',
-    required_fields: ['aim1_statement', 'aim1_milestones', 'aim2_statement', 'aim2_milestones', 'timeline_summary', 'interdependencies']
+    required_fields: ['aims', 'timeline_summary', 'interdependencies']
   },
   {
     id: 4,
@@ -672,7 +692,15 @@ export function createDefaultProject(
     })),
     m1_title_concept: {},
     m2_hypothesis: {},
-    m3_specific_aims: {},
+    m3_specific_aims: {
+      aims: [
+        createDefaultAim(1),
+        createDefaultAim(2),
+        createDefaultAim(3)
+      ],
+      timeline_summary: '',
+      interdependencies: ''
+    },
     m4_team_mapping: {},
     m5_experimental_approach: {},
     m6_budget: {},
@@ -681,8 +709,24 @@ export function createDefaultProject(
     m9_commercialization: {},
     phase1_commercialization: {},
     m3_fast_track: {
-      phase1: {},
-      phase2: {},
+      phase1: {
+        aims: [
+          createDefaultAim(1),
+          createDefaultAim(2),
+          createDefaultAim(3)
+        ],
+        timeline_summary: '',
+        interdependencies: ''
+      },
+      phase2: {
+        aims: [
+          createDefaultAim(1),
+          createDefaultAim(2),
+          createDefaultAim(3)
+        ],
+        timeline_summary: '',
+        interdependencies: ''
+      },
       phase1_complete: false,
       phase2_complete: false
     },

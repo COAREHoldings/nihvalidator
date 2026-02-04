@@ -440,7 +440,7 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
         <div className="space-y-3">
           {[
             { label: 'Grant type and program selected', done: !!project.grant_type },
-            { label: 'All specific aims defined', done: !!(project.m3_specific_aims.aim1_statement && project.m3_specific_aims.aim2_statement) },
+            { label: 'All specific aims defined', done: !!(project.m3_specific_aims?.aims?.length >= 3 && project.m3_specific_aims.aims.some(a => a.statement?.trim())) },
             { label: 'Budget within NIH caps', done: project.m6_budget.total_project_costs !== undefined && project.m6_budget.total_project_costs > 0 },
             { label: 'Team qualifications documented', done: !!project.m4_team_mapping.pi_name },
             { label: 'Regulatory requirements addressed', done: !!project.m7_regulatory.facilities_description },

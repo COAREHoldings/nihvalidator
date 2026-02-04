@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { ProjectSchemaV2, ModuleState, M3SpecificAims, M5ExperimentalApproach, M6Budget, M7Regulatory, M7Phase2Additional } from '../types'
+import type { ProjectSchemaV2, ModuleState, M3SpecificAims, M5ExperimentalApproach, M6Budget, M7Regulatory, M7Phase2Additional, SpecificAim } from '../types'
 import { MODULE_DEFINITIONS } from '../types'
 import { getBudgetCap } from '../validation'
 import { BudgetCalculator } from './BudgetCalculator'
@@ -342,7 +342,10 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate, onNext,
   const checkPhase1Fields = (data: Partial<M3SpecificAims> | Partial<M5ExperimentalApproach> | Partial<M6Budget> | Partial<M7Regulatory>) => {
     if (moduleId === 3) {
       const d = data as Partial<M3SpecificAims>
-      return !!(d.aim1_statement?.trim() && d.aim1_milestones?.length && d.aim2_statement?.trim() && d.timeline_summary?.trim())
+      // Check if at least 3 aims are defined with statements and milestones
+      const aims = d.aims || []
+      const validAims = aims.filter(a => a.statement?.trim() && a.milestones?.length)
+      return validAims.length >= 3 && !!d.timeline_summary?.trim()
     }
     if (moduleId === 5) {
       const d = data as Partial<M5ExperimentalApproach>
@@ -403,7 +406,7 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate, onNext,
       const currentPhaseData = phaseTab === 'phase1' ? ftData.phase1 : ftData.phase2
       const phase1Complete = checkPhase1Fields(ftData.phase1)
       
-      const update = (field: string, value: string | string[]) => {
+      const update = (field: string, value: string | string[] | SpecificAim[]) => {
         const updatedPhase = { ...currentPhaseData, [field]: value }
         const isComplete = checkPhase1Fields(updatedPhase as Partial<M3SpecificAims>)
         onUpdate({
@@ -430,11 +433,68 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate, onNext,
               {phaseTab === 'phase1' ? 'Feasibility study aims' : 'Full development aims'}
             </span>
           </div>
-          <TextField label="Aim 1 Statement" value={currentPhaseData.aim1_statement || ''} onChange={v => update('aim1_statement', v)} required multiline placeholder={phaseTab === 'phase1' ? 'Phase I feasibility aim' : 'Phase II development aim'} />
-          <TextField label="Aim 1 Milestones" value={(currentPhaseData.aim1_milestones || []).join('\n')} onChange={v => update('aim1_milestones', v.split('\n').filter(s => s.trim()))} required multiline placeholder="Enter milestones (one per line)" />
-          <TextField label="Aim 2 Statement" value={currentPhaseData.aim2_statement || ''} onChange={v => update('aim2_statement', v)} required multiline placeholder={phaseTab === 'phase1' ? 'Secondary feasibility aim' : 'Secondary development aim'} />
-          <TextField label="Aim 2 Milestones" value={(currentPhaseData.aim2_milestones || []).join('\n')} onChange={v => update('aim2_milestones', v.split('\n').filter(s => s.trim()))} required multiline placeholder="Enter milestones (one per line)" />
-          <TextField label="Aim 3 Statement (Optional)" value={currentPhaseData.aim3_statement || ''} onChange={v => update('aim3_statement', v)} multiline placeholder="Third specific aim (if applicable)" />
+          {/* Dynamic Aims - minimum 3 */}
+          {(currentPhaseData.aims || []).map((aim, idx) => (
+            <div key={aim.id || idx} className="mb-4 p-4 bg-neutral-50 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-neutral-700">Aim {idx + 1}</span>
+                {(currentPhaseData.aims?.length || 0) > 3 && (
+                  <button
+                    onClick={() => {
+                      const updatedAims = (currentPhaseData.aims || []).filter((_, i) => i !== idx)
+                      update('aims', updatedAims)
+                    }}
+                    className="text-semantic-error hover:text-red-700"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+              <TextField
+                label="Statement"
+                value={aim.statement || ''}
+                onChange={v => {
+                  const updatedAims = [...(currentPhaseData.aims || [])]
+                  updatedAims[idx] = { ...updatedAims[idx], statement: v }
+                  update('aims', updatedAims)
+                }}
+                required
+                multiline
+                placeholder={phaseTab === 'phase1' ? `Phase I aim ${idx + 1}` : `Phase II aim ${idx + 1}`}
+              />
+              <TextField
+                label="Milestones"
+                value={(aim.milestones || []).join('\n')}
+                onChange={v => {
+                  const updatedAims = [...(currentPhaseData.aims || [])]
+                  updatedAims[idx] = { ...updatedAims[idx], milestones: v.split('\n').filter(s => s.trim()) }
+                  update('aims', updatedAims)
+                }}
+                required
+                multiline
+                placeholder="Enter milestones (one per line)"
+              />
+              <TextField
+                label="Timeline"
+                value={aim.timeline || ''}
+                onChange={v => {
+                  const updatedAims = [...(currentPhaseData.aims || [])]
+                  updatedAims[idx] = { ...updatedAims[idx], timeline: v }
+                  update('aims', updatedAims)
+                }}
+                placeholder="Timeline for this aim"
+              />
+            </div>
+          ))}
+          <button
+            onClick={() => {
+              const newAim = { id: `aim-${Date.now()}`, statement: '', milestones: [], timeline: '' }
+              update('aims', [...(currentPhaseData.aims || []), newAim])
+            }}
+            className="flex items-center gap-1 text-sm text-primary-500 hover:text-primary-600 mb-4"
+          >
+            <Plus className="w-4 h-4" /> Add Aim
+          </button>
           <TextField label="Timeline Summary" value={currentPhaseData.timeline_summary || ''} onChange={v => update('timeline_summary', v)} required multiline placeholder={`${phaseTab === 'phase1' ? 'Phase I' : 'Phase II'} timeline`} />
           <TextField label="Aim Interdependencies" value={currentPhaseData.interdependencies || ''} onChange={v => update('interdependencies', v)} required multiline placeholder="How do the aims relate to each other?" />
         </div>
@@ -443,16 +503,73 @@ export function ModuleEditor({ project, moduleId, moduleState, onUpdate, onNext,
 
     // Non-Fast Track
     const data = project.m3_specific_aims
-    const update = (field: string, value: string | string[]) => {
+    const update = (field: string, value: string | string[] | SpecificAim[]) => {
       onUpdate({ m3_specific_aims: { ...data, [field]: value } })
     }
     return (
       <div>
-        <TextField label="Aim 1 Statement" value={data.aim1_statement || ''} onChange={v => update('aim1_statement', v)} required multiline placeholder="First specific aim" />
-        <TextField label="Aim 1 Milestones" value={(data.aim1_milestones || []).join('\n')} onChange={v => update('aim1_milestones', v.split('\n').filter(s => s.trim()))} required multiline placeholder="Enter milestones (one per line)" />
-        <TextField label="Aim 2 Statement" value={data.aim2_statement || ''} onChange={v => update('aim2_statement', v)} required multiline placeholder="Second specific aim" />
-        <TextField label="Aim 2 Milestones" value={(data.aim2_milestones || []).join('\n')} onChange={v => update('aim2_milestones', v.split('\n').filter(s => s.trim()))} required multiline placeholder="Enter milestones (one per line)" />
-        <TextField label="Aim 3 Statement (Optional)" value={data.aim3_statement || ''} onChange={v => update('aim3_statement', v)} multiline placeholder="Third specific aim (if applicable)" />
+        {/* Dynamic Aims - minimum 3 */}
+        {(data.aims || []).map((aim, idx) => (
+          <div key={aim.id || idx} className="mb-4 p-4 bg-neutral-50 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-neutral-700">Aim {idx + 1}</span>
+              {(data.aims?.length || 0) > 3 && (
+                <button
+                  onClick={() => {
+                    const updatedAims = (data.aims || []).filter((_, i) => i !== idx)
+                    onUpdate({ m3_specific_aims: { ...data, aims: updatedAims } })
+                  }}
+                  className="text-semantic-error hover:text-red-700"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <TextField
+              label="Statement"
+              value={aim.statement || ''}
+              onChange={v => {
+                const updatedAims = [...(data.aims || [])]
+                updatedAims[idx] = { ...updatedAims[idx], statement: v }
+                onUpdate({ m3_specific_aims: { ...data, aims: updatedAims } })
+              }}
+              required
+              multiline
+              placeholder={`Specific aim ${idx + 1}`}
+            />
+            <TextField
+              label="Milestones"
+              value={(aim.milestones || []).join('\n')}
+              onChange={v => {
+                const updatedAims = [...(data.aims || [])]
+                updatedAims[idx] = { ...updatedAims[idx], milestones: v.split('\n').filter(s => s.trim()) }
+                onUpdate({ m3_specific_aims: { ...data, aims: updatedAims } })
+              }}
+              required
+              multiline
+              placeholder="Enter milestones (one per line)"
+            />
+            <TextField
+              label="Timeline"
+              value={aim.timeline || ''}
+              onChange={v => {
+                const updatedAims = [...(data.aims || [])]
+                updatedAims[idx] = { ...updatedAims[idx], timeline: v }
+                onUpdate({ m3_specific_aims: { ...data, aims: updatedAims } })
+              }}
+              placeholder="Timeline for this aim"
+            />
+          </div>
+        ))}
+        <button
+          onClick={() => {
+            const newAim = { id: `aim-${Date.now()}`, statement: '', milestones: [], timeline: '' }
+            onUpdate({ m3_specific_aims: { ...data, aims: [...(data.aims || []), newAim] } })
+          }}
+          className="flex items-center gap-1 text-sm text-primary-500 hover:text-primary-600 mb-4"
+        >
+          <Plus className="w-4 h-4" /> Add Aim
+        </button>
         <TextField label="Timeline Summary" value={data.timeline_summary || ''} onChange={v => update('timeline_summary', v)} required multiline placeholder="Overall project timeline" />
         <TextField label="Aim Interdependencies" value={data.interdependencies || ''} onChange={v => update('interdependencies', v)} required multiline placeholder="How do the aims relate to each other?" />
       </div>

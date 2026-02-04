@@ -197,14 +197,12 @@ function getModuleData(project: ProjectSchemaV2, moduleId: number): Record<strin
     case 3: 
       if (isFastTrack) {
         // Merge phase1 and phase2 data for Fast Track validation
+        const phase1Aims = project.m3_fast_track.phase1?.aims || []
+        const phase2Aims = project.m3_fast_track.phase2?.aims || []
+        // For validation: check if there are enough aims with content
+        const hasValidAims = phase1Aims.some(a => a.statement?.trim()) || phase2Aims.some(a => a.statement?.trim())
         return {
-          ...project.m3_fast_track.phase1,
-          ...project.m3_fast_track.phase2,
-          // Mark complete if either phase has the field
-          aim1_statement: project.m3_fast_track.phase1?.aim1_statement || project.m3_specific_aims?.aim1_statement,
-          aim1_milestones: project.m3_fast_track.phase1?.aim1_milestones || project.m3_specific_aims?.aim1_milestones,
-          aim2_statement: project.m3_fast_track.phase1?.aim2_statement || project.m3_fast_track.phase2?.aim1_statement || project.m3_specific_aims?.aim2_statement,
-          aim2_milestones: project.m3_fast_track.phase1?.aim2_milestones || project.m3_fast_track.phase2?.aim1_milestones || project.m3_specific_aims?.aim2_milestones,
+          aims: hasValidAims ? [...phase1Aims, ...phase2Aims] : project.m3_specific_aims?.aims,
           timeline_summary: project.m3_fast_track.phase1?.timeline_summary || project.m3_fast_track.phase2?.timeline_summary || project.m3_specific_aims?.timeline_summary,
           interdependencies: project.m3_fast_track.phase1?.interdependencies || project.m3_fast_track.phase2?.interdependencies || project.m3_specific_aims?.interdependencies
         } as Record<string, unknown>

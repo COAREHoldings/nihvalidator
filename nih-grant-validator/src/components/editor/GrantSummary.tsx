@@ -146,7 +146,7 @@ export function GrantSummary({ project, onUpdate }: GrantSummaryProps) {
   }
 
   const coreConceptStatus = getCompletionStatus([
-    m1.project_title, m1.scientific_abstract, m2.central_hypothesis, m3.aim1_statement
+    m1.project_title, m1.scientific_abstract, m2.central_hypothesis, m3.aims?.[0]?.statement
   ])
   
   const researchPlanStatus = getCompletionStatus([
@@ -174,21 +174,21 @@ export function GrantSummary({ project, onUpdate }: GrantSummaryProps) {
     
     // Specific Aims
     text += `\nSPECIFIC AIMS\n${'-'.repeat(40)}\n\n`
-    text += `Aim 1: ${m3.aim1_statement || 'Not provided'}\n`
-    if (m3.aim1_milestones?.length) {
-      text += `Milestones: ${m3.aim1_milestones.join(', ')}\n`
+    if (m3.aims && m3.aims.length > 0) {
+      m3.aims.forEach((aim, idx) => {
+        text += `Aim ${idx + 1}: ${aim.statement || 'Not provided'}\n`
+        if (aim.milestones?.length) {
+          text += `Milestones: ${aim.milestones.join(', ')}\n`
+        }
+        if (aim.timeline) {
+          text += `Timeline: ${aim.timeline}\n`
+        }
+        text += `\n`
+      })
+    } else {
+      text += `No aims defined yet.\n\n`
     }
-    text += `\nAim 2: ${m3.aim2_statement || 'Not provided'}\n`
-    if (m3.aim2_milestones?.length) {
-      text += `Milestones: ${m3.aim2_milestones.join(', ')}\n`
-    }
-    if (m3.aim3_statement) {
-      text += `\nAim 3: ${m3.aim3_statement}\n`
-      if (m3.aim3_milestones?.length) {
-        text += `Milestones: ${m3.aim3_milestones.join(', ')}\n`
-      }
-    }
-    text += `\nTimeline Summary:\n${m3.timeline_summary || 'Not provided'}\n`
+    text += `Timeline Summary:\n${m3.timeline_summary || 'Not provided'}\n`
 
     // Research Plan
     text += `\n\nRESEARCH PLAN\n${'-'.repeat(40)}\n\n`
@@ -396,25 +396,21 @@ export function GrantSummary({ project, onUpdate }: GrantSummaryProps) {
         <div className="mt-6 pt-4 border-t">
           <h4 className="font-medium text-neutral-700 mb-3">Specific Aims</h4>
           <div className="space-y-4">
-            <EditableField
-              label="Aim 1"
-              value={m3.aim1_statement || ''}
-              onSave={(v) => onUpdate({ m3_specific_aims: { ...m3, aim1_statement: v } })}
-              multiline
-            />
-            <EditableField
-              label="Aim 2"
-              value={m3.aim2_statement || ''}
-              onSave={(v) => onUpdate({ m3_specific_aims: { ...m3, aim2_statement: v } })}
-              multiline
-            />
-            {m3.aim3_statement && (
+            {(m3.aims || []).map((aim, idx) => (
               <EditableField
-                label="Aim 3"
-                value={m3.aim3_statement || ''}
-                onSave={(v) => onUpdate({ m3_specific_aims: { ...m3, aim3_statement: v } })}
+                key={aim.id || idx}
+                label={`Aim ${idx + 1}`}
+                value={aim.statement || ''}
+                onSave={(v) => {
+                  const updatedAims = [...(m3.aims || [])]
+                  updatedAims[idx] = { ...updatedAims[idx], statement: v }
+                  onUpdate({ m3_specific_aims: { ...m3, aims: updatedAims } })
+                }}
                 multiline
               />
+            ))}
+            {(!m3.aims || m3.aims.length === 0) && (
+              <p className="text-sm text-neutral-500 italic">No aims defined yet.</p>
             )}
             <EditableField
               label="Timeline Summary"

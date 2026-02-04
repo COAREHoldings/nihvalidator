@@ -47,7 +47,7 @@ export function GrantEditor({ project, onUpdate, onBackToDashboard, onSave, savi
       case 2: // Core Concept
         const m1Done = !!(project.m1_title_concept?.project_title && project.m1_title_concept?.problem_statement)
         const m2Done = !!(project.m2_hypothesis?.central_hypothesis)
-        const m3Done = !!(project.m3_specific_aims?.aim1_statement)
+        const m3Done = !!(project.m3_specific_aims?.aims?.length > 0 && project.m3_specific_aims.aims[0]?.statement)
         return (m1Done && m2Done && m3Done) ? 'completed' : (stepId < currentStep ? 'completed' : 'locked')
       case 3: // Research Plan
         const m5Done = !!(project.m5_experimental_approach?.methodology_overview)
@@ -83,7 +83,7 @@ export function GrantEditor({ project, onUpdate, onBackToDashboard, onSave, savi
     const m1Fields = ['project_title', 'problem_statement', 'proposed_solution'] as const
     const m1Progress = m1Fields.filter(f => m1[f]).length / m1Fields.length
     const m2Progress = project.m2_hypothesis?.central_hypothesis ? 1 : 0
-    const m3Progress = project.m3_specific_aims?.aim1_statement ? 1 : 0
+    const m3Progress = (project.m3_specific_aims?.aims?.length > 0 && project.m3_specific_aims.aims[0]?.statement) ? 1 : 0
     completed += ((m1Progress + m2Progress + m3Progress) / 3) * 20
     
     // Step 3: Research Plan (20%)
