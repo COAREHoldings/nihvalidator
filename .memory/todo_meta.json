@@ -3,9 +3,9 @@
     "Coordinator": {
       "1": {
         "id": "1",
-        "content": "Implement Research Intelligence Dashboard",
-        "details": "4 panels: Grants.gov, NIH RePORTER, PubMed, ClinicalTrials.gov\n4 edge functions with caching\nContext-aware queries\nRead-only, isolated from compliance engine",
-        "status": "completed",
+        "content": "Implement NIH Grant Validator UI Redesign",
+        "details": "Rebuild the UI with cleaner, more intuitive design: Dashboard home, step-based editor, review page. Preserve all existing backend functionality.",
+        "status": "in_progress",
         "priority": "high"
       }
     }
