@@ -155,6 +155,63 @@ src/
 - FOA parsing
 - Research Intelligence dashboard
 
+## AI Document Generation (Contextual & In-Order)
+
+### Step 2: Core Concept
+- ✨ Generate 3 Titles (button next to title field)
+- ✨ Generate Specific Aims (button next to aims section)
+- 📄 Generate Specific Aims Page (button below aims)
+
+### Step 3: Research Plan
+- ✨ Generate Research Strategy (prominent button at top)
+
+### Step 5: Review & Export (STRICT ORDER)
+1. Validation Summary (always first)
+2. ✨ Generate Commercialization Plan (Phase II/Fast Track only)
+3. 📚 Generate References (LAST - must come after Commercialization to cite all content)
+4. Export Options
+
+## Export Formats (DOCX Primary)
+
+**All generated documents MUST support:**
+- **DOCX** (PRIMARY - for editing before NIH submission)
+- **PDF** (secondary - for review/archive)
+
+### DOCX Formatting (NIH Standard)
+- Font: Times New Roman 11pt
+- Margins: 0.5 inches all sides
+- Heading styles: H1, H2, H3 properly styled
+- Page breaks between major sections
+- Line spacing: Single
+- Page numbers in footer
+
+### Export UI Layout (Step 5)
+```
+┌─ Generated Documents ────────────────────────────────┐
+│                                                       │
+│  📄 Specific Aims Page         ✅ Generated          │
+│     [DOCX ↓]  [PDF ↓]  [✏️ Regenerate]               │
+│                                                       │
+│  📄 Research Strategy          ✅ Generated          │
+│     [DOCX ↓]  [PDF ↓]  [✏️ Regenerate]               │
+│                                                       │
+│  📄 Commercialization Plan     ⏳ Not Generated      │
+│     [✨ Generate Now]                                 │
+│     (Required for Phase II/Fast Track)               │
+│                                                       │
+│  📚 References                 🔒 Generate After     │
+│     [✨ Generate Now]              Commercialization │
+│                                                       │
+├───────────────────────────────────────────────────────┤
+│  📦 Bundle Export                                     │
+│  [Download All as DOCX]  [Download All as PDF]       │
+└───────────────────────────────────────────────────────┘
+```
+
+### Validation Report Export
+- PDF format (human-readable summary)
+- JSON format (hidden under "Advanced" - for system integration)
+
 ## Mockup References
 - Dashboard: imgs/mockup_dashboard.png
 - Step Editor: imgs/mockup_step_page.png
