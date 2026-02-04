@@ -5,6 +5,9 @@ import { runFullValidation } from '../../validation'
 import { ComplianceAuditPanel } from '../ComplianceAuditPanel'
 import { CommercializationDirector } from '../CommercializationDirector'
 import { AIGenerateButton } from '../shared/AIGenerateButton'
+import { GrantSummary } from './GrantSummary'
+
+type TabType = 'validation' | 'summary' | 'documents'
 
 interface StepReviewProps {
   project: ProjectSchemaV2
@@ -12,6 +15,7 @@ interface StepReviewProps {
 }
 
 export function StepReview({ project, onUpdate }: StepReviewProps) {
+  const [activeTab, setActiveTab] = useState<TabType>('summary')
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
   const [isValidating, setIsValidating] = useState(false)
   const [showComplianceAudit, setShowComplianceAudit] = useState(false)
@@ -64,11 +68,63 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
           </div>
           <div>
             <h2 className="text-xl font-semibold text-neutral-900">Review & Export</h2>
-            <p className="text-sm text-neutral-500">Validate your application and export for submission</p>
+            <p className="text-sm text-neutral-500">Review your compiled grant, validate, and export for submission</p>
           </div>
         </div>
       </div>
 
+      {/* Tab Navigation */}
+      <div className="border-b border-neutral-200">
+        <nav className="flex gap-1" aria-label="Tabs">
+          <button
+            onClick={() => setActiveTab('summary')}
+            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'summary'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Grant Summary
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('validation')}
+            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'validation'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <FileCheck className="w-4 h-4" />
+              Validation
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('documents')}
+            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'documents'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              AI Documents
+            </div>
+          </button>
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'summary' && (
+        <GrantSummary project={project} onUpdate={onUpdate} />
+      )}
+
+      {activeTab === 'validation' && (
+        <>
       {/* Quick Stats */}
       <div className="grid md:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border border-neutral-200 p-4">
@@ -313,7 +369,11 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
           )}
         </div>
       )}
+        </>
+      )}
 
+      {activeTab === 'documents' && (
+        <>
       {/* AI Document Generation */}
       <div className="bg-white rounded-xl border border-neutral-200 p-6">
         <div className="flex items-center gap-2 mb-6">
@@ -399,6 +459,8 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
           ))}
         </div>
       </div>
+        </>
+      )}
     </div>
   )
 }
