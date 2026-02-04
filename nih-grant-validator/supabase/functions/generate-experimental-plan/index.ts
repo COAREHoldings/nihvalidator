@@ -103,15 +103,49 @@ Required elements:
 
   'rigor': `
 === RIGOR AND REPRODUCIBILITY COMPLIANCE ===
-MANDATORY elements (all must be present):
-1. BIOLOGICAL REPLICATES - Independent experiments, minimum n=3
-2. STATISTICAL TEST SPECIFICATION - Exact test for each analysis
-3. POWER CALCULATION - Power >= 80% required
-4. SIGNIFICANCE THRESHOLD - State alpha level (typically 0.05)
-5. CELL LINE AUTHENTICATION - STR profiling required
-6. MYCOPLASMA TESTING - Testing method specified
-7. RANDOMIZATION STATEMENT - How subjects/samples will be randomized
-8. BLINDING STATEMENT - Who will be blinded
+MANDATORY elements (all must be present with SPECIFIC DETAILS):
+
+1. **SAMPLE SIZE JUSTIFICATION**
+   - For EACH experiment: state n=, power (≥80%), α-level (typically 0.05)
+   - Provide effect size used in calculation with source (preliminary data or literature)
+   - Example: "n=8 mice/group based on preliminary data (effect size d=1.2, SD=0.3) with 80% power and α=0.05"
+
+2. **STATISTICAL TEST SPECIFICATION**
+   - Name exact test for each experiment type (not generic "appropriate statistical tests")
+   - For comparisons: t-test (paired/unpaired), ANOVA with post-hoc (specify which: Tukey, Dunnett, Bonferroni)
+   - For dose-response: regression model type (linear, loglinear, Hill equation)
+   - For survival/time-to-event: Kaplan-Meier with log-rank test
+
+3. **MULTIPLE COMPARISON CORRECTION**
+   - If multiple comparisons within experiment: specify correction method
+   - State adjusted α-level (e.g., "Bonferroni-corrected α = 0.017 for 3 comparisons")
+   - OR justify no correction (planned contrasts, orthogonal comparisons)
+
+4. **BIOLOGICAL VS TECHNICAL REPLICATES**
+   - Define what constitutes a biological replicate (independent experiments, different animals, different patient samples)
+   - Distinguish from technical replicates (same sample measured multiple times)
+   - Minimum n=3 biological replicates for all key experiments
+
+5. **AUTHENTICATION & QUALITY CONTROL**
+   - Cell lines: STR profiling (source, frequency)
+   - Mycoplasma: testing method and frequency
+   - Antibodies: validation method (knockdown, knockout, peptide block)
+   - Key reagents: source, lot tracking
+
+6. **RANDOMIZATION APPROACH**
+   - Method: simple, block, stratified randomization
+   - Who performs randomization (separate from experimenter if possible)
+   - When performed (before treatment assignment)
+
+7. **BLINDING STATEMENT**
+   - Who is blinded: experimenter, analyst, outcome assessor
+   - If not blinded, justify why
+   - Method to maintain blinding (coded samples, separate personnel)
+
+8. **DATA HANDLING**
+   - Pre-specified inclusion/exclusion criteria
+   - Outlier handling (Grubbs test, ROUT method) - must be pre-specified, not post-hoc
+   - Missing data strategy (if applicable)
 `,
 
   'vertebrate_animals': `
@@ -288,11 +322,37 @@ ${grantType === 'Phase I' || phase === 'Phase I' ? `
 - State No-Go action if criteria not met
 ` : ''}
 
-**SECTION: STATISTICAL CONSIDERATIONS** (1-2 paragraphs)
-- Overall statistical approach
-- Power calculations (80% power standard)
-- Multiple comparison corrections if applicable
-- Software to be used
+**SECTION: STATISTICAL CONSIDERATIONS** (3-4 paragraphs, DETAILED)
+
+This section is CRITICAL for NIH reviewers. Generic statements will result in poor scores. Include ALL of the following with SPECIFIC details:
+
+**Paragraph 1: Sample Size Justification**
+- State sample sizes (n=) for EACH experiment group
+- Provide power analysis with specific parameters: α = 0.05, power = 80%, expected effect size (e.g., Cohen's d = 0.8, 2-fold difference, 30% improvement)
+- If preliminary data exists, reference the observed variance and effect sizes to justify n
+- Example: "Based on our preliminary data showing a mean difference of X ± Y (SD), with α=0.05 and 80% power, we calculated n=Z per group using [formula/software]."
+
+**Paragraph 2: Statistical Tests & Data Analysis**
+- Specify EXACT statistical tests for each type of comparison:
+  - Continuous data: t-test (paired/unpaired), ANOVA (one-way, two-way, repeated measures), linear regression
+  - Categorical data: Chi-square, Fisher's exact, logistic regression
+  - Time-to-event: Kaplan-Meier, log-rank test, Cox regression
+  - Multiple groups: Tukey's HSD, Dunnett's test, Bonferroni correction
+- State data distribution assumptions and how violations will be handled (e.g., "Data will be tested for normality using Shapiro-Wilk. Non-normal data will be analyzed using Mann-Whitney U test or log-transformed.")
+- Specify primary vs. secondary endpoints
+
+**Paragraph 3: Multiple Comparisons & Type I Error Control**
+- State how multiple comparisons will be handled
+- Specify correction method (Bonferroni, Benjamini-Hochberg FDR, Holm-Sidak) with justification
+- For complex designs, describe family-wise error rate control strategy
+- Example: "For the 4 planned comparisons in Aim 1, Bonferroni-adjusted α = 0.0125 will be used to maintain family-wise error rate at 0.05."
+
+**Paragraph 4: Software, Randomization & Blinding**
+- Specify statistical software: R (version X, specific packages), SAS, SPSS, GraphPad Prism, Python (statsmodels, scipy)
+- Describe randomization method: simple randomization, block randomization, stratified randomization
+- Describe blinding: single-blind, double-blind, who will be blinded (experimenters, analysts, assessors)
+- State interim analysis plan if applicable (O'Brien-Fleming boundaries, alpha spending function)
+- Handling of missing data: complete case analysis, imputation method (LOCF, multiple imputation)
 
 **SECTION: RIGOR & REPRODUCIBILITY** (1 paragraph)
 - Biological variables accounted for
@@ -346,14 +406,30 @@ ${phase ? `- Phase: ${phase}` : ''}
 
 **SPECIFIC AIMS:**
 
-**Aim 1:** ${moduleContent.m3?.aim1_statement || 'Not provided'}
+${(() => {
+  // Handle new aims array structure
+  const aims = moduleContent.m3?.aims;
+  if (Array.isArray(aims) && aims.length > 0) {
+    return aims.map((aim: { statement?: string; milestones?: string[]; timeline?: string }, idx: number) => `
+**Aim ${idx + 1}:** ${aim.statement || 'Not provided'}
+- Milestones: ${Array.isArray(aim.milestones) ? aim.milestones.join(', ') : 'Not provided'}
+- Timeline: ${aim.timeline || 'Not provided'}
+`).join('\n');
+  }
+  // Fallback to old structure for backwards compatibility
+  let aimsText = `**Aim 1:** ${moduleContent.m3?.aim1_statement || 'Not provided'}
 - Milestones: ${Array.isArray(moduleContent.m3?.aim1_milestones) ? moduleContent.m3.aim1_milestones.join(', ') : moduleContent.m3?.aim1_milestones || 'Not provided'}
 
 **Aim 2:** ${moduleContent.m3?.aim2_statement || 'Not provided'}
-- Milestones: ${Array.isArray(moduleContent.m3?.aim2_milestones) ? moduleContent.m3.aim2_milestones.join(', ') : moduleContent.m3?.aim2_milestones || 'Not provided'}
+- Milestones: ${Array.isArray(moduleContent.m3?.aim2_milestones) ? moduleContent.m3.aim2_milestones.join(', ') : moduleContent.m3?.aim2_milestones || 'Not provided'}`;
+  if (moduleContent.m3?.aim3_statement) {
+    aimsText += `
 
-${moduleContent.m3?.aim3_statement ? `**Aim 3:** ${moduleContent.m3.aim3_statement}
-- Milestones: ${Array.isArray(moduleContent.m3?.aim3_milestones) ? moduleContent.m3.aim3_milestones.join(', ') : moduleContent.m3?.aim3_milestones || 'Not provided'}` : ''}
+**Aim 3:** ${moduleContent.m3.aim3_statement}
+- Milestones: ${Array.isArray(moduleContent.m3?.aim3_milestones) ? moduleContent.m3.aim3_milestones.join(', ') : moduleContent.m3?.aim3_milestones || 'Not provided'}`;
+  }
+  return aimsText;
+})()}
 
 **Timeline Summary:** ${moduleContent.m3?.timeline_summary || 'Not provided'}
 
@@ -368,9 +444,21 @@ ${moduleContent.m3?.aim3_statement ? `**Aim 3:** ${moduleContent.m3.aim3_stateme
 - Experimental Design: ${moduleContent.m5?.experimental_design || 'Not yet defined'}
 - Data Collection: ${moduleContent.m5?.data_collection_methods || 'Not yet defined'}
 - Analysis Plan: ${moduleContent.m5?.analysis_plan || 'Not yet defined'}
-- Statistical Approach: ${moduleContent.m5?.statistical_approach || 'Not yet defined'}
 - Potential Pitfalls: ${moduleContent.m5?.potential_pitfalls || 'Not yet defined'}
 - Alternative Approaches: ${moduleContent.m5?.alternative_approaches || 'Not yet defined'}
+
+**STATISTICAL APPROACH (IMPORTANT - Elaborate on this with specific details):**
+User-provided approach: ${moduleContent.m5?.statistical_approach || 'Not yet defined - Generate comprehensive statistical plan'}
+
+For the Statistical Considerations section, you MUST include:
+1. Specific sample sizes (n=X) for each experiment with justification
+2. Named statistical tests (not generic "appropriate tests"): t-tests, ANOVA (one-way/two-way), Mann-Whitney, Kruskal-Wallis, etc.
+3. Power analysis parameters: effect size source (preliminary data or literature), α=0.05, power=80%
+4. Multiple comparison correction method (Bonferroni, Tukey, FDR) with calculated adjusted α
+5. Randomization method (simple, block, stratified)
+6. Blinding approach (single/double, who is blinded)
+7. Software with version (R, GraphPad Prism, SAS, SPSS)
+8. How non-normal data will be handled (transformations, non-parametric alternatives)
 
 **REGULATORY CONTEXT:**
 - Human Subjects: ${moduleContent.m7?.human_subjects_involved ? 'Yes' : 'No'}
