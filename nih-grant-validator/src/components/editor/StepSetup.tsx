@@ -230,11 +230,29 @@ export function StepSetup({ project, onUpdate }: StepSetupProps) {
       <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl border border-primary-200 p-6">
         <div className="flex items-center gap-2 mb-4">
           <Settings className="w-5 h-5 text-primary-600" />
-          <h3 className="text-lg font-semibold text-neutral-900">AI Assistance</h3>
+          <h3 className="text-lg font-semibold text-neutral-900">AI Title Assistant</h3>
         </div>
         <p className="text-sm text-neutral-600 mb-4">
-          Generate a project title based on your configuration above.
+          Enter your suggested title below, then use AI to refine it. Or leave it blank to generate a title based on your configuration.
         </p>
+        
+        {/* User's suggested title input */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
+            Your Suggested Title
+          </label>
+          <input
+            type="text"
+            value={project.m1_title_concept?.project_title || ''}
+            onChange={(e) => onUpdate({ m1_title_concept: { ...project.m1_title_concept, project_title: e.target.value } })}
+            placeholder="Enter your project title idea (optional)"
+            className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+          />
+          <p className="mt-1 text-xs text-neutral-500">
+            The AI will refine your title or suggest improvements based on NIH best practices
+          </p>
+        </div>
+
         <AIGenerateButton
           project={project}
           documentType="title"
