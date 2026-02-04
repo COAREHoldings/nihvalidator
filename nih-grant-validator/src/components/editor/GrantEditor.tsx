@@ -45,17 +45,17 @@ export function GrantEditor({ project, onUpdate, onBackToDashboard, onSave, savi
       case 1: // Setup
         return project.grant_type ? 'completed' : 'locked'
       case 2: // Core Concept
-        const m1Done = !!(project.m1_title_concept.project_title && project.m1_title_concept.problem_statement)
-        const m2Done = !!(project.m2_hypothesis.central_hypothesis)
-        const m3Done = !!(project.m3_specific_aims.aim1_statement)
+        const m1Done = !!(project.m1_title_concept?.project_title && project.m1_title_concept?.problem_statement)
+        const m2Done = !!(project.m2_hypothesis?.central_hypothesis)
+        const m3Done = !!(project.m3_specific_aims?.aim1_statement)
         return (m1Done && m2Done && m3Done) ? 'completed' : (stepId < currentStep ? 'completed' : 'locked')
       case 3: // Research Plan
-        const m5Done = !!(project.m5_experimental_approach.methodology_overview)
-        const m7Done = !!(project.m7_regulatory.facilities_description)
+        const m5Done = !!(project.m5_experimental_approach?.methodology_overview)
+        const m7Done = !!(project.m7_regulatory?.facilities_description)
         return (m5Done && m7Done) ? 'completed' : (stepId < currentStep ? 'completed' : 'locked')
       case 4: // Team & Budget
-        const m4Done = !!(project.m4_team_mapping.pi_name)
-        const m6Done = project.m6_budget.total_project_costs !== undefined && project.m6_budget.total_project_costs > 0
+        const m4Done = !!(project.m4_team_mapping?.pi_name)
+        const m6Done = project.m6_budget?.total_project_costs !== undefined && project.m6_budget?.total_project_costs > 0
         return (m4Done && m6Done) ? 'completed' : (stepId < currentStep ? 'completed' : 'locked')
       case 5: // Review
         return stepId < currentStep ? 'completed' : 'locked'
@@ -80,19 +80,19 @@ export function GrantEditor({ project, onUpdate, onBackToDashboard, onSave, savi
     
     // Step 2: Core Concept (20%)
     const m1Fields = ['project_title', 'problem_statement', 'proposed_solution']
-    const m1Progress = m1Fields.filter(f => project.m1_title_concept[f as keyof typeof project.m1_title_concept]).length / m1Fields.length
-    const m2Progress = project.m2_hypothesis.central_hypothesis ? 1 : 0
-    const m3Progress = project.m3_specific_aims.aim1_statement ? 1 : 0
+    const m1Progress = project.m1_title_concept ? m1Fields.filter(f => project.m1_title_concept[f as keyof typeof project.m1_title_concept]).length / m1Fields.length : 0
+    const m2Progress = project.m2_hypothesis?.central_hypothesis ? 1 : 0
+    const m3Progress = project.m3_specific_aims?.aim1_statement ? 1 : 0
     completed += ((m1Progress + m2Progress + m3Progress) / 3) * 20
     
     // Step 3: Research Plan (20%)
-    const m5Progress = project.m5_experimental_approach.methodology_overview ? 1 : 0
-    const m7Progress = project.m7_regulatory.facilities_description ? 1 : 0
+    const m5Progress = project.m5_experimental_approach?.methodology_overview ? 1 : 0
+    const m7Progress = project.m7_regulatory?.facilities_description ? 1 : 0
     completed += ((m5Progress + m7Progress) / 2) * 20
     
     // Step 4: Team & Budget (20%)
-    const m4Progress = project.m4_team_mapping.pi_name ? 1 : 0
-    const m6Progress = project.m6_budget.total_project_costs && project.m6_budget.total_project_costs > 0 ? 1 : 0
+    const m4Progress = project.m4_team_mapping?.pi_name ? 1 : 0
+    const m6Progress = project.m6_budget?.total_project_costs && project.m6_budget?.total_project_costs > 0 ? 1 : 0
     completed += ((m4Progress + m6Progress) / 2) * 20
     
     // Step 5: Review (20%) - always considered incomplete until validation passes
@@ -172,7 +172,7 @@ export function GrantEditor({ project, onUpdate, onBackToDashboard, onSave, savi
         currentStep={currentStep}
         onStepClick={handleStepClick}
         onBackToDashboard={onBackToDashboard}
-        grantTitle={project.m1_title_concept.project_title || 'Untitled Grant'}
+        grantTitle={project.m1_title_concept?.project_title || 'Untitled Grant'}
         grantType={project.grant_type ? `${project.program_type} ${project.grant_type}` : undefined}
         overallProgress={calculateProgress()}
       />
@@ -188,7 +188,7 @@ export function GrantEditor({ project, onUpdate, onBackToDashboard, onSave, savi
                 Dashboard
               </button>
               <ChevronRight className="w-4 h-4 text-neutral-300" />
-              <span className="text-neutral-500">{project.m1_title_concept.project_title || 'Untitled Grant'}</span>
+              <span className="text-neutral-500">{project.m1_title_concept?.project_title || 'Untitled Grant'}</span>
               <ChevronRight className="w-4 h-4 text-neutral-300" />
               <span className="text-primary-600 font-medium">{currentStepInfo?.name}</span>
             </nav>

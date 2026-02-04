@@ -200,6 +200,25 @@ export interface M5FastTrack {
   phase2_complete: boolean
 }
 
+// Sub Award Entry (for multiple academic institutions/partners)
+export interface SubAward {
+  id: string
+  institutionName: string
+  contactPI: string
+  directCosts: number
+  faRate: number // F&A rate for this institution
+  indirectCosts: number // calculated: directCosts * faRate%
+  total: number // directCosts + indirectCosts
+}
+
+// Vendor/Contractor Entry
+export interface Vendor {
+  id: string
+  vendorName: string
+  description: string
+  amount: number
+}
+
 // M6: Budget & Justification - Full NIH SBIR/STTR budget calculation fields
 export interface M6Budget {
   // Line Items (Direct Costs)
@@ -213,6 +232,9 @@ export interface M6Budget {
   patient_care_costs: number
   tuition_costs: number
   other_costs: number
+  // Multi-entry Sub Awards and Vendors
+  sub_awards: SubAward[]
+  vendors: Vendor[]
   // F&A (Indirect) Costs
   f_and_a_rate: number
   indirect_costs: number
@@ -224,6 +246,9 @@ export interface M6Budget {
   research_institution_percent: number
   // Justification
   budget_justification: string
+  // Fee/Profit
+  fee_percent?: number
+  fee_amount?: number
 }
 
 // M6 Fast Track Phase-specific
