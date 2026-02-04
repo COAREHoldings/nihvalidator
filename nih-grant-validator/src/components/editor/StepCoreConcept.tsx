@@ -1,7 +1,9 @@
-import { Lightbulb, Target, FileText, Plus, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { Lightbulb, Target, FileText, Plus, Trash2, FlaskConical } from 'lucide-react'
 import type { ProjectSchemaV2 } from '../../types'
 import { TextField } from '../shared/FormField'
 import { AIGenerateButton } from '../shared/AIGenerateButton'
+import { ExperimentalPlanGenerator } from '../ExperimentalPlanGenerator'
 
 interface StepCoreConceptProps {
   project: ProjectSchemaV2
@@ -10,6 +12,7 @@ interface StepCoreConceptProps {
 
 export function StepCoreConcept({ project, onUpdate }: StepCoreConceptProps) {
   const isFastTrack = project.grant_type === 'Fast Track'
+  const [showExperimentalPlanGenerator, setShowExperimentalPlanGenerator] = useState(false)
   
   // M1: Title & Concept - provide empty object fallback to prevent crashes
   const m1 = project.m1_title_concept || {}
@@ -453,7 +456,30 @@ export function StepCoreConcept({ project, onUpdate }: StepCoreConceptProps) {
             documentType="specific-aims-page"
           />
         </div>
+        
+        {/* Experimental Plan Generator Button */}
+        <div className="mt-4">
+          <button
+            onClick={() => setShowExperimentalPlanGenerator(true)}
+            className="w-full flex items-center justify-center gap-3 p-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all shadow-sm hover:shadow"
+          >
+            <FlaskConical className="w-5 h-5" />
+            Generate Experimental Plan
+            <span className="text-xs bg-white/20 px-2 py-0.5 rounded">Research Strategy</span>
+          </button>
+          <p className="text-xs text-neutral-500 mt-2 text-center">
+            Generate a complete Research Strategy / Experimental Plan from your Specific Aims
+          </p>
+        </div>
       </div>
+      
+      {/* Experimental Plan Generator Modal */}
+      {showExperimentalPlanGenerator && (
+        <ExperimentalPlanGenerator
+          project={project}
+          onClose={() => setShowExperimentalPlanGenerator(false)}
+        />
+      )}
     </div>
   )
 }
