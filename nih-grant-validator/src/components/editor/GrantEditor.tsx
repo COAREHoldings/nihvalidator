@@ -71,7 +71,7 @@ export function GrantEditor({ project, onUpdate, onBackToDashboard, onSave, savi
     status: getStepStatus(step.id)
   }))
 
-  // Calculate overall progress
+  // Calculate overall progress - use fallback values to prevent crashes
   const calculateProgress = (): number => {
     let completed = 0
     
@@ -79,8 +79,9 @@ export function GrantEditor({ project, onUpdate, onBackToDashboard, onSave, savi
     if (project.grant_type) completed += 20
     
     // Step 2: Core Concept (20%)
-    const m1Fields = ['project_title', 'problem_statement', 'proposed_solution']
-    const m1Progress = project.m1_title_concept ? m1Fields.filter(f => project.m1_title_concept[f as keyof typeof project.m1_title_concept]).length / m1Fields.length : 0
+    const m1 = project.m1_title_concept || {}
+    const m1Fields = ['project_title', 'problem_statement', 'proposed_solution'] as const
+    const m1Progress = m1Fields.filter(f => m1[f]).length / m1Fields.length
     const m2Progress = project.m2_hypothesis?.central_hypothesis ? 1 : 0
     const m3Progress = project.m3_specific_aims?.aim1_statement ? 1 : 0
     completed += ((m1Progress + m2Progress + m3Progress) / 3) * 20

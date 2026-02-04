@@ -48,10 +48,11 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
     setExpandedSections(prev => ({ ...prev, [moduleId]: !prev[moduleId] }))
   }
 
-  // Calculate completion stats
-  const totalModules = project.module_states.length
-  const completedModules = project.module_states.filter(m => m.status === 'complete').length
-  const partialModules = project.module_states.filter(m => m.status === 'partial').length
+  // Calculate completion stats - provide fallback for module_states
+  const moduleStates = project.module_states || []
+  const totalModules = moduleStates.length
+  const completedModules = moduleStates.filter(m => m.status === 'complete').length
+  const partialModules = moduleStates.filter(m => m.status === 'partial').length
 
   return (
     <div className="space-y-8">

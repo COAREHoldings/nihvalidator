@@ -12,14 +12,14 @@ export function StepResearchPlan({ project, onUpdate }: StepResearchPlanProps) {
   const isFastTrack = project.grant_type === 'Fast Track'
   const isPhaseI = project.grant_type === 'Phase I'
 
-  // M5: Experimental Approach
-  const m5 = project.m5_experimental_approach
+  // M5: Experimental Approach - provide empty object fallback to prevent crashes
+  const m5 = project.m5_experimental_approach || {}
   const updateM5 = (field: string, value: string) => {
     onUpdate({ m5_experimental_approach: { ...m5, [field]: value } })
   }
 
-  // M5 Fast Track
-  const m5ft = project.m5_fast_track
+  // M5 Fast Track - provide default structure
+  const m5ft = project.m5_fast_track || { phase1: {}, phase2: {}, phase1_complete: false, phase2_complete: false }
 
   const updateFastTrackApproach = (phase: 'phase1' | 'phase2', field: string, value: string) => {
     const currentPhase = m5ft[phase]
@@ -41,8 +41,8 @@ export function StepResearchPlan({ project, onUpdate }: StepResearchPlanProps) {
     })
   }
 
-  // M7: Regulatory
-  const m7 = project.m7_regulatory
+  // M7: Regulatory - provide empty object fallback
+  const m7 = project.m7_regulatory || {}
   const updateM7 = (field: string, value: unknown) => {
     onUpdate({ m7_regulatory: { ...m7, [field]: value } })
   }

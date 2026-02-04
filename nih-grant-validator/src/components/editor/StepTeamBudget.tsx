@@ -11,8 +11,8 @@ interface StepTeamBudgetProps {
 export function StepTeamBudget({ project, onUpdate }: StepTeamBudgetProps) {
   const isFastTrack = project.grant_type === 'Fast Track'
 
-  // M4: Team Mapping
-  const m4 = project.m4_team_mapping
+  // M4: Team Mapping - provide empty object fallback to prevent crashes
+  const m4 = project.m4_team_mapping || {}
   const updateM4 = (field: string, value: unknown) => {
     onUpdate({ m4_team_mapping: { ...m4, [field]: value } })
   }

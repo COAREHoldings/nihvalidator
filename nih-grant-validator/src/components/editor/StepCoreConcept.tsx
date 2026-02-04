@@ -11,26 +11,26 @@ interface StepCoreConceptProps {
 export function StepCoreConcept({ project, onUpdate }: StepCoreConceptProps) {
   const isFastTrack = project.grant_type === 'Fast Track'
   
-  // M1: Title & Concept
-  const m1 = project.m1_title_concept
+  // M1: Title & Concept - provide empty object fallback to prevent crashes
+  const m1 = project.m1_title_concept || {}
   const updateM1 = (field: string, value: string) => {
     onUpdate({ m1_title_concept: { ...m1, [field]: value } })
   }
 
-  // M2: Hypothesis
-  const m2 = project.m2_hypothesis
+  // M2: Hypothesis - provide empty object fallback
+  const m2 = project.m2_hypothesis || {}
   const updateM2 = (field: string, value: string) => {
     onUpdate({ m2_hypothesis: { ...m2, [field]: value } })
   }
 
-  // M3: Specific Aims
-  const m3 = project.m3_specific_aims
+  // M3: Specific Aims - provide empty object fallback
+  const m3 = project.m3_specific_aims || {}
   const updateM3 = (field: string, value: string | string[]) => {
     onUpdate({ m3_specific_aims: { ...m3, [field]: value } })
   }
 
-  // Fast Track aims
-  const m3ft = project.m3_fast_track
+  // Fast Track aims - provide default structure
+  const m3ft = project.m3_fast_track || { phase1: {}, phase2: {}, phase1_complete: false, phase2_complete: false }
 
   const updateFastTrackAims = (phase: 'phase1' | 'phase2', field: string, value: string | string[]) => {
     const currentPhase = m3ft[phase]
