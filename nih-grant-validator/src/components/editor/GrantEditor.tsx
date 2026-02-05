@@ -26,8 +26,33 @@ const STEPS = [
   { id: 5, name: 'Review & Export', description: 'Validation, Compliance, Export' },
 ]
 
+// Calculate the appropriate starting step based on project progress
+function calculateInitialStep(project: ProjectSchemaV2): number {
+  // Step 1: Setup - check if grant_type is set
+  if (!project.grant_type) return 1
+  
+  // Step 2: Core Concept - check M1, M2, M3
+  const m1Done = !!(project.m1_title_concept?.project_title && project.m1_title_concept?.problem_statement)
+  const m2Done = !!(project.m2_hypothesis?.central_hypothesis)
+  const m3Done = !!(project.m3_specific_aims?.aims?.length > 0 && project.m3_specific_aims.aims[0]?.statement)
+  if (!m1Done || !m2Done || !m3Done) return 2
+  
+  // Step 3: Research Plan - check M5, M7
+  const m5Done = !!(project.m5_experimental_approach?.methodology_overview)
+  const m7Done = !!(project.m7_regulatory?.facilities_description)
+  if (!m5Done || !m7Done) return 3
+  
+  // Step 4: Team & Budget - check M4, M6
+  const m4Done = !!(project.m4_team_mapping?.pi_name)
+  const m6Done = project.m6_budget?.total_project_costs !== undefined && project.m6_budget?.total_project_costs > 0
+  if (!m4Done || !m6Done) return 4
+  
+  // All steps complete, go to Review
+  return 5
+}
+
 export function GrantEditor({ project, onUpdate, onBackToDashboard, onSave, saving: externalSaving, lastSaved: externalLastSaved }: GrantEditorProps) {
-  const [currentStep, setCurrentStep] = useState(1)
+  const [currentStep, setCurrentStep] = useState(() => calculateInitialStep(project))
   const [showAI, setShowAI] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
