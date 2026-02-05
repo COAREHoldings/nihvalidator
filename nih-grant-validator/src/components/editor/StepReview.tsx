@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileCheck, CheckCircle, XCircle, AlertTriangle, Download, RefreshCw, ChevronDown, ChevronUp, ExternalLink, Briefcase, FileText, BookOpen, Image } from 'lucide-react'
+import { FileCheck, CheckCircle, XCircle, AlertTriangle, Download, RefreshCw, ChevronDown, ChevronUp, ExternalLink, Briefcase, FileText, BookOpen, Image, Package, Loader2 } from 'lucide-react'
 import type { ProjectSchemaV2, ValidationResult } from '../../types'
 import { runFullValidation } from '../../validation'
 import { ComplianceAuditPanel } from '../ComplianceAuditPanel'
@@ -8,6 +8,7 @@ import { AIGenerateButton } from '../shared/AIGenerateButton'
 import { AIAcknowledgment } from '../AIAcknowledgment'
 import { GrantSummary } from './GrantSummary'
 import { FigureLibrary } from '../FigureLibrary'
+import { batchExportDocuments, type BatchExportProgress } from '../../services/batchExportService'
 
 type TabType = 'validation' | 'summary' | 'documents' | 'figures'
 
@@ -23,6 +24,8 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
   const [showComplianceAudit, setShowComplianceAudit] = useState(false)
   const [showCommercialization, setShowCommercialization] = useState(false)
   const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({})
+  const [batchExporting, setBatchExporting] = useState(false)
+  const [exportProgress, setExportProgress] = useState<BatchExportProgress | null>(null))
 
   const showCommercializationModule = project.grant_type && ['Phase II', 'Fast Track', 'Direct to Phase II', 'Phase IIB'].includes(project.grant_type)
 
