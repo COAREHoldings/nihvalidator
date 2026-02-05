@@ -223,6 +223,9 @@ export default function App() {
       case 'grants':
         if (currentProject) {
           setMainView('editor')
+        } else {
+          // Show dashboard so user can see and select from their grants
+          setMainView('dashboard')
         }
         break
       case 'research':
