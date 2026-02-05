@@ -3,13 +3,13 @@
 ## Project Location
 - **Workspace:** `/workspace/nih-grant-validator`
 - **GitHub:** https://github.com/COAREHoldings/validator
-- **Live URL:** https://huhga0gptllp.space.minimax.io
+- **Live URL:** https://ypnu6f0yr88b.space.minimax.io
 
 ## Supabase Backend
 - **Project ID:** dvuhtfzsvcacyrlfettz
 - **URL:** https://dvuhtfzsvcacyrlfettz.supabase.co
 
-## Current Status: 9/10 Ready
+## Current Status: 9.5/10 Ready
 
 ### Completed Features
 - Grant type selection & wizard
@@ -19,8 +19,12 @@
 - Download All Documents (ZIP)
 - Figure/image upload & library
 - JSON data export
-- Toast notification system (INTEGRATED in App.tsx, DownloadButtons, AIGenerateButton)
-- Mobile-responsive sidebar with hamburger menu
+- Toast notification system (fully integrated)
+- Mobile-responsive UI:
+  - Hamburger menu sidebar
+  - Collapsible step navigation with horizontal pills
+  - Card-based grants list on mobile
+  - Responsive typography and spacing
 - "My Grants" dedicated page
 - AI Acknowledgment modal
 - User authentication (Supabase Auth)
@@ -28,43 +32,17 @@
 
 ---
 
-## REMAINING TASKS
+## REMAINING OPTIONAL ENHANCEMENTS
 
-### 1. Mobile Responsiveness - Key Areas
-
-**Priority fixes:**
-
-#### A. GrantEditor stepper (`src/components/editor/GrantEditor.tsx`)
-- Stepper numbers cramped on mobile
-- Fix: vertical layout or icons-only on small screens
-- Add: `flex-col md:flex-row` to stepper container
-
-#### B. My Grants table (`src/components/dashboard/MyGrants.tsx`)
-- Table overflows on mobile
-- Fix: card view for mobile, or horizontal scroll wrapper
-- Add: `overflow-x-auto` wrapper around table
-
-#### C. Module forms (various `Step*.tsx` files)
-- Some inputs/tables may overflow
-- Fix: Add `overflow-x-auto` to table containers
-- Fix: Use responsive grid classes `grid-cols-1 md:grid-cols-2`
-
-**CSS utilities available in `src/index.css`:**
-```css
-@media (max-width: 768px) {
-  .mobile-full-width { width: 100%; }
-  .mobile-stack { grid-template-columns: 1fr !important; }
-  .mobile-compact { padding: 1rem !important; }
-}
-```
-
-### 2. Additional Toast Integration (Optional)
-
-Toast system in `src/components/shared/ToastProvider.tsx` is integrated in main files.
+### 1. Additional Toast Integration (Optional)
 Consider adding to these files if needed:
 - `src/components/FigureLibrary.tsx` - Upload errors
 - `src/components/AuditMode.tsx` - Parse/audit errors (5 locations)
-- `src/components/DocumentImport.tsx` - Import errors
+
+### 2. Module Form Responsiveness (Minor)
+Some individual module forms may need overflow handling:
+- Add `overflow-x-auto` to table containers if needed
+- Use responsive grid classes `grid-cols-1 md:grid-cols-2`
 
 ---
 
@@ -75,6 +53,7 @@ Consider adding to these files if needed:
 - docx (DOCX generation)
 - jszip (ZIP bundling)
 - file-saver (downloads)
+- react-hot-toast (notifications)
 
 ## Build & Deploy Commands
 ```bash
@@ -97,8 +76,7 @@ Tell the AI:
 ```
 Continue working on the NIH Grant Validator project at /workspace/nih-grant-validator
 
-Read HANDOFF.md for context. The main remaining task is:
-- Improve mobile responsiveness in GrantEditor stepper and MyGrants table
+Read HANDOFF.md for context. The app is feature-complete at 9.5/10.
 
 GitHub: https://github.com/COAREHoldings/validator
 ```
