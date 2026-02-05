@@ -1,4 +1,5 @@
-import { Home, FileText, FlaskConical, Settings, LogOut, User } from 'lucide-react'
+import { useState } from 'react'
+import { Home, FileText, FlaskConical, Settings, LogOut, User, Menu, X } from 'lucide-react'
 
 interface SidebarProps {
   activeNav: 'dashboard' | 'grants' | 'research' | 'settings'
@@ -9,6 +10,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeNav, onNavigate, onReset, onSignOut, userEmail }: SidebarProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   const navItems = [
     { id: 'dashboard' as const, label: 'Dashboard', icon: Home },
     { id: 'grants' as const, label: 'My Grants', icon: FileText },
@@ -16,8 +19,13 @@ export function Sidebar({ activeNav, onNavigate, onReset, onSignOut, userEmail }
     { id: 'settings' as const, label: 'Settings', icon: Settings },
   ]
 
-  return (
-    <aside className="w-60 min-h-screen bg-white border-r border-neutral-200 flex flex-col sticky top-0">
+  const handleNavClick = (nav: typeof navItems[0]['id']) => {
+    onNavigate(nav)
+    setMobileMenuOpen(false)
+  }
+
+  const SidebarContent = () => (
+    <>
       {/* Logo */}
       <div className="p-5 border-b border-neutral-100">
         <div className="flex items-center gap-3">
@@ -36,7 +44,7 @@ export function Sidebar({ activeNav, onNavigate, onReset, onSignOut, userEmail }
         {navItems.map(item => (
           <button
             key={item.id}
-            onClick={() => onNavigate(item.id)}
+            onClick={() => handleNavClick(item.id)}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
               activeNav === item.id
                 ? 'bg-primary-50 text-primary-700 shadow-sm'
@@ -88,6 +96,56 @@ export function Sidebar({ activeNav, onNavigate, onReset, onSignOut, userEmail }
           </button>
         )}
       </div>
-    </aside>
+    </>
+  )
+
+  return (
+    <>
+      {/* Mobile Menu Button - Fixed at top */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-neutral-200 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-xs">NIH</span>
+          </div>
+          <span className="font-semibold text-neutral-900 text-sm">Grant Validator</span>
+        </div>
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="p-2 rounded-lg hover:bg-neutral-100 transition-colors"
+          aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+        >
+          {mobileMenuOpen ? (
+            <X className="w-6 h-6 text-neutral-600" />
+          ) : (
+            <Menu className="w-6 h-6 text-neutral-600" />
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Spacer */}
+      <div className="md:hidden h-14" />
+
+      {/* Mobile Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile Drawer */}
+      <aside
+        className={`md:hidden fixed top-14 left-0 bottom-0 w-72 bg-white z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <SidebarContent />
+      </aside>
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-60 min-h-screen bg-white border-r border-neutral-200 flex-col sticky top-0">
+        <SidebarContent />
+      </aside>
+    </>
   )
 }

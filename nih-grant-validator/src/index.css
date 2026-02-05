@@ -27,7 +27,70 @@
   }
 }
 
+/* Mobile responsiveness */
+@layer components {
+  /* Hide sidebar on mobile by default */
+  @media (max-width: 768px) {
+    .sidebar-desktop {
+      display: none;
+    }
+    
+    /* Full width containers on mobile */
+    .mobile-full-width {
+      width: 100%;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    /* Stack grid items on mobile */
+    .mobile-stack {
+      grid-template-columns: 1fr !important;
+    }
+    
+    /* Smaller padding on mobile */
+    .mobile-compact {
+      padding: 1rem !important;
+    }
+    
+    /* Smaller text on mobile */
+    .mobile-text-sm {
+      font-size: 0.875rem !important;
+    }
+  }
+  
+  /* Tablet adjustments */
+  @media (max-width: 1024px) {
+    .tablet-compact {
+      padding: 1.5rem !important;
+    }
+  }
+}
 
+/* Custom scrollbar */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+  }
+}
 
 img {
   object-position: top;
@@ -35,4 +98,32 @@ img {
 
 .fixed {
   position: fixed;
+}
+
+/* Toast animations */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+/* Mobile-friendly touch targets */
+@media (max-width: 768px) {
+  button, a, input, select, textarea {
+    min-height: 44px;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
 }
