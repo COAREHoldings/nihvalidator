@@ -3,15 +3,15 @@
 ## Project Location
 - **Workspace:** `/workspace/nih-grant-validator`
 - **GitHub:** https://github.com/COAREHoldings/validator
-- **Live URL:** https://fncbbyyg4kao.space.minimax.io
+- **Live URL:** https://huhga0gptllp.space.minimax.io
 
 ## Supabase Backend
 - **Project ID:** dvuhtfzsvcacyrlfettz
 - **URL:** https://dvuhtfzsvcacyrlfettz.supabase.co
 
-## Current Status: 8.5/10 Ready
+## Current Status: 9/10 Ready
 
-### ✅ Completed Features
+### Completed Features
 - Grant type selection & wizard
 - Module-based data entry (8 modules)
 - AI document generation (edge functions)
@@ -19,7 +19,7 @@
 - Download All Documents (ZIP)
 - Figure/image upload & library
 - JSON data export
-- Toast notification system (built, needs integration)
+- Toast notification system (INTEGRATED in App.tsx, DownloadButtons, AIGenerateButton)
 - Mobile-responsive sidebar with hamburger menu
 - "My Grants" dedicated page
 - AI Acknowledgment modal
@@ -28,41 +28,9 @@
 
 ---
 
-## ⚠️ REMAINING TASKS
+## REMAINING TASKS
 
-### 1. Error Handling - Integrate Toast Notifications
-
-Toast system exists in `src/components/shared/ToastProvider.tsx` with `useToast()` hook.
-
-**Files to update:**
-
-**src/App.tsx** - Add these toast calls:
-- Line ~98: `loadProjects` catch → `toast.error('Failed to load projects')`
-- Line ~125: auto-save catch → `toast.error('Auto-save failed', 'Your changes may not be saved')`
-- Line ~156: manual save catch → `toast.error('Save failed')`
-- Line ~193: create project catch → `toast.error('Failed to create project')`
-
-**Other files:**
-- `src/components/FigureLibrary.tsx` - Upload errors
-- `src/components/AuditMode.tsx` - Parse/audit errors
-- `src/services/batchExportService.ts` - Export errors
-
-**How to integrate:**
-```typescript
-// In App.tsx, add import:
-import { useToast } from './components/shared/ToastProvider'
-
-// In component function, add hook:
-const { success, error, warning } = useToast()
-
-// Replace console.error with:
-error('Title', 'Optional description')
-success('Saved successfully')
-```
-
----
-
-### 2. Mobile Responsiveness - Key Areas
+### 1. Mobile Responsiveness - Key Areas
 
 **Priority fixes:**
 
@@ -90,6 +58,14 @@ success('Saved successfully')
 }
 ```
 
+### 2. Additional Toast Integration (Optional)
+
+Toast system in `src/components/shared/ToastProvider.tsx` is integrated in main files.
+Consider adding to these files if needed:
+- `src/components/FigureLibrary.tsx` - Upload errors
+- `src/components/AuditMode.tsx` - Parse/audit errors (5 locations)
+- `src/components/DocumentImport.tsx` - Import errors
+
 ---
 
 ## Tech Stack
@@ -104,7 +80,7 @@ success('Saved successfully')
 ```bash
 cd /workspace/nih-grant-validator
 npm install
-npx vite build
+npx tsc -b && npx vite build
 # Then use deploy tool with dist_dir="/workspace/nih-grant-validator/dist"
 ```
 
@@ -121,9 +97,8 @@ Tell the AI:
 ```
 Continue working on the NIH Grant Validator project at /workspace/nih-grant-validator
 
-Read HANDOFF.md for context. The remaining tasks are:
-1. Integrate toast notifications for error handling in App.tsx and other files
-2. Improve mobile responsiveness in GrantEditor stepper and MyGrants table
+Read HANDOFF.md for context. The main remaining task is:
+- Improve mobile responsiveness in GrantEditor stepper and MyGrants table
 
 GitHub: https://github.com/COAREHoldings/validator
 ```
