@@ -5,6 +5,7 @@ import { runFullValidation } from '../../validation'
 import { ComplianceAuditPanel } from '../ComplianceAuditPanel'
 import { CommercializationDirector } from '../CommercializationDirector'
 import { AIGenerateButton } from '../shared/AIGenerateButton'
+import { AIAcknowledgment } from '../AIAcknowledgment'
 import { GrantSummary } from './GrantSummary'
 
 type TabType = 'validation' | 'summary' | 'documents'
@@ -373,6 +374,7 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
       )}
 
       {activeTab === 'documents' && (
+        <AIAcknowledgment>
         <>
       {/* AI Document Generation */}
       <div className="bg-white rounded-xl border border-neutral-200 p-6">
@@ -521,6 +523,7 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
         </div>
       </div>
         </>
+        </AIAcknowledgment>
       )}
     </div>
   )
