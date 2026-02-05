@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { Loader2, LogOut } from 'lucide-react'
 import { Sidebar } from './components/layout/Sidebar'
 import { Dashboard } from './components/dashboard/Dashboard'
+import { MyGrants } from './components/dashboard/MyGrants'
 import { GrantEditor } from './components/editor/GrantEditor'
 import { ProjectCreationWizard } from './components/ProjectCreationWizard'
 import { AuditMode } from './components/AuditMode'
@@ -13,7 +14,7 @@ import { getUserProjects, createProject, updateProject as updateProjectDB, saveP
 import type { ProjectSchemaV2 } from './types'
 import { updateModuleStates, createDefaultProject } from './types'
 
-type MainView = 'dashboard' | 'editor' | 'audit' | 'research-intelligence' | 'settings'
+type MainView = 'dashboard' | 'editor' | 'audit' | 'research-intelligence' | 'settings' | 'grants'
 type NavItem = 'dashboard' | 'grants' | 'research' | 'settings'
 
 export default function App() {
@@ -221,12 +222,7 @@ export default function App() {
         setMainView('dashboard')
         break
       case 'grants':
-        if (currentProject) {
-          setMainView('editor')
-        } else {
-          // Show dashboard so user can see and select from their grants
-          setMainView('dashboard')
-        }
+        setMainView('grants')
         break
       case 'research':
         setMainView('research-intelligence')
@@ -326,6 +322,28 @@ export default function App() {
         <div className="flex-1">
           <ResearchIntelligence project={currentProject} onBack={handleBackToDashboard} />
         </div>
+      </div>
+    )
+  }
+
+  // Show My Grants page
+  if (mainView === 'grants') {
+    return (
+      <div className="flex min-h-screen">
+        <Sidebar 
+          activeNav={activeNav} 
+          onNavigate={handleNavigate}
+          onReset={currentProject ? reset : undefined}
+          onSignOut={handleSignOut}
+          userEmail={user.email}
+        />
+        <MyGrants
+          projects={projects}
+          currentProject={currentProject}
+          onSelectProject={handleSelectProject}
+          onStartNew={handleStartNew}
+          loading={loadingProjects}
+        />
       </div>
     )
   }
