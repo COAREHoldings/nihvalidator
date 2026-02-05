@@ -205,7 +205,14 @@ export default function App() {
   }
 
   const handleContinueDraft = () => {
+    // If we have a currentProject, open the editor
     if (currentProject) {
+      setMainView('editor')
+      return
+    }
+    // Fallback: if currentProject is null but we have projects, select the first one
+    if (projects.length > 0) {
+      setCurrentProject(projects[0])
       setMainView('editor')
     }
   }

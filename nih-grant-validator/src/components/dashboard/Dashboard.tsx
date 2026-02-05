@@ -22,8 +22,11 @@ export function Dashboard({
   onSelectProject,
   loading = false
 }: DashboardProps) {
-  const hasDraft = currentProject !== null
+  const hasDraft = currentProject !== null || projects.length > 0
   const hasProjects = projects.length > 0
+  
+  // Use currentProject or fall back to first project for display
+  const displayProject = currentProject || (projects.length > 0 ? projects[0] : null)
   
   // Calculate progress based on module states
   const getProgress = (project: ProjectSchemaV2) => {
@@ -31,7 +34,7 @@ export function Dashboard({
     return Math.round((project.module_states.filter(m => m.status === 'complete').length / project.module_states.length) * 100)
   }
   
-  const draftProgress = currentProject ? getProgress(currentProject) : 0
+  const draftProgress = displayProject ? getProgress(displayProject) : 0
 
   return (
     <div className="flex-1 bg-neutral-50 min-h-screen">
@@ -63,10 +66,10 @@ export function Dashboard({
             iconColor={hasDraft ? "text-green-600" : "text-neutral-400"}
             title="Continue Draft"
             description={hasDraft 
-              ? `${currentProject?.program_type} ${currentProject?.grant_type || ''} - ${draftProgress}% complete`
+              ? `${displayProject?.program_type} ${displayProject?.grant_type || ''} - ${draftProgress}% complete`
               : 'No draft in progress'
             }
-            subtext={hasDraft ? `Last edited: ${new Date(currentProject?.updated_at || '').toLocaleDateString()}` : undefined}
+            subtext={hasDraft ? `Last edited: ${new Date(displayProject?.updated_at || '').toLocaleDateString()}` : undefined}
             buttonText="Resume"
             buttonVariant="primary"
             onClick={onContinueDraft}
