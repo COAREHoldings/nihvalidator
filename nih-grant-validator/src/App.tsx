@@ -211,16 +211,29 @@ export default function App() {
   }
 
   const handleContinueDraft = () => {
+    // If still loading projects, show a message
+    if (loadingProjects) {
+      toast.info('Loading...', 'Please wait while your projects are being loaded.')
+      return
+    }
+    
     // If we have a currentProject, open the editor
     if (currentProject) {
       setMainView('editor')
+      setActiveNav('dashboard')
       return
     }
+    
     // Fallback: if currentProject is null but we have projects, select the first one
     if (projects.length > 0) {
       setCurrentProject(projects[0])
       setMainView('editor')
+      setActiveNav('dashboard')
+      return
     }
+    
+    // No projects available
+    toast.info('No drafts found', 'Start a new grant application to begin.')
   }
 
   const handleSelectProject = (project: ProjectSchemaV2) => {
