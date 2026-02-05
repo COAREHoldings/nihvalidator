@@ -25,7 +25,7 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
   const [showCommercialization, setShowCommercialization] = useState(false)
   const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({})
   const [batchExporting, setBatchExporting] = useState(false)
-  const [exportProgress, setExportProgress] = useState<BatchExportProgress | null>(null))
+  const [exportProgress, setExportProgress] = useState<BatchExportProgress | null>(null)
 
   const showCommercializationModule = project.grant_type && ['Phase II', 'Fast Track', 'Direct to Phase II', 'Phase IIB'].includes(project.grant_type)
 
@@ -55,6 +55,17 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
 
   const toggleSection = (moduleId: number) => {
     setExpandedSections(prev => ({ ...prev, [moduleId]: !prev[moduleId] }))
+  }
+
+  const handleBatchExport = async () => {
+    setBatchExporting(true)
+    setExportProgress(null)
+    
+    await batchExportDocuments(project, (progress) => {
+      setExportProgress(progress)
+    })
+    
+    setBatchExporting(false)
   }
 
   // Calculate completion stats - provide fallback for module_states
@@ -490,26 +501,59 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
       <div className="bg-white rounded-xl border border-neutral-200 p-6">
         <h3 className="text-lg font-semibold text-neutral-900 mb-4">Export</h3>
         
+        {/* Batch Export Progress */}
+        {exportProgress && batchExporting && (
+          <div className="mb-4 p-4 bg-primary-50 rounded-lg border border-primary-200">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-primary-700">
+                {exportProgress.status === 'generating' && `Generating: ${exportProgress.currentDocument}`}
+                {exportProgress.status === 'packaging' && 'Packaging documents...'}
+                {exportProgress.status === 'complete' && 'Export complete!'}
+                {exportProgress.status === 'error' && `Error: ${exportProgress.error}`}
+              </span>
+              <span className="text-sm text-primary-600">
+                {exportProgress.current}/{exportProgress.total}
+              </span>
+            </div>
+            <div className="w-full bg-primary-200 rounded-full h-2">
+              <div 
+                className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${(exportProgress.current / exportProgress.total) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+        
         <div className="grid md:grid-cols-2 gap-4">
+          <button
+            onClick={handleBatchExport}
+            disabled={batchExporting}
+            className="flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg hover:from-violet-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-wait transition-all shadow-sm hover:shadow"
+          >
+            {batchExporting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span className="font-medium">Generating Documents...</span>
+              </>
+            ) : (
+              <>
+                <Package className="w-5 h-5" />
+                <span className="font-medium">Download All Documents (ZIP)</span>
+              </>
+            )}
+          </button>
+
           <button
             onClick={handleExportJSON}
             className="flex items-center justify-center gap-2 p-4 bg-primary-50 text-primary-700 border border-primary-200 rounded-lg hover:bg-primary-100 transition-colors"
           >
             <Download className="w-5 h-5" />
-            <span className="font-medium">Export JSON</span>
-          </button>
-
-          <button
-            disabled
-            className="flex items-center justify-center gap-2 p-4 bg-neutral-50 text-neutral-400 border border-neutral-200 rounded-lg cursor-not-allowed"
-          >
-            <ExternalLink className="w-5 h-5" />
-            <span className="font-medium">Generate Documents (Coming Soon)</span>
+            <span className="font-medium">Export JSON Data</span>
           </button>
         </div>
 
         <p className="text-xs text-neutral-500 mt-4 text-center">
-          Export your grant data for document generation or backup.
+          "Download All" generates DOCX files for all sections and packages them into a ZIP file.
         </p>
       </div>
 
