@@ -353,7 +353,7 @@ export async function batchExportDocuments(
 NIH Grant Document Export
 =========================
 
-Project: ${project.m1_title_concept?.title || 'Untitled'}
+Project: ${project.m1_title_concept?.project_title || 'Untitled'}
 Grant Type: ${project.grant_type || 'Not specified'}
 Program: ${project.program_type || 'Not specified'}
 Institute: ${project.institute || 'Not specified'}
@@ -386,7 +386,7 @@ ${errors.length > 0 ? `\nErrors:\n${errors.join('\n')}` : ''}
   try {
     // Generate and download ZIP
     const zipBlob = await zip.generateAsync({ type: 'blob' })
-    const projectName = project.m1_title_concept?.title?.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '_') || 'nih_grant'
+    const projectName = project.m1_title_concept?.project_title?.slice(0, 30).replace(/[^a-zA-Z0-9]/g, '_') || 'nih_grant'
     saveAs(zipBlob, `${projectName}_documents_${Date.now()}.zip`)
 
     onProgress?.({

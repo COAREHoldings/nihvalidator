@@ -1,6 +1,7 @@
 import { FileText, Download } from 'lucide-react'
 import { generateDocx, generatePdf } from '../../lib/docxGenerator'
 import { useState } from 'react'
+import { useToast } from '../shared/ToastProvider'
 
 interface DownloadButtonsProps {
   title: string
@@ -11,6 +12,7 @@ interface DownloadButtonsProps {
 
 export function DownloadButtons({ title, content, filename, disabled = false }: DownloadButtonsProps) {
   const [isGenerating, setIsGenerating] = useState(false)
+  const toast = useToast()
 
   const handleDocxDownload = async () => {
     if (!content || disabled) return
@@ -24,7 +26,7 @@ export function DownloadButtons({ title, content, filename, disabled = false }: 
       })
     } catch (error) {
       console.error('Error generating DOCX:', error)
-      alert('Error generating DOCX file. Please try again.')
+      toast.error('Export Failed', 'Error generating DOCX file. Please try again.')
     } finally {
       setIsGenerating(false)
     }

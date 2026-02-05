@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Sparkles, Loader2, Check, AlertCircle, FileText, Download, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react'
 import { generateDocument, getDocumentTypeTitle, getDocumentTypeDescription, type DocumentType, type GeneratedDocument } from '../../services/documentGenerationService'
 import { generateDocx, generatePdf } from '../../lib/docxGenerator'
+import { useToast } from '../shared/ToastProvider'
 import type { ProjectSchemaV2 } from '../../types'
 
 interface AIGenerateButtonProps {
@@ -26,6 +27,7 @@ export function AIGenerateButton({
   const [generatedContent, setGeneratedContent] = useState<GeneratedDocument | null>(null)
   const [showPreview, setShowPreview] = useState(false)
   const [downloadingDocx, setDownloadingDocx] = useState(false)
+  const toast = useToast()
 
   const title = getDocumentTypeTitle(documentType)
   const description = getDocumentTypeDescription(documentType)
@@ -59,6 +61,7 @@ export function AIGenerateButton({
       })
     } catch (err) {
       console.error('DOCX generation error:', err)
+      toast.error('Export Failed', 'Failed to generate DOCX file. Please try again.')
     } finally {
       setDownloadingDocx(false)
     }

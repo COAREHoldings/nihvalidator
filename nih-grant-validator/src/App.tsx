@@ -10,6 +10,7 @@ import { ResearchIntelligence } from './components/ResearchIntelligence'
 import { AuthScreen } from './components/auth/AuthScreen'
 import { Onboarding } from './components/Onboarding'
 import { useAuth } from './contexts/AuthContext'
+import { useToast } from './components/shared/ToastProvider'
 import { getUserProjects, createProject, updateProject as updateProjectDB, saveProject } from './services/projectService'
 import type { ProjectSchemaV2 } from './types'
 import { updateModuleStates, createDefaultProject } from './types'
@@ -19,6 +20,7 @@ type NavItem = 'dashboard' | 'grants' | 'research' | 'settings'
 
 export default function App() {
   const { user, loading: authLoading, signOut } = useAuth()
+  const toast = useToast()
   const [mainView, setMainView] = useState<MainView>('dashboard')
   const [activeNav, setActiveNav] = useState<NavItem>('dashboard')
   const [projects, setProjects] = useState<ProjectSchemaV2[]>([])
@@ -96,6 +98,7 @@ export default function App() {
       }
     } catch (error) {
       console.error('Failed to load projects:', error)
+      toast.error('Failed to load projects', 'Please check your connection and try refreshing the page.')
     } finally {
       setLoadingProjects(false)
     }
@@ -123,6 +126,7 @@ export default function App() {
         pendingChangesRef.current = null
       } catch (error) {
         console.error('Auto-save failed:', error)
+        toast.error('Auto-save failed', 'Please check your connection and try saving manually.')
       } finally {
         setSaving(false)
       }
@@ -154,6 +158,7 @@ export default function App() {
       pendingChangesRef.current = null
     } catch (error) {
       console.error('Save failed:', error)
+      toast.error('Save failed', 'Unable to save your changes. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -191,6 +196,7 @@ export default function App() {
       setLastSaved(new Date())
     } catch (error) {
       console.error('Failed to create project:', error)
+      toast.error('Failed to create project', 'Unable to create your grant application. Please try again.')
     } finally {
       setSaving(false)
     }
