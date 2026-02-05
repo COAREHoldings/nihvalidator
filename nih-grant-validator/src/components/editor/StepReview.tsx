@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileCheck, CheckCircle, XCircle, AlertTriangle, Download, RefreshCw, ChevronDown, ChevronUp, ExternalLink, Briefcase, FileText, BookOpen } from 'lucide-react'
+import { FileCheck, CheckCircle, XCircle, AlertTriangle, Download, RefreshCw, ChevronDown, ChevronUp, ExternalLink, Briefcase, FileText, BookOpen, Image } from 'lucide-react'
 import type { ProjectSchemaV2, ValidationResult } from '../../types'
 import { runFullValidation } from '../../validation'
 import { ComplianceAuditPanel } from '../ComplianceAuditPanel'
@@ -7,8 +7,9 @@ import { CommercializationDirector } from '../CommercializationDirector'
 import { AIGenerateButton } from '../shared/AIGenerateButton'
 import { AIAcknowledgment } from '../AIAcknowledgment'
 import { GrantSummary } from './GrantSummary'
+import { FigureLibrary } from '../FigureLibrary'
 
-type TabType = 'validation' | 'summary' | 'documents'
+type TabType = 'validation' | 'summary' | 'documents' | 'figures'
 
 interface StepReviewProps {
   project: ProjectSchemaV2
@@ -114,6 +115,19 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
               AI Documents
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('figures')}
+            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'figures'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Image className="w-4 h-4" />
+              Figures
             </div>
           </button>
         </nav>
@@ -524,6 +538,16 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
       </div>
         </>
         </AIAcknowledgment>
+      )}
+
+      {activeTab === 'figures' && project.id && (
+        <FigureLibrary 
+          projectId={project.id}
+          onSelectFigure={(figure) => {
+            // Could copy figure reference or open preview
+            console.log('Selected figure:', figure)
+          }}
+        />
       )}
     </div>
   )
