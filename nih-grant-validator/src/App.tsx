@@ -7,6 +7,7 @@ import { ProjectCreationWizard } from './components/ProjectCreationWizard'
 import { AuditMode } from './components/AuditMode'
 import { ResearchIntelligence } from './components/ResearchIntelligence'
 import { AuthScreen } from './components/auth/AuthScreen'
+import { Onboarding } from './components/Onboarding'
 import { useAuth } from './contexts/AuthContext'
 import { getUserProjects, createProject, updateProject as updateProjectDB, saveProject } from './services/projectService'
 import type { ProjectSchemaV2 } from './types'
@@ -25,6 +26,7 @@ export default function App() {
   const [loadingProjects, setLoadingProjects] = useState(false)
   const [saving, setSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [showOnboarding, setShowOnboarding] = useState(false)
   
   // Auto-save debounce timer
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -34,11 +36,24 @@ export default function App() {
   useEffect(() => {
     if (user) {
       loadProjects()
+      // Check if user has seen onboarding
+      const hasSeenOnboarding = localStorage.getItem(`onboarding_completed_${user.id}`)
+      if (!hasSeenOnboarding) {
+        setShowOnboarding(true)
+      }
     } else {
       setProjects([])
       setCurrentProject(null)
     }
   }, [user])
+
+  // Handle onboarding completion
+  const handleOnboardingComplete = () => {
+    if (user) {
+      localStorage.setItem(`onboarding_completed_${user.id}`, 'true')
+    }
+    setShowOnboarding(false)
+  }
 
   // Auto-save functionality
   useEffect(() => {
@@ -251,6 +266,37 @@ export default function App() {
   // Show auth screen if not logged in
   if (!user) {
     return <AuthScreen onSuccess={loadProjects} />
+  }
+
+  // Show onboarding for new users
+  if (showOnboarding) {
+    return (
+      <>
+        <div className="flex min-h-screen">
+          <Sidebar 
+            activeNav={activeNav} 
+            onNavigate={handleNavigate}
+            onReset={currentProject ? reset : undefined}
+            onSignOut={handleSignOut}
+            userEmail={user.email}
+          />
+          <Dashboard
+            onStartNew={handleStartNew}
+            onContinueDraft={handleContinueDraft}
+            onAudit={() => setMainView('audit')}
+            onResearchIntel={() => setMainView('research-intelligence')}
+            currentProject={currentProject}
+            projects={projects}
+            onSelectProject={handleSelectProject}
+            loading={loadingProjects}
+          />
+        </div>
+        <Onboarding 
+          onComplete={handleOnboardingComplete} 
+          userName={user.email?.split('@')[0]}
+        />
+      </>
+    )
   }
 
   // Show wizard if active
