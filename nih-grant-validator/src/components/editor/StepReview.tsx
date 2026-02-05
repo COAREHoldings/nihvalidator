@@ -376,34 +376,95 @@ export function StepReview({ project, onUpdate }: StepReviewProps) {
         <>
       {/* AI Document Generation */}
       <div className="bg-white rounded-xl border border-neutral-200 p-6">
-        <div className="flex items-center gap-2 mb-6">
+        <div className="flex items-center gap-2 mb-2">
           <FileText className="w-5 h-5 text-neutral-400" />
           <h3 className="text-lg font-semibold text-neutral-900">AI Document Generation</h3>
         </div>
+        <p className="text-sm text-neutral-500 mb-6">Generate NIH-compliant documents with AI assistance. Each document follows strict compliance guidelines.</p>
 
-        <div className="grid lg:grid-cols-2 gap-4">
-          {/* References */}
-          <AIGenerateButton
-            project={project}
-            documentType="references"
-          />
-
-          {/* Compiled Grant */}
-          <AIGenerateButton
-            project={project}
-            documentType="compiled-grant"
-          />
-        </div>
-
-        {/* Commercialization for Phase II+ */}
-        {showCommercializationModule && (
-          <div className="mt-4">
-            <AIGenerateButton
-              project={project}
-              documentType="commercialization"
-            />
+        {/* Core Documents */}
+        <div className="space-y-6">
+          {/* Specific Aims Section */}
+          <div>
+            <h4 className="text-sm font-medium text-neutral-700 mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+              Specific Aims
+            </h4>
+            <div className="grid lg:grid-cols-2 gap-4 pl-8">
+              <AIGenerateButton
+                project={project}
+                documentType="specific-aims"
+              />
+              <AIGenerateButton
+                project={project}
+                documentType="specific-aims-page"
+              />
+            </div>
           </div>
-        )}
+
+          {/* Narrative Section */}
+          <div>
+            <h4 className="text-sm font-medium text-neutral-700 mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+              Project Narrative
+            </h4>
+            <div className="pl-8">
+              <AIGenerateButton
+                project={project}
+                documentType="project-narrative"
+              />
+            </div>
+          </div>
+
+          {/* Research Strategy Section */}
+          <div>
+            <h4 className="text-sm font-medium text-neutral-700 mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+              Research Strategy
+            </h4>
+            <div className="grid lg:grid-cols-2 gap-4 pl-8">
+              <AIGenerateButton
+                project={project}
+                documentType="research-strategy"
+              />
+              <AIGenerateButton
+                project={project}
+                documentType="experimental-plan"
+              />
+            </div>
+          </div>
+
+          {/* Commercialization for Phase II+ */}
+          {showCommercializationModule && (
+            <div>
+              <h4 className="text-sm font-medium text-neutral-700 mb-3 flex items-center gap-2">
+                <span className="w-6 h-6 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center text-xs font-bold">4</span>
+                Commercialization Plan
+                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Phase II+</span>
+              </h4>
+              <div className="pl-8">
+                <AIGenerateButton
+                  project={project}
+                  documentType="commercialization"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Full Application */}
+          <div className="pt-4 border-t border-neutral-200">
+            <h4 className="text-sm font-medium text-neutral-700 mb-3 flex items-center gap-2">
+              <span className="w-6 h-6 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">✓</span>
+              Compiled Full Application
+            </h4>
+            <div className="pl-8">
+              <AIGenerateButton
+                project={project}
+                documentType="compiled-grant"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Export Section */}

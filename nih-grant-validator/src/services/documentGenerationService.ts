@@ -10,6 +10,7 @@ export type DocumentType =
   | 'specific-aims'
   | 'specific-aims-page'
   | 'research-strategy'
+  | 'experimental-plan'
   | 'commercialization'
   | 'references'
   | 'compiled-grant'
@@ -67,8 +68,13 @@ export async function generateDocument(
 ): Promise<GenerationResult> {
   try {
     const payload = buildGenerationPayload(project, documentType)
+    
+    // Use dedicated edge function for experimental-plan
+    const endpoint = documentType === 'experimental-plan' 
+      ? 'generate-experimental-plan' 
+      : 'generate-document'
 
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/generate-document`, {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/${endpoint}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -115,11 +121,31 @@ export function getDocumentTypeTitle(type: DocumentType): string {
     'specific-aims': 'Specific Aims',
     'specific-aims-page': 'Specific Aims Page',
     'research-strategy': 'Research Strategy',
+    'experimental-plan': 'Experimental Plan',
     'commercialization': 'Commercialization Plan',
     'references': 'References',
-    'compiled-grant': 'Compiled Grant Application'
+    'compiled-grant': 'Compiled Full Application'
   }
   return titles[type] || type
+}
+
+/**
+ * Get description for each document type
+ */
+export function getDocumentTypeDescription(type: DocumentType): string {
+  const descriptions: Record<DocumentType, string> = {
+    'title': 'Generate an optimal project title under 81 characters',
+    'project-summary': '30-line abstract for your application',
+    'project-narrative': '2-3 sentence public health relevance statement',
+    'specific-aims': 'Clear, testable aims with milestones',
+    'specific-aims-page': 'The most important page of your grant',
+    'research-strategy': 'Significance, Innovation, and Approach sections',
+    'experimental-plan': 'Detailed methodology with statistical considerations',
+    'commercialization': '12-page plan with all 6 NIH sections',
+    'references': 'Reference framework with search guidance',
+    'compiled-grant': 'Full application document ready for submission'
+  }
+  return descriptions[type] || ''
 }
 
 /**
@@ -133,6 +159,7 @@ export function getDocumentStep(type: DocumentType): number {
     'specific-aims': 2,
     'specific-aims-page': 2,
     'research-strategy': 3,
+    'experimental-plan': 3,
     'commercialization': 4,
     'references': 5,
     'compiled-grant': 5

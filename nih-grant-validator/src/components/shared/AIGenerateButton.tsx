@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Sparkles, Loader2, Check, AlertCircle, FileText, Download, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react'
-import { generateDocument, getDocumentTypeTitle, type DocumentType, type GeneratedDocument } from '../../services/documentGenerationService'
+import { generateDocument, getDocumentTypeTitle, getDocumentTypeDescription, type DocumentType, type GeneratedDocument } from '../../services/documentGenerationService'
 import { generateDocx, generatePdf } from '../../lib/docxGenerator'
 import type { ProjectSchemaV2 } from '../../types'
 
@@ -28,6 +28,7 @@ export function AIGenerateButton({
   const [downloadingDocx, setDownloadingDocx] = useState(false)
 
   const title = getDocumentTypeTitle(documentType)
+  const description = getDocumentTypeDescription(documentType)
 
   const handleGenerate = async () => {
     setLoading(true)
@@ -102,7 +103,7 @@ export function AIGenerateButton({
             </div>
             <div>
               <h4 className="font-semibold text-neutral-900">{title}</h4>
-              <p className="text-xs text-neutral-500">AI-powered document generation</p>
+              <p className="text-xs text-neutral-500">{description}</p>
             </div>
           </div>
           
@@ -223,7 +224,8 @@ export function AIGenerateButton({
       {!generatedContent && !loading && !error && (
         <div className="p-6 text-center text-neutral-500">
           <FileText className="w-10 h-10 mx-auto mb-2 opacity-30" />
-          <p className="text-sm">Click "Generate" to create {title.toLowerCase()}</p>
+          <p className="text-sm">Click "Generate" to create your {title.toLowerCase()}</p>
+          <p className="text-xs mt-1 text-neutral-400">{description}</p>
         </div>
       )}
     </div>
