@@ -64,7 +64,3 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["code"]
-
-[[tool.uv.index]]
-url = "http://mirrors.cloud.aliyuncs.com/pypi/simple"
-default = true
